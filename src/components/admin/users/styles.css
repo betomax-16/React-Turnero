@@ -1,0 +1,75 @@
+.users-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    z-index: 1;
+}
+
+.users-container .table{
+    height: 100%;
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    padding-bottom: 80px;
+}
+
+.users-container .buttons{
+    display: flex;
+    flex-direction: row-reverse;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    gap: 15px;
+}
+
+.users-container .button-filter {
+    position: fixed;
+    top: 25px;
+    right: 20px;
+}
+
+.users-container .button-filter,
+.users-container .buttons .button-add, 
+.users-container .buttons .button-edit,
+.users-container .buttons .button-delete{
+    width: 30px;
+    height: 30px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 50%;
+    background-color: #c1dbd4;
+    box-shadow: 2px 3px 5px grey;
+    color: white;
+}
+
+.users-container .button-filter:hover,
+.users-container .buttons .button-add:hover,
+.users-container .buttons .button-edit:hover,
+.users-container .buttons .button-delete:hover{
+    background-color: #a5d3c7;
+}
+
+.users-container .button-filter:hover .icon,
+.users-container .buttons .button-add:hover .icon,
+.users-container .buttons .button-edit:hover .icon,
+.users-container .buttons .button-delete:hover .icon{
+    transform: scale(1.2);
+}
+
+.users-container .button-filter .icon,
+.users-container .buttons .button-add .icon,
+.users-container .buttons .button-edit .icon,
+.users-container .buttons .button-delete .icon{
+    transition: transform .2s;
+}
+
+.select-input {
+    margin-top: 10px;
+}
+
+.Mui-checked {
+    color: #88c2b1 !important;
+}

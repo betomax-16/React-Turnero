@@ -1,0 +1,54 @@
+.config-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.config-container .form-box {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.config-container .form-box .input {
+    max-width: 250px;
+}
+
+.config-container .form-box .save-button {
+
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+
+.config-container .form-box .button-add {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 30px;
+    height: 30px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 50%;
+    background-color: #c1dbd4;
+    box-shadow: 2px 3px 5px grey;
+    color: white;
+}
+
+.config-container .form-box .button-add:hover {
+    background-color: #a5d3c7;
+}
+
+.config-container .form-box .button-add:hover .icon {
+    transform: scale(1.2);
+}
+
+.config-container .form-box .button-add .icon{
+    transition: transform .2s;
+}

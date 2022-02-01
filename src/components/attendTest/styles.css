@@ -1,0 +1,41 @@
+.attendTest-container {
+    background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5)), url("../../public/img/fondoVigia.jpg");
+    min-height: 100vh;
+    height: 100vh;
+}
+
+.attendTest-content {
+    display: flex;
+    height: calc(100vh - 63px);
+}
+
+.attendTest-body {
+    width: calc(100% - 250px);
+    overflow: auto;
+    box-sizing: border-box;
+    padding: 25px;
+}
+
+.button-associate {
+    background-color: #86c1af;
+    padding: 9px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    line-height: normal;
+}
+
+.attendTest-container .message {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+}
+
+.attendTest-container .message .title{
+    font-size: 500%;
+    color: #5a8f80;
+    text-align: center;
+}

@@ -1,0 +1,115 @@
+.takeTurn-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+}
+
+.takeTurn-container::before {
+    content: '';
+    background-image: url("../../public/img/fondoVigia.jpg");
+    background-color: #cccccc;
+    opacity: 0.15;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+}
+
+.takeTurn-empty-header{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #079970;
+    color: white;
+    flex-direction: column;
+    z-index: 1;
+}
+
+.takeTurn-empty-body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    z-index: 1;
+}
+
+.takeTurn-header {
+    color: #05805e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.takeTurn-title {
+    margin: 0;
+    margin-top: 25px;
+}
+
+.takeTurn-logo {
+    width: 250px;
+}
+
+.takeTurn-sucursal {
+    color: #05805e;
+    margin: 0;
+    margin-bottom: 25px;
+    font-size: 22px;
+    text-transform: capitalize;
+    font-weight: bold;
+}
+
+.takeTurn-body {
+    background-color: #079970;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 25px 0;
+    flex: 1 0 auto;
+    z-index: 1;
+}
+
+.takeTurn-subTitle {
+    margin: 0;
+    font-size: 50px;
+    color: white;
+}
+
+.takeTurn-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    flex: 1 0 auto;
+}
+
+.takeTurn-button {
+    background-color: #98c9bb;
+    color: white;
+    border-radius: 5px;
+    padding: 15px 30px;
+    width: 25%;
+    min-width: 200px;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.takeTurn-button:hover {
+    background-color: #83afa3;
+}
+
+.takeTurn-footer {
+    background-color: #066a4f;
+    color: white;
+    display: flex;
+    justify-content: center;
+    flex: 0 0 auto;
+    text-align: center;
+}

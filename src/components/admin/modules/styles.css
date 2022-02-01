@@ -1,0 +1,105 @@
+.modules-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    z-index: 1;
+}
+
+.modules-container .table{
+    height: 100%;
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    padding-bottom: 80px;
+}
+
+.modules-container .buttons{
+    display: flex;
+    flex-direction: row-reverse;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    gap: 15px;
+}
+
+.modules-container .button-filter {
+    position: fixed;
+    top: 25px;
+    right: 20px;
+}
+
+.modules-container .button-filter,
+.modules-container .buttons .button-add, 
+.modules-container .buttons .button-edit,
+.modules-container .buttons .button-delete{
+    width: 30px;
+    height: 30px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 50%;
+    background-color: #c1dbd4;
+    box-shadow: 2px 3px 5px grey;
+    color: white;
+}
+
+.modules-container .button-filter:hover,
+.modules-container .buttons .button-add:hover,
+.modules-container .buttons .button-edit:hover,
+.modules-container .buttons .button-delete:hover{
+    background-color: #a5d3c7;
+}
+
+.modules-container .button-filter:hover .icon,
+.modules-container .buttons .button-add:hover .icon,
+.modules-container .buttons .button-edit:hover .icon,
+.modules-container .buttons .button-delete:hover .icon{
+    transform: scale(1.2);
+}
+
+.modules-container .button-filter .icon,
+.modules-container .buttons .button-add .icon,
+.modules-container .buttons .button-edit .icon,
+.modules-container .buttons .button-delete .icon{
+    transition: transform .2s;
+}
+
+.select-input {
+    margin-top: 10px;
+}
+
+.Mui-checked {
+    color: #88c2b1 !important;
+}
+
+.icon-red {
+    color: red;
+}
+
+.icon-green {
+    color: green;
+}
+
+.item-combobox {
+    text-transform: capitalize;
+}
+
+.button-associate-privilege {
+    background-color: #86c1af;
+    padding: 9px 9px;
+    cursor: pointer;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    line-height: normal;
+}
+
+.button-associate-privilege:hover {
+    background-color: #95d4c1;
+}
+
+.button-associate-privilege:visited {
+    color: white;
+}

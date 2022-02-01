@@ -1,0 +1,13 @@
+.input-number-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-number-container .label {
+    color: gray;
+    margin-bottom: 5px;
+}
+
+.input-number-container .input {
+
+}

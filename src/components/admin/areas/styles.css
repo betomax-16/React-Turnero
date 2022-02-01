@@ -1,0 +1,71 @@
+.areas-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    z-index: 1;
+}
+
+.areas-container .table{
+    height: 100%;
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    padding-bottom: 80px;
+}
+
+.areas-container .buttons{
+    display: flex;
+    flex-direction: row-reverse;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    gap: 15px;
+}
+
+.areas-container .button-filter {
+    position: fixed;
+    top: 25px;
+    right: 20px;
+}
+
+.areas-container .button-filter,
+.areas-container .buttons .button-add, 
+.areas-container .buttons .button-edit,
+.areas-container .buttons .button-delete{
+    width: 30px;
+    height: 30px;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 50%;
+    background-color: #c1dbd4;
+    box-shadow: 2px 3px 5px grey;
+    color: white;
+}
+
+.areas-container .button-filter:hover,
+.areas-container .buttons .button-add:hover,
+.areas-container .buttons .button-edit:hover,
+.areas-container .buttons .button-delete:hover{
+    background-color: #a5d3c7;
+}
+
+.areas-container .button-filter:hover .icon,
+.areas-container .buttons .button-add:hover .icon,
+.areas-container .buttons .button-edit:hover .icon,
+.areas-container .buttons .button-delete:hover .icon{
+    transform: scale(1.2);
+}
+
+.areas-container .button-filter .icon,
+.areas-container .buttons .button-add .icon,
+.areas-container .buttons .button-edit .icon,
+.areas-container .buttons .button-delete .icon{
+    transition: transform .2s;
+}
+
+.Mui-checked {
+    color: #88c2b1 !important;
+}

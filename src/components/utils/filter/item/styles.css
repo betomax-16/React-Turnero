@@ -1,0 +1,29 @@
+.item-filter {
+    display: flex;
+    align-items: center;
+    padding-top: 8px;
+}
+
+.item-filter {
+    /* padding: 0 8px 8px 8px;
+    box-shadow: #9994947a 1px 1px 1px; */
+    height: 90px;
+    padding: 0 8px 0px 8px;
+    box-shadow: #9994947a 1px 1px 1px;
+    display: flex;
+    align-items: center;
+}
+
+.item-filter .button-remove {
+    min-height: 30px;
+    min-width: 30px;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-left: 10px;
+    transition: transform .2s;
+    border-radius: 50%;
+}
+
+.item-filter .button-remove:hover {
+    transform: scale(1.2);
+}

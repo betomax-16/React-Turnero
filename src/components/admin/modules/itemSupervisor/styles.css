@@ -1,0 +1,13 @@
+.itemSupervisor-container {
+    display: flex;
+    min-width: 200px;
+    margin-bottom: 10px;
+}
+
+.itemSupervisor-container .button-delete {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+}

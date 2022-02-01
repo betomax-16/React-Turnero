@@ -1,0 +1,127 @@
+.currentTurn-container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    height: 100%;
+    background: linear-gradient(318deg, #f7f7f7, #f5edbc);
+    background-size: 400% 400%;
+    -webkit-animation: AnimationName 30s ease infinite;
+    -moz-animation: AnimationName 30s ease infinite;
+    animation: AnimationName 30s ease infinite;
+    width: 100%;
+}
+
+.turn-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 70%;
+}
+
+.turn-info .frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 7px;
+    box-shadow: 7px 7px 17px 0px black;
+    /* min-width: 382px;
+    min-height: 277px; */
+    width: 50%;
+    height: 65%;
+    min-width: 420px;
+    min-height: 346px;
+    max-width: 600px;
+    max-height: 400px;
+    background-color: rgb(247 251 222);
+}
+
+.turn-info .title {
+    font-size: 300%;
+    margin: 0;
+    width: 100%;
+    border-radius: 7px 7px 0 0;
+    text-align: center;
+    background-color: #f0f19e;
+    color: #746300;
+}
+
+.turn-info .turn {
+    font-size: 1000%;
+    background-color: rgb(247 251 222);
+    padding: 0 4%;
+    border-radius: 0 0 7px 7px;
+    padding-top: 10%;
+    font-weight: bold;
+    color: #746300;
+}
+
+.module {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    position: relative;
+    /* height: 50%; */
+    height: 30%;
+    /* overflow: hidden; */
+}
+
+.currentTurn-ubication {
+    font-size: 500%;
+    font-weight: bold;
+    color: #746300;
+    position: absolute;
+    top: -30%;
+}
+
+.module .wave {
+    position: absolute;
+    bottom: 0;
+}
+
+.module .wave-down {
+    position: absolute;
+    bottom: -50%;
+}
+
+@-webkit-keyframes AnimationBack {
+    0%{background-position:20% 0%}
+    50%{background-position:81% 100%}
+    100%{background-position:20% 0%}
+}
+@-moz-keyframes AnimationBack {
+    0%{background-position:20% 0%}
+    50%{background-position:81% 100%}
+    100%{background-position:20% 0%}
+}
+@keyframes AnimationBack {
+    0%{background-position:20% 0%}
+    50%{background-position:81% 100%}
+    100%{background-position:20% 0%}
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+    
+} 
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {
+    
+} 
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
+
+} 
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+    
+} 
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) {
+    
+}

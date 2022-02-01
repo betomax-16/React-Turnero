@@ -1,0 +1,9 @@
+.screen-content {
+    height: 100vh;
+}
+
+.screen-content .tv{
+    border: none;
+    width: 100%;
+    height: calc(100% - 4px);
+}

@@ -1,0 +1,121 @@
+.attendMenu-container {
+    display: flex;
+    justify-content: space-between;
+    background-color: #05805e;
+    box-shadow: inset 0px -4px 20px 0px #136646;
+    height: 63px;
+}
+
+.attendMenu-logo {
+    background-color: white;
+}
+
+.attendMenu-module {
+    display: flex;
+    align-items: center;
+}
+
+.attendMenu-container .center {
+    width: 100%;
+    justify-content: center;
+}
+
+.attendMenu-title {
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+}
+
+.attendMenu-options {
+    display: flex;
+    grid-gap: 15px;
+    gap: 15px;
+    box-sizing: border-box;
+    padding: 10px 15px;
+}
+
+.attendMenu-button {
+    background-color: #5a8f80;
+    padding: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: white;
+    border: 1px solid;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.attendMenu-button:hover {
+    background-color: #477266;
+}
+
+.attendMenu-button .icon {
+    margin-right: 5px;
+}
+
+.attendMenu-button .text {
+    display: none;
+}
+
+.menu-modules-container {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+}
+
+.menu-btn-ok {
+    cursor: pointer;
+    background-color: #067f5d;
+    padding: 5px 10px;
+    color: white;
+    font-weight: bold;
+    border-radius: 5px;
+    text-align: center;
+    margin: 5px;
+}
+
+.menu-btn-ok:hover {
+    background-color: #08926b;
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {} 
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {} 
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
+    .attendMenu-button .text {
+        display: inherit;
+    }
+
+    .attendMenu-button {
+        padding: 10px 20px;
+    }
+} 
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+    .attendMenu-button .text {
+        display: inherit;
+    }
+
+    .attendMenu-button {
+        padding: 10px 20px;
+    }
+} 
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) {
+    .attendMenu-button .text {
+        display: inherit;
+    }
+
+    .attendMenu-button {
+        padding: 10px 20px;
+    }
+}

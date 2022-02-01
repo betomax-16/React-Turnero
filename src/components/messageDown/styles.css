@@ -1,0 +1,81 @@
+.message-container {
+    box-sizing: border-box;
+    width: 100%;
+    border-radius: 5px;
+    border: solid 1px black;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    color: black;
+    position: fixed;
+    bottom: -50px;
+    height: 50px;
+    font-weight: bolder;
+    z-index: 50000;
+}
+
+.show {
+    bottom: 0;
+    transition: bottom 200ms ease-in-out;
+}
+
+.down {
+    bottom: -50px;
+    transition: bottom 200ms ease-in-out;
+}
+
+.red {
+    border-color: red;
+    color: red;
+    background-color: salmon;
+}
+
+.green {
+    border-color: rgb(42, 194, 63);
+    color: rgb(42, 194, 63);
+    background-color: rgb(169, 248, 181);
+}
+
+.blue {
+    border-color: rgb(22, 143, 223);
+    color: rgb(22, 143, 223);
+    background-color: rgb(148, 198, 231);
+}
+
+.yellow {
+    border-color: rgb(188, 190, 25);
+    color: rgb(188, 190, 25);
+    background-color: rgb(240, 241, 158);
+}
+
+.message {
+    width: 99%;
+    overflow: auto;
+}
+
+.message::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+  
+  /* Track */
+.message::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+   
+  /* Handle */
+.message::-webkit-scrollbar-thumb {
+    background: #888; 
+}
+  
+  /* Handle on hover */
+.message::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+}
+
+.button-close {
+    width: 1%;
+    cursor: pointer;
+}

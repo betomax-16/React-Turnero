@@ -1,0 +1,164 @@
+.menu-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #05805e;
+    box-shadow: inset -7px 0px 20px #13664f;
+    color: white;
+}
+
+.menu-container .logo {
+    background-color: white;
+    box-shadow: inset -7px 0px 20px #e4e5e5;
+}
+
+.menu-container .capital {
+
+}
+
+.menu-container .options {
+    display: flex;
+    flex-direction: column;
+    padding-top: 25px;
+    
+    height: 100%;
+    position: relative;
+}
+
+.menu-container .options::before {
+    content: '';
+    background-image: url("../../../public/img/fondoAdmin.png");
+    background-color: #cccccc;
+    background-size: auto;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+    opacity: 0.15;
+}
+
+.options a {
+    color: white;
+}
+
+.options .option,
+.options .sub-option {
+    margin-bottom: 5px;
+    z-index: 1;
+    box-sizing: border-box;
+    text-align: center;
+    width: 100%;
+    padding: 10px 20px;
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 20px;
+    position: relative;
+}
+
+.options .option:hover,
+.options .sub-option:hover {
+    background-color: #0774553d;
+    box-shadow: inset -2px 0px 20px #13664f;
+}
+
+.options .option:hover .icon,
+.options .sub-option:hover .icon{
+    transform: scale(1.1);
+}
+
+.options .option::before,
+.options .sub-option::before {
+    content: '';
+    position: absolute;
+    width: 96px;
+    height: 100%;
+    background-color: #ffffff70;
+    left: -34px;
+    top: 0px;
+    border-radius: 14%;
+}
+
+.options .sub-option::before {
+    background-color: #7cff8a70;
+}
+
+.options .option .icon,
+.options .sub-option .icon{
+    z-index: 1;
+    width: 30px;
+    transition: transform .2s;
+}
+
+.options .option .title,
+.options .sub-option .title{
+    z-index: 1;
+    margin-left: 25px;
+}
+
+#sub-turn{
+    max-height: 0;
+    transition: max-height 0.15s ease-out;
+    overflow: hidden;
+}
+
+.down-sub {
+    max-height: 200px !important;
+    transition: max-height 0.25s ease-in !important;
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+
+} 
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {
+
+} 
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
+    .options .sub-option {
+        padding-left: 40px;
+    }
+
+    .options .sub-option::before {
+        left: -15px; 
+    }
+} 
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+    .options .sub-option {
+        padding-left: 40px;
+    }
+
+    .options .sub-option::before {
+        left: -15px; 
+    }
+} 
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) {
+    .options .sub-option {
+        padding-left: 40px;
+    }
+
+    .options .sub-option::before {
+        left: -15px; 
+    }
+}
+
+@media only screen and (min-width: 1700px) {
+    .options .sub-option {
+        padding-left: 40px;
+    }
+
+    .options .sub-option::before {
+        left: -15px; 
+    }
+}

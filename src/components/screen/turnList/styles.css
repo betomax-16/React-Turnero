@@ -1,0 +1,159 @@
+.turnList-container {
+    display: flex;
+    height: 100%;
+}
+
+.turnList-info {
+    display: none;
+}
+
+.turnList-info .add{
+    width: 100%;
+    padding: 25px;
+    box-sizing: border-box;
+    background-color: #01613cab;
+}
+
+.turnList {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    background-color: #f7fbdea3;
+}
+
+.turns{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 0px 0px;
+    overflow: auto;
+    height: 100%;
+}
+
+.turn-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.turn-card .title {
+    background-color: rgb(240 241 158);
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 180%;
+    font-weight: 500;
+    color: #746300;
+}
+
+.turn-card .body {
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    font-size: 600%;
+    padding: 20px 0;
+    background-color: #f7fbde;
+    height: 100%;
+    color: #746300;
+}
+
+.today-date {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* background-color: #ffc77a; */
+    background-color: #6dc19f;
+    color: #fafcea;
+}
+
+.today-date .date {
+    font-size: 100%;
+    text-align: center;
+    width: 50%;
+    padding: 25px 10px;
+    border-right: 1px dashed #a5d3c7;
+}
+
+.today-date .date span{
+    font-size: 150%;
+    font-weight: 500;
+}
+
+.today-date .hour {
+    font-size: 150%;
+    text-align: center;
+    width: 50%;
+    padding: 25px 10px;
+    font-weight: bold;
+}
+
+.today-date .hour span {
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+    
+} 
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {
+    
+} 
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
+    
+} 
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+    .turnList-info {
+        display: flex;
+        width: 70%;
+    }
+
+    .turnList {
+        width: 30%;
+    }
+} 
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) {
+    .turnList-info {
+        display: flex;
+        width: 70%;
+    }
+
+    .turnList {
+        width: 30%;
+    }
+
+    .today-date .date {
+        font-size: 120%;
+    }
+
+    .today-date .hour {
+        font-size: 35px;
+    }
+}
+
+@media only screen and (min-width: 1700px) {
+    .turnList-info {
+        display: flex;
+        width: 70%;
+    }
+
+    .turnList {
+        width: 30%;
+    }
+
+    .today-date .date {
+        font-size: 131%;
+    }
+}

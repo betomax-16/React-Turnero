@@ -1,0 +1,48 @@
+.item-filter-header {
+    display: flex;
+    align-items: center;
+    padding-top: 8px;
+}
+
+.item-filter-header {
+    box-shadow: #00000014 0px 8px 5px;
+}
+
+.item-filter-header .button-plus {
+    min-height: 30px;
+    min-width: 30px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: transform .2s;
+}
+
+.item-filter-header .button-plus:hover {
+    transform: scale(1.2);
+}
+
+.item-filter-header .headerField:nth-child(2) {
+    margin-right: 20px;
+}
+
+.item-filter-header .headerField:nth-child(3) {
+    margin-right: 85px;
+}
+
+.item-filter-header .headerField:nth-child(4) {
+    margin-right: 35px;
+}
+
+.item-filter-header .headerField:nth-child(5) {
+    margin-right: 150px;
+}
+
+.list-filters {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    max-height: 700px;
+}
+
+.MuiList-root {
+    padding: 0 !important;
+}
