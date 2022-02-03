@@ -79,7 +79,7 @@ function Config(props) {
                                                 className="input"
                                                 error={errors.timer?.type === 'required'}
                                                 helperText={errors.timer ? 'Campo obligatorio.' : ''} 
-                                                id="timer" label="Tiempo de timbre en pantalla en seg." type="number" margin="dense" variant="standard" fullWidth {...field}/> }
+                                                id="timer" label="Tiempo de timbre en pantalla en milisegundos." type="number" margin="dense" variant="standard" fullWidth {...field}/> }
                     rules={{ required: true }}
                 />
                 {messageResponse !== '' && <span className="messageError">{messageResponse}</span>}

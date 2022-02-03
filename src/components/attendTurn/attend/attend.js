@@ -32,6 +32,7 @@ function Attend(props) {
                     {module && module.mode === 'auto' &&
                     <div onClick={() => props.handlerAttendTurn('')}
                         className={disabledButtons ? "attend-button-next disabled" : "attend-button-next"}>
+                        {/* <span className="attend-number">{props.number}</span> */}
                         <span className="attend-text">Siguiente</span>
                     </div>}
                     {module && module.mode === 'manual' && <>

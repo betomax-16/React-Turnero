@@ -30,6 +30,9 @@ function AttendTurn(props) {
   const [moduleSelect, setModuleSelect] = useState('');
   const [sucursalSelect, setSucursalSelect] = useState('');
   const [timer, setTimer] = useState(null);
+  const [configSucursal, setConfigSucursal] = useState({
+    color: '#fff'
+  });
   
   const [currentTurn, setCurrentTurn] = useState({
     turn:''
@@ -55,6 +58,7 @@ function AttendTurn(props) {
       const dataUser = getDataUser();
       if (dataUser) {
         setUser(dataUser);
+        getConfigSucursal(dataUser.sucursal);
         const res = await getMyModule(dataUser, auxSocket);
         if (!res) {
           getSucursals();
@@ -286,6 +290,28 @@ function AttendTurn(props) {
     }
   }
 
+  const getConfigSucursal = async (suc) => {
+    try {
+        const urlApi = `http://localhost:4000/api/sucursal`;
+        const res = await axios.get(urlApi, { 
+            headers: {
+                'auth': localStorage.getItem('token')
+            }
+        });
+
+        setConfigSucursal(res.data.body.find(s => s.name === suc));
+    } catch (error) {
+        if (error.response && error.response.data) {
+            console.log(error.response.data);
+            showAlert("red", error.response.data.body.message); 
+        }
+        else {
+            console.log(error);
+            showAlert("red", 'Ocurrio algun error interno.');
+        }
+    }
+  }
+
   const updateStateModule = async (username, isLogout = false) => {
     try {
         const auxModule = module ? module.name : moduleSelect;
@@ -322,7 +348,7 @@ function AttendTurn(props) {
 
               if (socket) {
                 console.log(data);
-                socket.emit('join-type', {sucursal:currentSucursal, type:data.type, name:data.name, username: user.username});
+                socket.emit('join-type', {sucursal:currentSucursal, type:data.type, name:data.name, username: user.username, user: user});
               }
           }  
         }      
@@ -357,6 +383,7 @@ function AttendTurn(props) {
 
   const handlerChangeSucursal = () => {
     if (socket) {
+      setConfigSucursal({ color: '#fff' });
       setCurrentSucursal(null);
       setModules([]);
       setModuleSelect('');
@@ -376,6 +403,7 @@ function AttendTurn(props) {
     setCurrentSucursal(sucursalSelect);
     socket.emit('join-sucursal', sucursalSelect);
     getModules(sucursalSelect);
+    getConfigSucursal(sucursalSelect);
   }
 //-----------------------------------------------------------------------------
   const getMyModule = async (dataUser, auxSocket) => {
@@ -743,7 +771,7 @@ function AttendTurn(props) {
     <RequireAuth>
       <div className="attendTurn-container">
         <AttendMenu moduleSelect={moduleSelect} modules={modules} 
-                    sucursalSelect={sucursalSelect} sucursals={sucursals}
+                    sucursalSelect={sucursalSelect} sucursals={sucursals} configSuc={configSucursal}
                     updateStateModule={updateStateModule}
                     handlerChangeModule={handlerChangeModule}
                     handlerChangeModuleSelect={handlerChangeModuleSelect}

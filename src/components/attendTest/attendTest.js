@@ -40,10 +40,14 @@ function AttendTest(props) {
         action: '',
         data: null
     });
+    const [configSucursal, setConfigSucursal] = useState({
+        color: '#fff'
+      });
 
     useEffect(() => {
         const sucursal = window.atob(props.match.params.suc);
         const module = window.atob(props.match.params.module);
+        getConfigSucursal(sucursal);
         getModule();
         getTurns();
         getCurrentTurn();
@@ -87,6 +91,28 @@ function AttendTest(props) {
             }
         }
     }, [socketTurns]);// eslint-disable-line react-hooks/exhaustive-deps
+
+    const getConfigSucursal = async (suc) => {
+        try {
+            const urlApi = `http://localhost:4000/api/sucursal`;
+            const res = await axios.get(urlApi, { 
+                headers: {
+                    'me': ''
+                }
+            });
+    
+            setConfigSucursal(res.data.body.find(s => s.name === suc));
+        } catch (error) {
+            if (error.response && error.response.data) {
+                console.log(error.response.data);
+                showAlert("red", error.response.data.body.message); 
+            }
+            else {
+                console.log(error);
+                showAlert("red", 'Ocurrio algun error interno.');
+            }
+        }
+    }
 
     const handlerAttendTurn = async (shift) => {
         if (module && !module.status) {
@@ -328,7 +354,7 @@ function AttendTest(props) {
     return (
         // <h1>{props.match.params.suc}-{props.match.params.area}</h1>
         <div className="attendTest-container">
-            <AttendMenu isModuleFree={true}/>
+            <AttendMenu isModuleFree={true} sucursal={window.atob(props.match.params.suc)} module={window.atob(props.match.params.module)} configSuc={configSucursal}/>
             {module ? <div className="attendTest-content">
                 <Attend currentTurn={currentTurn} isModuleFree={true}
                         handlerAttendedTurn={handlerAttendedTurn}

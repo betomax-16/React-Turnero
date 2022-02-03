@@ -17,6 +17,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Tooltip from '@mui/material/Tooltip';
+import Checkbox from '@mui/material/Checkbox';
 import InputNumber from "../../utils/inputNumber/inputNumber";
 import ItemSupervisor from "./itemSupervisor/itemSupervisor";
 import { DataGrid, esES } from '@mui/x-data-grid';
@@ -115,6 +116,7 @@ function Modules(props) {
         }
     }
 
+    const [moduleSelected, setModuleSelected] = useState(null);
     const [vigias, setVigias] = useState([]);
     const [sucursalSelected, setSucursalSelected] = useState('');
     const [moduleToMonitor, setModuleToMonitor] = useState(null);
@@ -196,6 +198,7 @@ function Modules(props) {
     };
 
     const handleOpenAssociate = (data) => {
+        setModuleSelected(data);
         setTitleAssociate(`${data.name} - ${data.sucursal}`);
         getAreasBySucursal(data.id, data.sucursal);
         setOpenAssociate(true);
@@ -203,6 +206,7 @@ function Modules(props) {
 
     const handleCloseAssociate = () => {
         setOpenAssociate(false);
+        setModuleSelected(null);
     }
 
     const handleChangeAssociate = (index, value) => {
@@ -217,6 +221,15 @@ function Modules(props) {
 
     const handleSaveAssociate = () => {
         try {
+            const req = {
+                isPrivilegeByArrivalTime: moduleSelected.isPrivilegeByArrivalTime
+            };
+            axios.put(`http://localhost:4000/api/modules/${moduleSelected.name}/${moduleSelected.sucursal}`, req, { 
+                headers: {
+                    'auth': localStorage.getItem('token')
+                }
+            });
+
             areas.forEach(element => {
                 if (!element.idAssociate) {
                     axios.post(`http://localhost:4000/api/privilege`, element, { 
@@ -233,6 +246,8 @@ function Modules(props) {
                     });
                 } 
             });
+
+            handleCloseAssociate();
             showAlert("green", 'Registro existoso.');
         } catch (error) {
             console.log(error);
@@ -276,7 +291,7 @@ function Modules(props) {
                 <div className="button-associate-privilege" onClick={() => handlerOpenModalSupervisor(params.value)}>Asignar</div>
         ) },
         { field: 'mode', headerName: 'Modalidad', flex: 1, mytype: 'string' },
-        { field: 'associate', headerName: 'Acciones', flex: 1,
+        { field: 'associate', headerName: 'Acciones', flex: 1, 
             renderCell: (params) => (printButtonAssociate(params.value)),},
     ];
 
@@ -324,6 +339,8 @@ function Modules(props) {
             if (auxData.mode === undefined || auxData.mode === '') {
                 auxData.mode = 'auto';
             }
+
+            auxData.isPrivilegeByArrivalTime = false;
             
             if (isNew) {
                 const res = await axios.post(`http://localhost:4000/api/modules`, auxData, { 
@@ -430,7 +447,8 @@ function Modules(props) {
                     username: row.username,
                     pattern: auxPattern,
                     mode: mode,
-                    associate: associate
+                    associate: associate,
+                    isPrivilegeByArrivalTime: row.isPrivilegeByArrivalTime
                 });
             });
 
@@ -919,6 +937,25 @@ function Modules(props) {
                 <DialogTitle>Prioridad: {titleAssociate}</DialogTitle>
                 <DialogContent>
                     {areas.map(area => <InputNumber key={area.index} index={area.index} label={area.area} value={area.privilege} onChange={handleChangeAssociate}/>)}
+                    <Checkbox checked={moduleSelected && moduleSelected.isPrivilegeByArrivalTime} onChange={(event) => {
+                        const auxModuleSelected = {...moduleSelected};
+                        auxModuleSelected.isPrivilegeByArrivalTime = event.target.checked;
+                        setModuleSelected(auxModuleSelected);
+
+                        const auxModules = [...modules];
+                        
+                        for (let index = 0; index < auxModules.length; index++) {
+                            const auxModule = {...auxModules[index]};
+                            if (auxModule.id === auxModuleSelected.id) {
+                                auxModule.isPrivilegeByArrivalTime = event.target.checked;
+                                auxModules[index] = auxModule;
+                                break;
+                            }
+                        }
+
+                        setModules(auxModules);
+                    }}/>
+                    Por tiempo.
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseAssociate}>Cancelar</Button>

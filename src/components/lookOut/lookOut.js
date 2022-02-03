@@ -44,6 +44,9 @@ function LookOut(props) {
     const [tab, setTab] = useState(0);
     const [turns, setTurns] = useState([]);
     const [trace, setTrace] = useState([]);
+    const [configSucursal, setConfigSucursal] = useState({
+        color: '#fff'
+    });
 
     const [stateModule, setStateModule] = useState({
         status: false,
@@ -92,6 +95,7 @@ function LookOut(props) {
             if (dataUser) {
                 setUser(dataUser);
                 auxSocket.emit('join-sucursal', dataUser.sucursal);
+                getConfigSucursal(dataUser.sucursal);
             }
             
             auxSocket.on('newTurn', data => {
@@ -156,6 +160,7 @@ function LookOut(props) {
                     const element = {...auxSlaveModules[index]};
                     if (element.name === stateModule.data.name) {
                         element.username = stateModule.data.username;
+                        element.user = stateModule.data.user;
                         element.status = 'Inactivo';
                     }
                     auxSlaveModules[index] = element;
@@ -196,6 +201,7 @@ function LookOut(props) {
                     const element = {...auxSlaveModules[index]};
                     if (element.name === stateModule.data.name) {
                         element.username = '';
+                        element.user = undefined;
                         element.status = 'Libre';
                     }
                     auxSlaveModules[index] = element;
@@ -320,14 +326,14 @@ function LookOut(props) {
             });
     
             const rows = [];
-            res.data.body.forEach(row => {
+            res.data.body.forEach(async row => {
                 let mode = undefined;
                 let associate = undefined;
                 if (row.type === 'modulo') {
                     mode = row.mode;
                     associate = row._id
                 }
-    
+
                 rows.push({
                     id: row._id,
                     name: row.name,
@@ -489,13 +495,40 @@ function LookOut(props) {
             });
 
             const auxData = [];
-            res.data.body.forEach(element => {
+
+            for (let index = 0; index < res.data.body.length; index++) {
+                const element = res.data.body[index];
+                
                 let pos = 0;
                 for(let i = 0; i < element.modulo.name.length; i++) {
                     if(!isNaN(element.modulo.name[i])) {
                         pos = i;
                         break;
                     }
+                }
+
+                let user = {};
+                if (element.modulo.username && element.modulo.username !== '') {
+                    const resUser = await axios.get(`http://localhost:4000/api/users?username=${element.modulo.username}|eq`, { 
+                        headers: {
+                            'auth': localStorage.getItem('token')
+                        }
+                    });
+
+                    if (resUser.data.body.length) {
+                        user = resUser.data.body[0];
+                    }
+                }
+
+                let privileges = [];
+                const resPrivilage = await axios.get(`http://localhost:4000/api/privilege/${element.modulo._id}`, { 
+                    headers: {
+                        'auth': localStorage.getItem('token')
+                    }
+                });
+
+                if (resPrivilage.data.body.length) {
+                    privileges = resPrivilage.data.body;
                 }
 
                 const number = element.modulo.name.substr(pos, element.modulo.name.length - pos);
@@ -507,7 +540,10 @@ function LookOut(props) {
                     status: status,
                     mode: element.modulo.mode,
                     id: element.modulo._id,
-                    name: element.modulo.name
+                    name: element.modulo.name,
+                    user: user,
+                    privilages: privileges,
+                    isPrivilegeByArrivalTime: element.modulo.isPrivilegeByArrivalTime
                 });
 
                 auxData.sort(( a, b ) => {
@@ -519,7 +555,7 @@ function LookOut(props) {
                     }
                     return 0;
                 });
-            });
+            }
 
             setSlaveModules(auxData);
         } catch (error) {
@@ -534,6 +570,27 @@ function LookOut(props) {
         }
     }
 
+    const getConfigSucursal = async (suc) => {
+        try {
+            const urlApi = `http://localhost:4000/api/sucursal`;
+            const res = await axios.get(urlApi, { 
+                headers: {
+                    'auth': localStorage.getItem('token')
+                }
+            });
+
+            setConfigSucursal(res.data.body.find(s => s.name === suc));
+        } catch (error) {
+            if (error.response && error.response.data) {
+                console.log(error.response.data);
+                showAlert("red", error.response.data.body.message); 
+            }
+            else {
+                console.log(error);
+                showAlert("red", 'Ocurrio algun error interno.');
+            }
+        }
+    }
     // -------------------------------------------------------------
     //                        OPEN MENU FILTER
     // -------------------------------------------------------------
@@ -721,7 +778,6 @@ function LookOut(props) {
             });
     
             if (username === '') {
-                console.log(module);
                 if (module) {
                   socket.emit('addModule', {sucursal:currentSucursal, data: module});
                 }
@@ -785,6 +841,7 @@ function LookOut(props) {
 
     const handlerChangeSucursal = () => {
         if (socket) {
+            setConfigSucursal({ color: '#fff' });
             setCurrentSucursal(null);
             setModules([]);
             setModuleSelect('');
@@ -804,13 +861,14 @@ function LookOut(props) {
         setCurrentSucursal(sucursalSelect);
         socket.emit('join-sucursal', sucursalSelect);
         getModules(sucursalSelect);
+        getConfigSucursal(sucursalSelect);
     }
 
     return (<>
         <RequireAuth>
             <div className="lookout-container">
                 <AttendMenu moduleSelect={moduleSelect} modules={modules} 
-                            sucursalSelect={sucursalSelect} sucursals={sucursals}
+                            sucursalSelect={sucursalSelect} sucursals={sucursals} configSuc={configSucursal}
                             updateStateModule={updateStateModule}
                             handlerChangeModule={handlerChangeModule}
                             handlerChangeModuleSelect={handlerChangeModuleSelect}
@@ -823,7 +881,7 @@ function LookOut(props) {
                     <div className="up">
                         <span className="title">Modulos</span>
                         <div className="list">
-                            {slaveModules.map((element, index) => <ModuleCard key={index} number={element.number} username={element.username} status={element.status}/>)}
+                            {slaveModules.map((element, index) => <ModuleCard key={index} data={element}/>)}
                         </div>
                     </div>
                     <div className="down">
@@ -880,7 +938,6 @@ function LookOut(props) {
             open={open} 
             anchorEl={anchorEl} 
             handleClose={closeMenu} 
-            
             columns={columns} 
             filters={filters}
             add={addFilter}

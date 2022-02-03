@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react";
+import { useForm, Controller  } from "react-hook-form";
 import { Link } from "react-router-dom";
 import AppContext from "../../../context/app/app-context";
 import axios from "axios";
@@ -7,6 +8,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
@@ -42,11 +44,50 @@ function Sucursales(props) {
                    Asociar Areas
                </div> 
         ),},
+        { field: 'config', headerName: 'Configuración', flex: 1,
+            renderCell: (params) => (
+                <div className="button-associate" onClick={async () => {
+                    try {
+                        const sucursal = params.value.name;
+                        setSucursalSelected(sucursal);
+                        const res = await axios.get(`http://localhost:4000/api/sucursal/${sucursal}`, { 
+                            headers: {
+                                'auth': localStorage.getItem('token')
+                            }
+                        }); 
+            
+                        for (const property in res.data.body) {
+                            setValue(property, res.data.body[property], {
+                                shouldValidate: true
+                            })
+                        }
+                        setOpenConfig(true);
+                    } catch (error) {
+                        if (error.response && error.response.data) {
+                            console.log(error.response.data);
+                            showAlert("red", error.response.data.body.message); 
+                        }
+                        else {
+                            console.log(error);
+                            showAlert("red", 'Ocurrio algun error interno.');
+                        }
+                    }
+               }}>
+                   Configurar
+               </div> 
+        ),},
     ];
+
+    const { control, handleSubmit, setValue, formState: { errors } } = useForm({defaultValues: {
+        color: '',
+        timeLimit: 0
+    }});
+    const onSubmit = data => handleSaveConfig(data);
 
     const [sucursalSelected, setSucursalSelected] = useState(null);
     const { showAlert } = useContext(AppContext);
     const [open, setOpen] = useState(false);
+    const [openConfig, setOpenConfig] = useState(false);
     const [sucursals, setSucursals] = useState([]);
     const [areas, setAreas] = useState([]);
 
@@ -60,7 +101,11 @@ function Sucursales(props) {
 
     const getSucursals = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/sucursal`);
+            const res = await axios.get(`http://localhost:4000/api/sucursal`, { 
+                headers: {
+                    'auth': localStorage.getItem('token')
+                }
+            });
             const auxData = [];
             
             res.data.body.forEach(element => {
@@ -69,7 +114,12 @@ function Sucursales(props) {
                     sucursal: element.name, 
                     url: btoa(element.name),
                     urlScreen: btoa(element.name),
-                    associate: element.name
+                    associate: element.name,
+                    config: {
+                        name: element.name,
+                        color: element.color,
+                        timeLimit: element.timeLimit
+                    }
                 });                
             });
 
@@ -236,6 +286,37 @@ function Sucursales(props) {
         return result;
     }
 
+    const handleCloseConfig = () => {
+        setSucursalSelected(null);
+        setOpenConfig(false);
+    };
+
+    const handleSaveConfig = async (data) => {
+        try {
+            const req = {
+                color: data.color,
+                timeLimit: data.timeLimit
+            };
+            await axios.put(`http://localhost:4000/api/sucursal/${data.name}`, req, { 
+                headers: {
+                    'auth': localStorage.getItem('token')
+                }
+            }); 
+
+            setOpenConfig(false);
+            showAlert("green", "Cambios exitosos.");
+        } catch (error) {
+            if (error.response && error.response.data) {
+                console.log(error.response.data);
+                showAlert("red", error.response.data.body.message); 
+            }
+            else {
+                console.log(error);
+                showAlert("red", 'Ocurrio algun error interno.');
+            }
+        }
+    }
+
     return (<>
         <div className="sucursal-container">
             <h1>Sucursales</h1>
@@ -264,6 +345,56 @@ function Sucursales(props) {
                 <Button onClick={handleClose}>Cancelar</Button>
                 <Button onClick={handleSave}>Guardar</Button>
             </DialogActions>
+        </Dialog>
+
+        <Dialog open={openConfig} onClose={handleCloseConfig}>
+            <DialogTitle>
+                Configuración para: {sucursalSelected}
+            </DialogTitle>
+            <form onSubmit={handleSubmit(onSubmit)}>
+            <DialogContent>
+                <FormGroup>
+                <Controller
+                            name="color"
+                            control={control}
+                            render={({ field }) => <TextField
+                                    error={errors.color?.type === 'required'}
+                                    helperText={errors.color ? 'Campo obligatorio.' : ''}
+                                    autoFocus
+                                    margin="dense"
+                                    id="color"
+                                    label="Color"
+                                    type="text"
+                                    fullWidth
+                                    variant="standard"
+                                    {...field}
+                            />}
+                            rules={{ required: true }}
+                        />
+                <Controller
+                            name="timeLimit"
+                            control={control}
+                            render={({ field }) => <TextField
+                                    error={errors.timeLimit?.type === 'required'}
+                                    helperText={errors.timeLimit ? 'Campo obligatorio.' : ''}
+                                    margin="dense"
+                                    id="timeLimit"
+                                    label="Tiempo Limite"
+                                    type="number"
+                                    InputProps={{ inputProps: { min: 0 } }}
+                                    fullWidth
+                                    variant="standard"
+                                    {...field}
+                            />}
+                            rules={{ required: true }}
+                        />
+                </FormGroup>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleCloseConfig}>Cancelar</Button>
+                <Button type="submit">Guardar</Button>
+            </DialogActions>
+            </form>
         </Dialog>
     </>);
 }
