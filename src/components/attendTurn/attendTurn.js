@@ -31,7 +31,7 @@ function AttendTurn(props) {
   const [sucursalSelect, setSucursalSelect] = useState('');
   const [timer, setTimer] = useState(null);
   const [configSucursal, setConfigSucursal] = useState({
-    color: '#fff'
+    color: '#05805e'
   });
   
   const [currentTurn, setCurrentTurn] = useState({
@@ -58,7 +58,6 @@ function AttendTurn(props) {
       const dataUser = getDataUser();
       if (dataUser) {
         setUser(dataUser);
-        getConfigSucursal(dataUser.sucursal);
         const res = await getMyModule(dataUser, auxSocket);
         if (!res) {
           getSucursals();
@@ -377,13 +376,13 @@ function AttendTurn(props) {
 
   const handlerOkModuleSelect = () => {
     updateStateModule(user.username);
-    getAreas();
+    getAreas(module);
     getLastTurns();
   }
 
   const handlerChangeSucursal = () => {
     if (socket) {
-      setConfigSucursal({ color: '#fff' });
+      setConfigSucursal({ color: '#05805e' });
       setCurrentSucursal(null);
       setModules([]);
       setModuleSelect('');
@@ -419,8 +418,9 @@ function AttendTurn(props) {
         let auxModule = null;
         if (res.data.body.length) {
             auxModule = res.data.body[0];
-            getAreas(auxModule.sucursal);
+            getAreas(auxModule);
             getLastTurns(auxModule.sucursal);
+            getConfigSucursal(auxModule.sucursal);
             const resPending = await getPendingTurn(auxModule);
             if (auxSocket) {
               auxSocket.emit('join-sucursal', auxModule.sucursal);
@@ -451,12 +451,42 @@ function AttendTurn(props) {
     }
   }
 
-  const getAreas = async (suc) => {
+  const getAreas = async (modulo) => {
     try {
-      const dataUser = getDataUser();
-      if (dataUser) {
-        const sucursal = suc ? suc : currentSucursal;
-        const resAreas = await axios.get(`http://localhost:4000/api/area-sucursal/${sucursal}`, { 
+      if (modulo && modulo.mode === 'manual') {
+        const dataUser = getDataUser();
+        if (dataUser) {
+          const sucursal = modulo ? modulo.sucursal : currentSucursal;
+          const resAreas = await axios.get(`http://localhost:4000/api/area-sucursal/${sucursal}`, { 
+            headers: {
+                'auth': localStorage.getItem('token')
+            }
+          });
+
+          const rows = [];
+
+          for (let index = 0; index < resAreas.data.body.length; index++) {
+            const row = resAreas.data.body[index];
+            const resNums = await axios.get(`http://localhost:4000/api/shifts?area=${row.area}|eq&sucursal=${sucursal}|eq|and&state=espera|eq|and`, { 
+                headers: {
+                    'auth': localStorage.getItem('token')
+                }
+            });
+
+            const num = resNums.data.body ? resNums.data.body.length : 0;
+            rows.push({
+              name: row.area,
+              number: num
+            });
+          }
+
+          setAreas(rows);
+          return rows;
+        }
+      }
+      else if (modulo && modulo.mode === 'auto') {
+        const sucursal = modulo ? modulo.sucursal : currentSucursal;
+        const resAreas = await axios.get(`http://localhost:4000/api/privilege/${modulo._id}`, { 
           headers: {
               'auth': localStorage.getItem('token')
           }
@@ -536,7 +566,6 @@ function AttendTurn(props) {
         });
   
         setLastTurns(res.data.body);
-        console.log(res);
         return res.data.body;
       }
     } catch (error) {
@@ -772,6 +801,7 @@ function AttendTurn(props) {
       <div className="attendTurn-container">
         <AttendMenu moduleSelect={moduleSelect} modules={modules} 
                     sucursalSelect={sucursalSelect} sucursals={sucursals} configSuc={configSucursal}
+                    setConfigSucursal={setConfigSucursal}
                     updateStateModule={updateStateModule}
                     handlerChangeModule={handlerChangeModule}
                     handlerChangeModuleSelect={handlerChangeModuleSelect}

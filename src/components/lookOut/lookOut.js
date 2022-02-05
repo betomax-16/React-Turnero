@@ -44,8 +44,10 @@ function LookOut(props) {
     const [tab, setTab] = useState(0);
     const [turns, setTurns] = useState([]);
     const [trace, setTrace] = useState([]);
+    const [dateState, setDateState] = useState(moment());
+    const [timer, setTimer] = useState(null);
     const [configSucursal, setConfigSucursal] = useState({
-        color: '#fff'
+        color: '#05805e'
     });
 
     const [stateModule, setStateModule] = useState({
@@ -89,13 +91,13 @@ function LookOut(props) {
             const auxMyModule = await getMyModule();
             if (auxMyModule) {
                 getSlaves(auxMyModule._id);
+                getConfigSucursal(auxMyModule.sucursal);
             }
             
             const dataUser = getDataUser();
             if (dataUser) {
                 setUser(dataUser);
                 auxSocket.emit('join-sucursal', dataUser.sucursal);
-                getConfigSucursal(dataUser.sucursal);
             }
             
             auxSocket.on('newTurn', data => {
@@ -134,6 +136,8 @@ function LookOut(props) {
                 showAlert("blue", `${resTurn.turn.ubication} ha re-llamado a: ${resTurn.turn.turn}`); 
                 setStateDataTurns({ status: true, action: 'updateTurn', data: resTurn });   
             });
+
+            setTimer(setInterval(() => setDateState(moment()), 1000));
         }
         
         init();
@@ -315,6 +319,33 @@ function LookOut(props) {
         }
     };
 
+    useEffect(() => {
+        if (configSucursal.timeLimit) {
+            const result = trace.filter(r => r.finalDate === undefined && 
+                r.state === 'espera' && 
+                moment(r.startDate).add(configSucursal.timeLimit, 'minutes') < moment());
+
+            if (result.length) {
+                const copyTurns = [...turns]; 
+                for (let index = 0; index < result.length; index++) {
+                    const element = result[index];
+
+                    for (let j = 0; j < copyTurns.length; j++) {
+                        const t = {...copyTurns[j]};
+                        if (t.turn === element.turn) {
+                            t.limit = true;
+                            copyTurns[j] = t;
+                        }
+                    }
+
+                }
+
+                setTurns(copyTurns);
+            }  
+        }
+         
+    }, [dateState]);// eslint-disable-line react-hooks/exhaustive-deps
+    
     const getModules = async (suc) => {
         try {
             const sucursal = suc ? suc : currentSucursal;
@@ -397,6 +428,7 @@ function LookOut(props) {
             });
 
             setTurns(rows);
+            return rows;
         } catch (error) {
             if (error.response && error.response.data) {
                 console.log(error.response.data);
@@ -436,6 +468,7 @@ function LookOut(props) {
             });
 
             setTrace(rows);
+            return rows;
         } catch (error) {
             if (error.response && error.response.data) {
                 console.log(error.response.data);
@@ -579,7 +612,8 @@ function LookOut(props) {
                 }
             });
 
-            setConfigSucursal(res.data.body.find(s => s.name === suc));
+            const dataConfig = res.data.body.find(s => s.name === suc);
+            setConfigSucursal(dataConfig);
         } catch (error) {
             if (error.response && error.response.data) {
                 console.log(error.response.data);
@@ -784,6 +818,8 @@ function LookOut(props) {
                 setModule(null);
                 if (isLogout) {
                   socket.disconnect();   
+                  clearInterval(timer);
+                  setTimer(null);
                 }
                 else {
                     getModules();
@@ -841,7 +877,7 @@ function LookOut(props) {
 
     const handlerChangeSucursal = () => {
         if (socket) {
-            setConfigSucursal({ color: '#fff' });
+            setConfigSucursal({...configSucursal, color: '#05805e' });
             setCurrentSucursal(null);
             setModules([]);
             setModuleSelect('');
@@ -869,6 +905,7 @@ function LookOut(props) {
             <div className="lookout-container">
                 <AttendMenu moduleSelect={moduleSelect} modules={modules} 
                             sucursalSelect={sucursalSelect} sucursals={sucursals} configSuc={configSucursal}
+                            setConfigSucursal={setConfigSucursal}
                             updateStateModule={updateStateModule}
                             handlerChangeModule={handlerChangeModule}
                             handlerChangeModuleSelect={handlerChangeModuleSelect}
@@ -907,6 +944,9 @@ function LookOut(props) {
                                         disableSelectionOnClick
                                         onSelectionModelChange={(ids) => {
                                             console.log(ids[0]);
+                                        }}
+                                        getRowClassName={(params) => {
+                                            return params.row.limit && params.row.state === 'espera' ? `super-app-theme ` : '';
                                         }}
                                     />
                                 </div> :

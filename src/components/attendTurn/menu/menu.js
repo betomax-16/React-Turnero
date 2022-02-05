@@ -25,6 +25,40 @@ function AttendMenu(props) {
         }
     }, [isSucursal]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    const padZero = (str, len) => {
+        len = len || 2;
+        var zeros = new Array(len).join('0');
+        return (zeros + str).slice(-len);
+    }
+
+    const invertColor = (hex, bw = true) => {
+        if (hex.indexOf('#') === 0) {
+            hex = hex.slice(1);
+        }
+        // convert 3-digit hex to 6-digits.
+        if (hex.length === 3) {
+            hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        }
+        if (hex.length !== 6) {
+            throw new Error('Invalid HEX color.');
+        }
+        var r = parseInt(hex.slice(0, 2), 16),
+            g = parseInt(hex.slice(2, 4), 16),
+            b = parseInt(hex.slice(4, 6), 16);
+        if (bw) {
+            // https://stackoverflow.com/a/3943023/112731
+            return (r * 0.299 + g * 0.587 + b * 0.114) > 186
+                ? '#000000'
+                : '#FFFFFF';
+        }
+        // invert color components
+        r = (255 - r).toString(16);
+        g = (255 - g).toString(16);
+        b = (255 - b).toString(16);
+        // pad each with zeros and return
+        return "#" + padZero(r) + padZero(g) + padZero(b);
+    }
+
     // -------------------------------------------------------------
     //                        OPEN MENU FILTER
     // -------------------------------------------------------------
@@ -44,6 +78,7 @@ function AttendMenu(props) {
         }
         userLogout();
         setCurrentSucursal(null);
+        props.setConfigSucursal({ color: '#05805e' });
     }
 
     const handlerChangeOption = (e) => {
@@ -67,36 +102,36 @@ function AttendMenu(props) {
     }
 
     return (<>
-        <nav className="attendMenu-container">
+        <nav style={{backgroundColor: props.configSuc.color, color: invertColor(props.configSuc.color)}} className="attendMenu-container">
             <div className="attendMenu-logo">
                 <img src={logo} alt="logo"></img>
             </div>
             <div className={props.isModuleFree ? "attendMenu-module center" : "attendMenu-module"}>
-                {module && <span className="attendMenu-title"><span style={{color: props.configSuc.color}}>{currentSucursal||props.sucursal}</span> - {module.name||props.module}</span>}
+                {module && <span className="attendMenu-title">{currentSucursal||props.sucursal} - {module.name||props.module}</span>}
             </div>
             {!props.isModuleFree && 
                 <div className="attendMenu-options">
                     {!currentSucursal && 
-                    <div onClick={(e) => openMenu(e, true)} className="attendMenu-button">
+                    <div onClick={(e) => openMenu(e, true)} className="attendMenu-button" style={{color: invertColor(props.configSuc.color)}}>
                         <BiSelectMultiple className="icon" size={20}/>
                         <span className="text">Seleccionar sucursal</span>
                     </div>}
                     {currentSucursal && 
-                    <div className="attendMenu-button" onClick={props.handlerChangeSucursal}>
+                    <div className="attendMenu-button" onClick={props.handlerChangeSucursal} style={{color: invertColor(props.configSuc.color)}}>
                         <FaExchangeAlt className="icon" size={20}/>
                         <span className="text">Cambiar sucursal</span>
                     </div>}
                     {!module && currentSucursal &&
-                    <div onClick={(e) => openMenu(e, false)} className="attendMenu-button">
+                    <div onClick={(e) => openMenu(e, false)} className="attendMenu-button" style={{color: invertColor(props.configSuc.color)}}>
                         <BiSelectMultiple className="icon" size={20}/>
                         <span className="text">Seleccionar módulo</span>
                     </div>}
                     {module && 
-                    <div className="attendMenu-button" onClick={props.handlerChangeModule}>
+                    <div className="attendMenu-button" onClick={props.handlerChangeModule} style={{color: invertColor(props.configSuc.color)}}>
                         <FaExchangeAlt className="icon" size={20}/>
                         <span className="text">Cambiar módulo</span>
                     </div>}
-                    <div className="attendMenu-button" onClick={logout}>
+                    <div className="attendMenu-button" onClick={logout} style={{color: invertColor(props.configSuc.color)}}>
                         <BiLogOut className="attendMenu-icon" size={20}/> 
                         <span className="text">Cerrar sesión</span>
                     </div>

@@ -40,3 +40,8 @@
 h2>.MuiCheckbox-root {
     padding-left: 0;
 }
+
+.MuiDialogContent-root {
+    display: flex;
+    gap: 30px;
+}

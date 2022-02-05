@@ -13,6 +13,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import { DataGrid, esES } from '@mui/x-data-grid';
+import { ChromePicker  } from 'react-color';
 import './styles.css';
 
 // const protocol = window.location.protocol;
@@ -59,7 +60,11 @@ function Sucursales(props) {
                         for (const property in res.data.body) {
                             setValue(property, res.data.body[property], {
                                 shouldValidate: true
-                            })
+                            });
+
+                            if (property === 'color') {
+                                setColor({hex: res.data.body[property]});
+                            }
                         }
                         setOpenConfig(true);
                     } catch (error) {
@@ -90,6 +95,7 @@ function Sucursales(props) {
     const [openConfig, setOpenConfig] = useState(false);
     const [sucursals, setSucursals] = useState([]);
     const [areas, setAreas] = useState([]);
+    const [color, setColor] = useState({hex: "#782929"});
 
     const [copyAreasSucursal, setCopyAreasSucursal] = useState({});
     const [areasSucursal, setAreasSucursal] = useState({});
@@ -317,6 +323,10 @@ function Sucursales(props) {
         }
     }
 
+    const handleChangeColor = (color) => {
+        setValue("color", color.hex);
+        setColor(color);
+    };
     return (<>
         <div className="sucursal-container">
             <h1>Sucursales</h1>
@@ -353,11 +363,13 @@ function Sucursales(props) {
             </DialogTitle>
             <form onSubmit={handleSubmit(onSubmit)}>
             <DialogContent>
+                <ChromePicker color={color} onChange={handleChangeColor}/>
                 <FormGroup>
                 <Controller
                             name="color"
                             control={control}
                             render={({ field }) => <TextField
+                                    disabled
                                     error={errors.color?.type === 'required'}
                                     helperText={errors.color ? 'Campo obligatorio.' : ''}
                                     autoFocus

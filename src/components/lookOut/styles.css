@@ -183,6 +183,16 @@
     display: none;
 }
 
+.page .super-app-theme {
+    background-color: red !important;
+    color: white !important;
+    font-weight: bold;
+}
+
+.page .super-app-theme:hover {
+    background-color: #f17171 !important;
+}
+
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
     

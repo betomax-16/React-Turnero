@@ -21,6 +21,16 @@ function Attend(props) {
         setOpenConfirm(false);
     };
 
+    const countPendings = () => {
+        let count = 0;
+        for (let index = 0; index < props.areas.length; index++) {
+            const area = props.areas[index];
+            count += area.number;
+        }
+
+        return count;
+    }
+
     return (<>
         <div className="attend-container">
             <div className="attend-options">
@@ -32,7 +42,7 @@ function Attend(props) {
                     {module && module.mode === 'auto' &&
                     <div onClick={() => props.handlerAttendTurn('')}
                         className={disabledButtons ? "attend-button-next disabled" : "attend-button-next"}>
-                        {/* <span className="attend-number">{props.number}</span> */}
+                        <span className="attend-number">{countPendings()}</span>
                         <span className="attend-text">Siguiente</span>
                     </div>}
                     {module && module.mode === 'manual' && <>
