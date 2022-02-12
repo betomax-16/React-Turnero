@@ -6,6 +6,7 @@ import AppContext from "../../context/app/app-context";
 import CurrentTurn from "../screen/currentTurn/currentTurn";
 import TurnList from "../screen/turnList/turnList";
 import { useLocation } from "react-router-dom";
+import logo from '../../public/img/logo.png';
 import './styles.css';
 
 function Screen(props) {
@@ -14,6 +15,7 @@ function Screen(props) {
     const { search } = useLocation();
     const query = useMemo(() => new URLSearchParams(search), [search]);
     const [showTV, setShowTV] = useState(false);
+    const [sucursalExist, setSucursalExist] = useState(false);
     const [dateState, setDateState] = useState(moment());
     const [shifts, setShifts] = useState([]);
     const [timer, setTimer] = useState(5000);
@@ -32,29 +34,46 @@ function Screen(props) {
     });
 
     useEffect(() => {
-        const sucursal = window.atob(props.match.params.suc);
-        const auxSocket = socketIOClient(ENDPOINT);
-        auxSocket.emit('join-sucursal', sucursal);
-        getDataConfig();
-        getLastTurns();
-        setInterval(() => setDateState(moment()), 1000);
-
-        auxSocket.on('turnAttend', resTurn => {
-            setStateDataTurns({ status: true, action: 'addTurn', data: resTurn });  
-        });
-
-        auxSocket.on('turnFinish', resTurn => {
-            setStateDataTurns({ status: true, action: 'finishTurn', data: resTurn });   
-        });
-
-        auxSocket.on('turnReCall', resTurn => {
-            emphasis(resTurn.turn);
-        });
-
-        
-        if (query.get('tv') && query.get('tv').toLowerCase() === 'si') {
-            setShowTV(true);
+        async function init() {
+            try {
+                const sucursal = window.atob(props.match.params.suc);
+                if (await callGetSucursal(sucursal)) {
+                    const auxSocket = socketIOClient(ENDPOINT);
+                    auxSocket.emit('join-sucursal', sucursal);
+                    getDataConfig();
+                    getLastTurns();
+                    setInterval(() => setDateState(moment()), 1000);
+    
+                    auxSocket.on('turnAttend', resTurn => {
+                        setStateDataTurns({ status: true, action: 'addTurn', data: resTurn });  
+                    });
+    
+                    auxSocket.on('turnFinish', resTurn => {
+                        setStateDataTurns({ status: true, action: 'finishTurn', data: resTurn });   
+                    });
+    
+                    auxSocket.on('turnReCall', resTurn => {
+                        emphasis(resTurn);
+                    });
+    
+                    
+                    if (query.get('tv') && query.get('tv').toLowerCase() === 'si') {
+                        setShowTV(true);
+                    }
+                }
+            } catch (error) {
+                if (error.response && error.response.data) {
+                    console.log(error.response.data);
+                    showAlert("red", error.response.data.body.message); 
+                }
+                else {
+                    console.log(error);
+                    showAlert("red", error.message);
+                }
+            }
         }
+        
+        init();
     }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
@@ -69,15 +88,15 @@ function Screen(props) {
 
                     if (recall.state) {
                         setTimeout(() => { 
-                            emphasis(stateDataTurns.data.turn);
+                            emphasis(stateDataTurns.data);
                         }, timer*(auxShifts.length - 1));
                     }
                     else {
-                        emphasis(stateDataTurns.data.turn);
+                        emphasis(stateDataTurns.data);
                     }
 
                     const auxLastTurns = [...lastTurns];
-                    auxLastTurns.push(stateDataTurns.data.turn);
+                    auxLastTurns.push({...stateDataTurns.data.turn, ubication: stateDataTurns.data.ubication});
                     
                     //Mayor a menor
                     auxLastTurns.sort(( a, b ) => {
@@ -125,6 +144,25 @@ function Screen(props) {
         }
     }, [stateDataTurns]);// eslint-disable-line react-hooks/exhaustive-deps
 
+    const callGetSucursal = async (sucursal) => {
+        try {
+          const res = await axios.get(`http://localhost:5000/api/sucursal/${sucursal}`);
+          const exist = res.data.statusCode === 200;
+          setSucursalExist(exist);
+          return exist;
+        } catch (error) {
+          if (error.response && error.response.data) {
+            console.log(error.response.data);
+            showAlert("red", error.response.data.body.message); 
+          }
+          else {
+            console.log(error);
+            showAlert("red", error.message);
+          }
+        }
+        
+    };
+
     const getDataConfig = async () => {
         try {
             const res = await axios.get(`http://localhost:4000/api/config`, { 
@@ -150,12 +188,11 @@ function Screen(props) {
 
     const emphasis =  (resTurn) => {
         return new Promise((resolve, reject) => {
-            console.log('turnReCall', resTurn);
 
             setRecall({
                 state: true,
                 data: {
-                    turn: resTurn.turn,
+                    turn: resTurn.turn.turn,
                     ubication: resTurn.ubication
                 }
             });
@@ -210,14 +247,21 @@ function Screen(props) {
     }
 
     return <div className="screen-content">
-        {showTV ? <>
+        {sucursalExist ? showTV ? <>
             <iframe className="tv" style={{display: !recall.state ? 'inherit' : 'none'}} title="tele" src="https://pluto.tv/es/live-tv/pluto-tv-cine-estelar-1"></iframe>
             {recall.state && <CurrentTurn currentTurn={recall.data} wave="wave-down" playSound={true}/>}
         </> :
         !recall.state ? 
             <TurnList date={dateState} currentTurn={currentTurn} lastTurns={lastTurns} showAdds={props.showAdds}/> :
             <CurrentTurn currentTurn={recall.data} wave="wave-down" playSound={true}/>
-        }
+        : <>
+            <div className="takeTurn-empty-header">
+                <h1>Sucursal inexistente.</h1>
+            </div>
+            <div className="takeTurn-empty-body">
+                <img className="takeTurn-logo" src={logo} alt="logo"></img>
+            </div>
+       </>}
     </div>
 }
 

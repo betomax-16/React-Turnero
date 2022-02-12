@@ -184,7 +184,6 @@ function Current(props) {
     ]);
 
     useEffect(() => {
-        console.log(filters);
         let query = '?';
         filters.forEach(filter => {
             const op = getOperatorMongo(filter.operator);
@@ -204,7 +203,6 @@ function Current(props) {
         let auxUrlUsers = tab === 0 ? urlTurns : urlTrace;
         auxUrlUsers += query;
 
-        console.log(auxUrlUsers);
         if (tab === 0) {
             getTurns(auxUrlUsers);
         }
@@ -290,15 +288,36 @@ function Current(props) {
         setFilters(auxData);
     };
 
-    const handlerChangeValue = (event, index) => {
+    const handlerChangeValue = (event, index, type) => {
         const auxData = [ ...filters ];
         const editIndex = auxData.map(item => item.index).indexOf(index);
         if (editIndex !== -1) {
-            if (event.target) {
-                auxData[editIndex].value = event.target.value;
+            if (event) {
+                if (event.target) {
+                    if (type !== 'date') {
+                        auxData[editIndex].value = event.target.value;
+                    }
+                    else if (moment(event.target.value).isValid()) {
+                        auxData[editIndex].value = event.target.value;
+                    }
+                    else {
+                        return;
+                    }
+                }
+                else {
+                    if (type !== 'date') {
+                        auxData[editIndex].value = event;    
+                    }
+                    else if (moment(event).isValid()) {
+                        auxData[editIndex].value = event;    
+                    }
+                    else {
+                        return;
+                    }
+                }
             }
             else {
-                auxData[editIndex].value = event;
+                return;
             }
         }
 
@@ -339,7 +358,7 @@ function Current(props) {
                             rowsPerPageOptions={[10]}
                             disableSelectionOnClick
                             onSelectionModelChange={(ids) => {
-                                console.log(ids[0]);
+                                // console.log(ids[0]);
                             }}
                         />
                     </div> :
@@ -353,7 +372,7 @@ function Current(props) {
                         rowsPerPageOptions={[10]}
                         disableSelectionOnClick
                         onSelectionModelChange={(ids) => {
-                            console.log(ids[0]);
+                            // console.log(ids[0]);
                         }}
                     />
                 </div>}

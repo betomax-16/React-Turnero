@@ -46,17 +46,32 @@ function ModuleCard(props) {
 
   const getPrivilages = () => {
     const items = [];
-    let message = 'No';
-    if (props.data.isPrivilegeByArrivalTime) {
-      message = 'Si';
-    }
+    if (props.data.mode === 'auto') {
+      let message = 'No';
+      if (props.data.isPrivilegeByArrivalTime) {
+        message = 'Si';
+      }
 
-    items.push(<li key={0}>Por tiempo de espera - ({message})</li>);
-    if (props.data.privilages) {
-      props.data.privilages.forEach((element, index) => {
-        items.push(<li key={index + 1}>{element.area} - {element.privilege}</li>);
-      });
+      items.push(<li key={0}>Por tiempo de espera - ({message})</li>);
+      if (props.data.privilages.length) {
+        const auxPrivileges = props.data.privilages.sort(( a, b ) => {
+          if ( a.privilege < b.privilege ){
+            return -1;
+          }
+          if ( a.privilege > b.privilege ){
+            return 1;
+          }
+          return 0;
+        });
+        auxPrivileges.forEach((element, index) => {
+          items.push(<li key={index + 1}>{element.area} - {element.privilege}</li>);
+        });
+      }
+      else {
+        items.push(<li key={1}>Sin Privilegios.</li>);
+      }  
     }
+    
     return items;
   }
 
@@ -66,7 +81,7 @@ function ModuleCard(props) {
           <h2>Datos y configuración</h2>
           <h3>Usuario:</h3><em>{getFullNameUser()}</em>
           <h3>Modo:</h3><em>{props.data.mode.toUpperCase()}</em>
-          <h3>Privilegios:</h3><ul>{getPrivilages()}</ul>
+          {props.data.mode === 'auto' && <><h3>Privilegios:</h3><ul>{getPrivilages()}</ul></>}
       </>}
     >
       <div data-tip="Hola" data-for="global" className="module-card-container">

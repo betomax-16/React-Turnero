@@ -11,7 +11,7 @@ function Config(props) {
     const { showAlert } = useContext(AppContext);
     const [messageResponse, setMessageResponse] = useState('');
     const { control, setValue, handleSubmit, watch, formState: { errors } } = useForm({defaultValues:{
-        timer: '5000',
+        timer: '5',
     }});
 
     useEffect(() => {
@@ -25,7 +25,10 @@ function Config(props) {
     const onSubmit = data => saveData(data);
     const saveData = async (data) => {
         try {
-            await axios.post(`http://localhost:4000/api/config`, data, { 
+            const auxData = {
+                timer: data.timer * 1000
+            };
+            await axios.post(`http://localhost:4000/api/config`, auxData, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
@@ -52,7 +55,7 @@ function Config(props) {
             });
             
             if (res.data.body.length) {
-                setValue('timer', res.data.body[0].timer, {
+                setValue('timer', res.data.body[0].timer/1000, {
                     shouldValidate: true,
                 })
             }
@@ -79,7 +82,7 @@ function Config(props) {
                                                 className="input"
                                                 error={errors.timer?.type === 'required'}
                                                 helperText={errors.timer ? 'Campo obligatorio.' : ''} 
-                                                id="timer" label="Tiempo de timbre en pantalla en milisegundos." type="number" margin="dense" variant="standard" fullWidth {...field}/> }
+                                                id="timer" label="Tiempo de timbre en pantalla en seg." type="number" margin="dense" variant="standard" fullWidth {...field}/> }
                     rules={{ required: true }}
                 />
                 {messageResponse !== '' && <span className="messageError">{messageResponse}</span>}
@@ -88,7 +91,6 @@ function Config(props) {
                         <IoIosSave className="icon" size={25}/>
                     </div>
                 </Tooltip>
-                {/* <input type="submit" className="save-button" value="Guardar" /> */}
             </form>
         </div>
     </>);

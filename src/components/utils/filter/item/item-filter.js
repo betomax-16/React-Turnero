@@ -78,7 +78,7 @@ function ItemFilter(props) {
         if (props.type !== 'date') {
             return <TextField 
                 fullWidth
-                onChange={(e) => props.handlerValue(e, props.index)}
+                onChange={(e) => props.handlerValue(e, props.index, props.type)}
                 value={props.value} 
                 label="Valor" 
                 variant="standard" />
@@ -91,7 +91,7 @@ function ItemFilter(props) {
                     value={props.value}
                     onChange={(newValue) => {
                         // console.log(newValue);
-                        props.handlerValue(newValue, props.index)
+                        props.handlerValue(newValue, props.index, props.type)
                     }}
                 />
             </LocalizationProvider>

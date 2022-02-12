@@ -18,7 +18,7 @@ const columnsTurns = [
     { field: 'area', headerName: 'Area', flex: 1, mytype: 'string' },
     { field: 'sucursal', headerName: 'Sucursal', flex: 1, mytype: 'string' },
     { field: 'state', headerName: 'Estado', flex: 1, mytype: 'string' },
-    { field: 'creationDate', headerName: 'Fecha creación', flex: 1, mytype: 'string' }
+    { field: 'creationDate', headerName: 'Fecha creación', flex: 1, mytype: 'date' }
 ];
 
 const columnsTrace = [
@@ -231,7 +231,7 @@ function LookOut(props) {
                 //Actualizar estado de las tarjetas de modulos
                 for (let index = 0; index < auxSlaveModules.length; index++) {
                     const element = {...auxSlaveModules[index]};
-                    if (element.name === stateModule.data.turn.ubication) {
+                    if (element.name === stateModule.data.ubication) {
                         element.status = 'Activo';
                     }
                     auxSlaveModules[index] = element;
@@ -253,7 +253,7 @@ function LookOut(props) {
                 //Actualizar estado de las tarjetas de modulos
                 for (let index = 0; index < auxSlaveModules.length; index++) {
                     const element = {...auxSlaveModules[index]};
-                    if (element.name === stateModule.data.turn.ubication) {
+                    if (element.name === stateModule.data.ubication) {
                         element.status = 'Inactivo';
                     }
                     auxSlaveModules[index] = element;
@@ -278,10 +278,14 @@ function LookOut(props) {
         if (stateDataTurns.status && stateDataTurns.data !== null) {
             setStateDataTurns({ status: false, action: '', data: null });
             const auxTurns = [...turns];
+            const auxTraces = [...trace];
             if (stateDataTurns.action === 'addTurn') {
                 const row = {id: stateDataTurns.data.turn._id, ...stateDataTurns.data.turn};
+                const rowTrace = {id: stateDataTurns.data.trace._id, ...stateDataTurns.data.trace};
                 auxTurns.push(row);
+                auxTraces.push(rowTrace);
                 setTurns(auxTurns);
+                setTrace(auxTraces);
             }
             else if (stateDataTurns.action === 'updateTurn') {
                 const turn = stateDataTurns.data.turn.turn;
@@ -294,6 +298,20 @@ function LookOut(props) {
                         break;
                     }
                 }
+
+                const auxTraces = [...trace];
+                const rowTrace = {id: stateDataTurns.data.trace._id, ...stateDataTurns.data.trace};
+
+                for (let index = 0; index < auxTraces.length; index++) {
+                    let element = {...auxTraces[index]};
+                    if (!element.finalDate) {
+                        element.finalDate = moment().format("YYYY-MM-DD HH:mm:ss");
+                        auxTraces[index] = element;
+                        break;
+                    }
+                }
+                auxTraces.push(rowTrace);
+                setTrace(auxTraces);
             }
         }
     }, [stateDataTurns]);// eslint-disable-line react-hooks/exhaustive-deps
@@ -322,7 +340,7 @@ function LookOut(props) {
     useEffect(() => {
         if (configSucursal.timeLimit) {
             const result = trace.filter(r => r.finalDate === undefined && 
-                r.state === 'espera' && 
+                (r.state === 'espera' || r.state === 'espera toma') && 
                 moment(r.startDate).add(configSucursal.timeLimit, 'minutes') < moment());
 
             if (result.length) {
@@ -775,15 +793,36 @@ function LookOut(props) {
         setFilters(auxData);
     };
 
-    const handlerChangeValue = (event, index) => {
+    const handlerChangeValue = (event, index, type) => {
         const auxData = [ ...filters ];
         const editIndex = auxData.map(item => item.index).indexOf(index);
         if (editIndex !== -1) {
-            if (event.target) {
-                auxData[editIndex].value = event.target.value;
+            if (event) {
+                if (event.target) {
+                    if (type !== 'date') {
+                        auxData[editIndex].value = event.target.value;
+                    }
+                    else if (moment(event.target.value).isValid()) {
+                        auxData[editIndex].value = event.target.value;
+                    }
+                    else {
+                        return;
+                    }
+                }
+                else {
+                    if (type !== 'date') {
+                        auxData[editIndex].value = event;    
+                    }
+                    else if (moment(event).isValid()) {
+                        auxData[editIndex].value = event;    
+                    }
+                    else {
+                        return;
+                    }
+                }
             }
             else {
-                auxData[editIndex].value = event;
+                return;
             }
         }
 
@@ -946,7 +985,7 @@ function LookOut(props) {
                                             console.log(ids[0]);
                                         }}
                                         getRowClassName={(params) => {
-                                            return params.row.limit && params.row.state === 'espera' ? `super-app-theme ` : '';
+                                            return params.row.limit && (params.row.state === 'espera' || params.row.state === 'espera toma') ? `super-app-theme ` : '';
                                         }}
                                     />
                                 </div> :

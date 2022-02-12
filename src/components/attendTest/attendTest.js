@@ -6,6 +6,7 @@ import socketIOClient from "socket.io-client";
 import AppContext from "../../context/app/app-context";
 import AttendMenu from "../attendTurn/menu/menu";
 import Attend from "../attendTurn/attend/attend";
+import logo from '../../public/img/logo.png';
 import "./styles.css";
 
 function AttendTest(props) {
@@ -20,9 +21,8 @@ function AttendTest(props) {
             renderCell: (params) => (
                 <div className="button-associate" onClick={async () => {
                     const turn = params.value;
-                    const sucursal = props.match.params.suc;
+                    // const sucursal = props.match.params.suc;
                     handlerAttendTurn(turn);
-                    console.log(turn + '-' + sucursal);
                }}>
                    Llamar a toma
                </div>  
@@ -30,8 +30,15 @@ function AttendTest(props) {
     ];
 
     const { showAlert, setModule, module } = useContext(AppContext);
+    const [sucursalExist, setSucursalExist] = useState(false);
+
+    const [sucursal, setSucursal] = useState('');
+    const [modulo, setModulo] = useState('');
+
+    const [dateState, setDateState] = useState(moment());
     const [socket, setSocket] = useState(null);
     const [turns, setTurns] = useState([]);
+    const [trace, setTrace] = useState([]);
     const [currentTurn, setCurrentTurn] = useState({
         turn:''
     });
@@ -45,28 +52,50 @@ function AttendTest(props) {
       });
 
     useEffect(() => {
-        const sucursal = window.atob(props.match.params.suc);
-        const module = window.atob(props.match.params.module);
-        getConfigSucursal(sucursal);
-        getModule();
-        getTurns();
-        getCurrentTurn();
-        const auxSocket = socketIOClient(ENDPOINT);
-        setSocket(auxSocket);
-        auxSocket.emit('join-sucursal', sucursal);
-        auxSocket.emit('join-type', {sucursal:sucursal, type:'toma', name:module, username: ''});
+        async function init() {
+            try {
+                const suc = window.atob(props.match.params.suc);
+                const mod = window.atob(props.match.params.module);
+                setSucursal(suc);
+                setModulo(mod);
+                if (await callGetSucursal(suc, mod)) {
+                    await getConfigSucursal(suc);
+                    await getModule(suc, mod);
+                    await getTurns(suc, mod);
+                    await getTrace(suc);
+                    await getCurrentTurn(suc, mod);
+                    const auxSocket = socketIOClient(ENDPOINT);
+                    setSocket(auxSocket);
+                    auxSocket.emit('join-sucursal', suc);
+                    auxSocket.emit('join-type', {sucursal:suc, type:'toma', name:modulo, username: ''});
+    
+                    auxSocket.on('newTurnTest', data => {
+                        if (data) {
+                            setSocketTurns({ status: true, action: 'addTurn', data: data });   
+                        }
+                    });
+    
+                    auxSocket.on('attendTurnTest', data => {
+                        if (data) {
+                            setSocketTurns({ status: true, action: 'removeTurn', data: data });   
+                        }
+                    });
+                }
 
-        auxSocket.on('newTurnTest', data => {
-            if (data) {
-                setSocketTurns({ status: true, action: 'addTurn', data: data.turn });   
+                setInterval(() => setDateState(moment()), 1000);
+            } catch (error) {
+                if (error.response && error.response.data) {
+                    console.log(error.response.data);
+                    showAlert("red", error.response.data.body.message); 
+                }
+                else {
+                    console.log(error);
+                    showAlert("red", error.message);
+                }
             }
-        });
-
-        auxSocket.on('attendTurnTest', data => {
-            if (data) {
-                setSocketTurns({ status: true, action: 'removeTurn', data: data.turn });   
-            }
-        });
+        }
+        
+        init();
     }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
@@ -75,22 +104,80 @@ function AttendTest(props) {
             if (socketTurns.action === 'addTurn') {
                 const auxShifts = [...turns];
                 auxShifts.push({
-                    id: socketTurns.data._id,
-                    turn: socketTurns.data.turn,
-                    area: socketTurns.data.area,
-                    creationDate: moment(socketTurns.data.creationDate).format("YYYY-MM-DD HH:mm:ss"),
-                    state: socketTurns.data.state,
-                    sucursal: socketTurns.data.sucursal,
-                    call: socketTurns.data.turn
+                    id: socketTurns.data.turn._id,
+                    turn: socketTurns.data.turn.turn,
+                    area: socketTurns.data.turn.area,
+                    creationDate: moment(socketTurns.data.turn.creationDate).format("YYYY-MM-DD HH:mm:ss"),
+                    state: socketTurns.data.turn.state,
+                    sucursal: socketTurns.data.turn.sucursal,
+                    call: socketTurns.data.turn.turn
                 });
                 setTurns(auxShifts);
+
+                const auxTrace = [...trace];
+                auxTrace.push(socketTurns.data.trace);
+                setTrace(auxTrace);
             }
             else if (socketTurns.action === 'removeTurn') {
-                const auxShifts = turns.filter(t => t.turn !== socketTurns.data.turn);
+                const auxShifts = turns.filter(t => t.turn !== socketTurns.data.turn.turn);
                 setTurns(auxShifts);
+
+                const auxTraces = [...trace];
+                const auxTrace = auxTraces.filter(t => t.turn !== socketTurns.data.trace.turn);
+                setTrace(auxTrace);
             }
         }
     }, [socketTurns]);// eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        if (configSucursal.timeLimit) {
+            const result = trace.filter(r => r.finalDate === undefined && 
+                r.state === 'espera toma' && 
+                moment(r.startDate).add(configSucursal.timeLimit, 'minutes') < moment());
+
+            if (result.length) {
+                const copyTurns = [...turns]; 
+                for (let index = 0; index < result.length; index++) {
+                    const element = result[index];
+
+                    for (let j = 0; j < copyTurns.length; j++) {
+                        const t = {...copyTurns[j]};
+                        if (t.turn === element.turn) {
+                            t.limit = true;
+                            copyTurns[j] = t;
+                        }
+                    }
+
+                }
+
+                setTurns(copyTurns);
+            }  
+        }
+         
+    }, [dateState]);// eslint-disable-line react-hooks/exhaustive-deps
+
+    const callGetSucursal = async (suc, mod) => {
+        try {
+          const res = await axios.get(`http://localhost:4000/api/modules?sucursal=${suc}|eq&name=${mod}|eq|and`, {
+            headers: {
+                'me': ''
+            }
+          });
+          const exist = res.data.body.length === 1;
+          setSucursalExist(exist);
+          return exist;
+        } catch (error) {
+          if (error.response && error.response.data) {
+            console.log(error.response.data);
+            showAlert("red", error.response.data.body.message); 
+          }
+          else {
+            console.log(error);
+            showAlert("red", error.message);
+          }
+        }
+        
+    };
 
     const getConfigSucursal = async (suc) => {
         try {
@@ -117,25 +204,24 @@ function AttendTest(props) {
     const handlerAttendTurn = async (shift) => {
         if (module && !module.status) {
             try {
-                const sucursal = window.atob(props.match.params.suc);
-                const module = window.atob(props.match.params.module);
                 const data = {
                     turn: shift,
                     sucursal: sucursal,
-                    ubication: module
+                    ubication: modulo
                 };
         
                 const res = await axios.post(`http://localhost:4000/api/action/assistance`, data);
     
-                const turn = {...res.data.body, ubication: module};
+                const turn = {...res.data.body.turn, ubication: modulo};
                 setCurrentTurn(turn);
 
                 const auxShifts = turns.filter(t => t.turn !== shift);
                 setTurns(auxShifts);
     
                 if (socket) {
-                    socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: turn });
-                    socket.emit('turnAttend', { sucursal: sucursal, data: turn });
+                    const data = {...res.data.body, ubication: modulo};
+                    socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: data });
+                    socket.emit('turnAttend', { sucursal: sucursal, data: data });
                 }
         
                 const auxModule = {...module};
@@ -148,7 +234,7 @@ function AttendTest(props) {
                 }
                 else {
                     console.log(error);
-                    showAlert("red", 'Ocurrio algun error interno.');
+                    showAlert("red", error.message);
                 }
             } 
         }
@@ -160,12 +246,10 @@ function AttendTest(props) {
     const handlerReCallTurn = async () => {
         if (module && module.status) {
             try {
-                const sucursal = window.atob(props.match.params.suc);
-                const module = window.atob(props.match.params.module);
                 const data = {
                     turn: currentTurn.turn,
                     sucursal: sucursal,
-                    ubication: module
+                    ubication: modulo
                 };
             
                 const res = await axios.post(`http://localhost:4000/api/action/recall`, data, { 
@@ -175,7 +259,7 @@ function AttendTest(props) {
                 showAlert("blue", `Ha re-llamado a: ${currentTurn.turn}`); 
         
                 if (socket) {
-                    const turn = {...res.data.body, ubication: module};
+                    const turn = {...res.data.body, ubication: modulo};
                     socket.emit('turnReCall', { sucursal: sucursal, data: turn });
                 }
             } catch (error) {
@@ -185,7 +269,7 @@ function AttendTest(props) {
                 }
                 else {
                     console.log(error);
-                    showAlert("red", 'Ocurrio algun error interno.');
+                    showAlert("red", error.message);
                 }
             } 
         }
@@ -197,21 +281,23 @@ function AttendTest(props) {
     const handlerCancelationTurn = async () => {
         if (module && module.status) {
             try {
-                const sucursal = window.atob(props.match.params.suc);
-                const module = window.atob(props.match.params.module);
                 const data = {
                     turn: currentTurn.turn,
                     sucursal: sucursal,
-                    ubication: module
+                    ubication: modulo
                 };
             
                 const res = await axios.post(`http://localhost:4000/api/action/cancelation`, data);
                 setCurrentTurn({turn: ''});
         
                 if (socket) {
-                    const turn = {...res.data.body, ubication: module};
+                    const turn = {...res.data.body, ubication: modulo};
                     socket.emit('turnFinish', { sucursal: sucursal, data: turn });
                 }
+
+                const auxTraces = [...trace];
+                const auxTrace = auxTraces.filter(t => t.turn !== res.data.body.trace.turn);
+                setTrace(auxTrace);
 
                 const auxModule = {...module};
                 auxModule.status = false;
@@ -223,7 +309,7 @@ function AttendTest(props) {
                 }
                 else {
                     console.log(error);
-                    showAlert("red", 'Ocurrio algun error interno.');
+                    showAlert("red", error.message);
                 }
             } 
         }
@@ -235,12 +321,10 @@ function AttendTest(props) {
     const handlerAttendedTurn = async () => {
         if (module && module.status) {
             try {
-                const sucursal = window.atob(props.match.params.suc);
-                const moduleParam = window.atob(props.match.params.module);
                 const data = {
                     turn: currentTurn.turn,
                     sucursal: sucursal,
-                    ubication: moduleParam
+                    ubication: modulo
                 };
             
                 const res = await axios.post(`http://localhost:4000/api/action/finished`, data);
@@ -248,9 +332,13 @@ function AttendTest(props) {
                 setCurrentTurn({turn: ''});
 
                 if (socket) {
-                    const turn = {...res.data.body, ubication: moduleParam};
+                    const turn = {...res.data.body, ubication: modulo};
                     socket.emit('turnFinish', { sucursal: sucursal, data: turn });
                 }
+
+                const auxTraces = [...trace];
+                const auxTrace = auxTraces.filter(t => t.turn !== res.data.body.trace.turn);
+                setTrace(auxTrace);
 
                 const auxModule = {...module};
                 auxModule.status = false;
@@ -262,7 +350,7 @@ function AttendTest(props) {
                 }
                 else {
                     console.log(error);
-                    showAlert("red", 'Ocurrio algun error interno.');
+                    showAlert("red", error.message);
                 }
             } 
         }
@@ -271,10 +359,9 @@ function AttendTest(props) {
         }
     }
 
-    const getTurns = async (url = '') => {
+    const getTurns = async (suc, mod, url = '') => {
         try {
-            const sucursal = window.atob(props.match.params.suc);
-            const urlTurns = `http://localhost:4000/api/action/attended/${sucursal}`;
+            const urlTurns = `http://localhost:4000/api/action/attended/${suc}`;
             const urlApi = url !== '' ? url : urlTurns;
             const res = await axios.get(urlApi);
 
@@ -299,33 +386,62 @@ function AttendTest(props) {
             }
             else {
                 console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", error.message);
             }
         }
     }
 
-    const getModule = async () => {
+    const getTrace = async (suc) => {
         try {
-            const sucursal = props.match.params.suc;
-            const module = props.match.params.module;
-            const auxModule = await axios.get(`http://localhost:4000/api/modules/${window.atob(module)}/${window.atob(sucursal)}`);
+            const res = await axios.get(`http://localhost:4000/api/trace?sucursal=${suc}|eq&state=espera toma|eq|and&finalDate=null|eq|and`, {
+                headers: {
+                    'me': ''
+                }
+            });
+
+            const rows = [];
+            res.data.body.forEach(row => {
+                rows.push({
+                    id: row._id,
+                    turn: row.turn,
+                    startDate: moment(row.startDate).format("YYYY-MM-DD HH:mm:ss"),
+                    ubication: row.ubication,
+                    state: row.state,
+                    sucursal: row.sucursal
+                });
+            });
+
+            setTrace(rows);
+        } catch (error) {
+            if (error.response && error.response.data) {
+                console.log(error.response.data);
+                showAlert("red", error.response.data.body.message); 
+            }
+            else {
+                console.log(error);
+                showAlert("red", error.message);
+            }
+        }
+    }
+
+    const getModule = async (suc, mod) => {
+        try {
+            const auxModule = await axios.get(`http://localhost:4000/api/modules/${mod}/${suc}`);
             setModule(auxModule.data.body);
         } catch (error) {
             console.log(error);
             if (error.response && error.response.status === 404) {
-                // showAlert("red", "Módulo no encontrado.");
+                showAlert("red", "Módulo no encontrado.");
             }
             else {
-                showAlert("red", "Ocurrio algún error.");
+                showAlert("red", error.message);
             }
         }
     };
 
-    const getCurrentTurn = async () => {
+    const getCurrentTurn = async (suc, mod) => {
         try {
-            const sucursal = window.atob(props.match.params.suc);
-            const module = window.atob(props.match.params.module);
-            const res = await axios.get(`http://localhost:4000/api/trace?ubication=${module}|eq&sucursal=${sucursal}|eq|and&finalDate=null|eq|and`,{ 
+            const res = await axios.get(`http://localhost:4000/api/trace?ubication=${mod}|eq&sucursal=${suc}|eq|and&finalDate=null|eq|and`,{ 
                 headers: { 'me': '' }
             });
 
@@ -346,7 +462,7 @@ function AttendTest(props) {
                 showAlert("red", "Módulo no encontrado.");
             }
             else {
-                showAlert("red", "Ocurrio algún error.");
+                showAlert("red", error.message);
             }
         }
     };
@@ -354,30 +470,41 @@ function AttendTest(props) {
     return (
         // <h1>{props.match.params.suc}-{props.match.params.area}</h1>
         <div className="attendTest-container">
-            <AttendMenu isModuleFree={true} sucursal={window.atob(props.match.params.suc)} module={window.atob(props.match.params.module)} configSuc={configSucursal}/>
-            {module ? <div className="attendTest-content">
-                <Attend currentTurn={currentTurn} isModuleFree={true}
-                        handlerAttendedTurn={handlerAttendedTurn}
-                        handlerCancelationTurn={handlerCancelationTurn}
-                        handlerReCallTurn={handlerReCallTurn}/>
-                <div className="attendTest-body">
-                    <DataGrid
-                        localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-                        rows={turns}
-                        columns={columnsTurns}
-                        pageSize={10}
-                        rowsPerPageOptions={[10]}
-                        disableSelectionOnClick
-                        onSelectionModelChange={(ids) => {
-                            console.log(ids[0]);
-                        }}
-                    />
+            {sucursalExist ?
+                <><AttendMenu isModuleFree={true} sucursal={sucursal} module={modulo} configSuc={configSucursal}/>
+                {module ? <div className="attendTest-content">
+                    <Attend currentTurn={currentTurn} isModuleFree={true}
+                            handlerAttendedTurn={handlerAttendedTurn}
+                            handlerCancelationTurn={handlerCancelationTurn}
+                            handlerReCallTurn={handlerReCallTurn}/>
+                    <div className="attendTest-body">
+                        <DataGrid
+                            localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+                            rows={turns}
+                            columns={columnsTurns}
+                            pageSize={10}
+                            rowsPerPageOptions={[10]}
+                            disableSelectionOnClick
+                            onSelectionModelChange={(ids) => {
+                                console.log(ids[0]);
+                            }}
+                            getRowClassName={(params) => {
+                                return params.row.limit && params.row.state === 'espera toma' ? `super-app-theme ` : '';
+                            }}
+                        />
+                    </div>
+            </div> :
+            <div className="message">
+                <h1 className="title">Módulo no disponible.</h1>
+            </div>
+            }</>  : <>
+                <div className="takeTurn-empty-header">
+                    <h1>Módulo inexistente.</h1>
                 </div>
-          </div> :
-          <div className="message">
-              <h1 className="title">Módulo no disponible.</h1>
-          </div>
-          }  
+                <div className="takeTurn-empty-body">
+                    <img className="takeTurn-logo" src={logo} alt="logo"></img>
+                </div>
+            </>}
         </div>
     );
 }

@@ -39,16 +39,17 @@ function Users(props) {
     const urlUsers = `http://localhost:4000/api/users`;
     const [openConfirm, setOpenConfirm] = useState(false);
 
-    const handleAcceptConfirm = () => {
+    const handleAcceptConfirm = async () => {
         try {
             if (usersSelected.length > 0) {
-                usersSelected.forEach(async user => {
+                for (let index = 0; index < usersSelected.length; index++) {
+                    const user = usersSelected[index];
                     await axios.delete(`http://localhost:4000/api/users/${user.username}`, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
                     });
-                });
+                }
 
                 showAlert("green", 'Eliminación exitosa.'); 
                 getUsers();
@@ -81,6 +82,7 @@ function Users(props) {
 
     const [users, setUsers] = useState([]);
     const [usersSelected, setUsersSelected] = useState([]);
+    const [usersSelectedID, setUsersSelectedID] = useState([]);
 
     useEffect(() => {
         getSucursals();
@@ -155,6 +157,8 @@ function Users(props) {
                 });
                 if (res.data.statusCode === 200) {
                     showAlert("green", 'Edición exitosa.');  
+                    setUsersSelected([]);
+                    setUsersSelectedID([]);
                     getUsers(); 
                     handleClose();
                 }
@@ -373,6 +377,7 @@ function Users(props) {
                     rowsPerPageOptions={[14]}
                     disableSelectionOnClick
                     checkboxSelection
+                    selectionModel={usersSelectedID}
                     onSelectionModelChange={(ids) => {
                         const auxUsers = [];
                         ids.forEach(id => {
@@ -381,8 +386,7 @@ function Users(props) {
                         });
 
                         setUsersSelected(auxUsers);
-
-                        
+                        setUsersSelectedID(ids);
                     }}
                 />
             </div>

@@ -7,6 +7,11 @@ function Attend(props) {
     const { module } = useContext(AppContext);
     const [openConfirm, setOpenConfirm] = useState(false);
     const [disabledButtons, setDisabledButtons] = useState(false);
+    const [numbers, setNumbers] = useState(0);
+
+    useEffect(() => {
+        countPendings();
+    }, [props.areas]);// eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
         setDisabledButtons(module && module.status);
@@ -23,12 +28,14 @@ function Attend(props) {
 
     const countPendings = () => {
         let count = 0;
-        for (let index = 0; index < props.areas.length; index++) {
-            const area = props.areas[index];
-            count += area.number;
+        if (props.areas) {
+            for (let index = 0; index < props.areas.length; index++) {
+                const area = props.areas[index];
+                count += area.number;
+            }
+    
+            setNumbers(count);
         }
-
-        return count;
     }
 
     return (<>
@@ -42,7 +49,7 @@ function Attend(props) {
                     {module && module.mode === 'auto' &&
                     <div onClick={() => props.handlerAttendTurn('')}
                         className={disabledButtons ? "attend-button-next disabled" : "attend-button-next"}>
-                        <span className="attend-number">{countPendings()}</span>
+                        <span className="attend-number">{numbers}</span>
                         <span className="attend-text">Siguiente</span>
                     </div>}
                     {module && module.mode === 'manual' && <>

@@ -39,17 +39,18 @@ function Modules(props) {
         ask: ''
     });
 
-    const handleAcceptConfirm = () => {
+    const handleAcceptConfirm = async () => {
         try {
             if (openConfirm.title === 'Eliminar modulos') {
                 if (modulesSelected.length > 0) {
-                    modulesSelected.forEach(async item => {
+                    for (let index = 0; index < modulesSelected.length; index++) {
+                        const item = modulesSelected[index];
                         await axios.delete(`http://localhost:4000/api/modules/${item.name}/${item.sucursal}`, { 
                             headers: {
                                 'auth': localStorage.getItem('token')
                             }
                         });
-                    });
+                    };
     
                     showAlert("green", 'Eliminación exitosa.'); 
                     getModules();
@@ -134,6 +135,7 @@ function Modules(props) {
 
 
     const [modules, setModules] = useState([]);
+    const [modulesSelectedID, setModulesSelectedID] = useState([]);
     const [modulesSelected, setModulesSelected] = useState([]);
 
     useEffect(() => {
@@ -323,7 +325,6 @@ function Modules(props) {
             }
 
             setItemsSupervisors(auxItems);
-            console.log(auxItems);
             setOpenSupervisor(true);    
         } catch (error) {
             console.log(error);
@@ -365,7 +366,9 @@ function Modules(props) {
                     }
                 });
                 if (res.data.statusCode === 200) {
-                    showAlert("green", 'Edición exitosa.');  
+                    showAlert("green", 'Edición exitosa.'); 
+                    setModulesSelected([]);
+                    setModulesSelectedID([]);
                     getModules(); 
                     handleClose();
                 }
@@ -574,7 +577,6 @@ function Modules(props) {
         let auxUrlUsers = urlModules;
         auxUrlUsers += query;
         getModules(auxUrlUsers);
-        console.log(auxUrlUsers);
     }, [filters]);// eslint-disable-line react-hooks/exhaustive-deps
 
     const addFilter = () => {
@@ -771,6 +773,7 @@ function Modules(props) {
                     rowsPerPageOptions={[14]}
                     checkboxSelection
                     disableSelectionOnClick
+                    selectionModel={modulesSelectedID}
                     onSelectionModelChange={(ids) => {
                         const auxData = [];
                         ids.forEach(id => {
@@ -779,6 +782,7 @@ function Modules(props) {
                         });
 
                         setModulesSelected(auxData);
+                        setModulesSelectedID(ids);
                     }}
                 />
             </div>
@@ -825,6 +829,7 @@ function Modules(props) {
                                     type="text"
                                     fullWidth
                                     variant="standard"
+                                    disabled={!isNew}
                                     {...field}
                             />}
                             rules={{ required: true }}

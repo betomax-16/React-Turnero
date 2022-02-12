@@ -26,16 +26,17 @@ const columns = [
 function Areas(props) {
     const [openConfirm, setOpenConfirm] = useState(false);
 
-    const handleAcceptConfirm = () => {
+    const handleAcceptConfirm = async () => {
         try {
             if (areasSelected.length > 0) {
-                areasSelected.forEach(async item => {
+                for (let index = 0; index < areasSelected.length; index++) {
+                    const item = areasSelected[index];
                     await axios.delete(`http://localhost:4000/api/areas/${item.name}`, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
                     });
-                });
+                }
 
                 showAlert("green", 'Eliminación exitosa.'); 
                 getAreas();
@@ -59,14 +60,11 @@ function Areas(props) {
 
     const [areas, setAreas] = useState([]);
     const [areasSelected, setAreasSelected] = useState([]);
+    const [areasSelectedID, setAreasSelectedID] = useState([]);
 
     useEffect(() => {
         getAreas();
     }, []);// eslint-disable-line react-hooks/exhaustive-deps
-
-
-    
-
 
     const { showAlert } = useContext(AppContext);
     const [open, setOpen] = useState(false);
@@ -130,6 +128,8 @@ function Areas(props) {
                 });
                 if (res.data.statusCode === 200) {
                     showAlert("green", 'Edición exitosa.');  
+                    setAreasSelected([]);
+                    setAreasSelectedID([]);
                     getAreas(); 
                     handleClose();
                 }
@@ -142,8 +142,6 @@ function Areas(props) {
             showAlert("red", 'algo salio mal');
         }
     }
-
-    
 
     const getAreas = async () => {
         try {
@@ -187,6 +185,7 @@ function Areas(props) {
                     rowsPerPageOptions={[14]}
                     checkboxSelection
                     disableSelectionOnClick
+                    selectionModel={areasSelectedID}
                     onSelectionModelChange={(ids) => {
                         const auxData = [];
                         ids.forEach(id => {
@@ -195,6 +194,7 @@ function Areas(props) {
                         });
 
                         setAreasSelected(auxData);
+                        setAreasSelectedID(ids);
                     }}
                 />
             </div>

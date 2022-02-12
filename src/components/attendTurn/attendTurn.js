@@ -323,7 +323,6 @@ function AttendTurn(props) {
           });
 
           if (username === '') {
-              console.log(module);
               if (module) {
                 socket.emit('addModule', {sucursal:currentSucursal, data: module});
               }
@@ -346,7 +345,6 @@ function AttendTurn(props) {
               // setAnchorEl(null);
 
               if (socket) {
-                console.log(data);
                 socket.emit('join-type', {sucursal:currentSucursal, type:data.type, name:data.name, username: user.username, user: user});
               }
           }  
@@ -376,7 +374,12 @@ function AttendTurn(props) {
 
   const handlerOkModuleSelect = () => {
     updateStateModule(user.username);
-    getAreas(module);
+
+    const dataModule = modules.find(m => m.name === moduleSelect);
+    if (dataModule) {
+      getAreas(dataModule);  
+    }
+    
     getLastTurns();
   }
 
@@ -486,27 +489,28 @@ function AttendTurn(props) {
       }
       else if (modulo && modulo.mode === 'auto') {
         const sucursal = modulo ? modulo.sucursal : currentSucursal;
-        const resAreas = await axios.get(`http://localhost:4000/api/privilege/${modulo._id}`, { 
+        const resAreas = await axios.get(`http://localhost:4000/api/privilege/${modulo.id}`, { 
           headers: {
               'auth': localStorage.getItem('token')
           }
         });
 
         const rows = [];
-
         for (let index = 0; index < resAreas.data.body.length; index++) {
           const row = resAreas.data.body[index];
-          const resNums = await axios.get(`http://localhost:4000/api/shifts?area=${row.area}|eq&sucursal=${sucursal}|eq|and&state=espera|eq|and`, { 
+          if (row.privilege > 0) {
+            const resNums = await axios.get(`http://localhost:4000/api/shifts?area=${row.area}|eq&sucursal=${sucursal}|eq|and&state=espera|eq|and`, { 
               headers: {
                   'auth': localStorage.getItem('token')
               }
-          });
+            });
 
-          const num = resNums.data.body ? resNums.data.body.length : 0;
-          rows.push({
-            name: row.area,
-            number: num
-          });
+            const num = resNums.data.body ? resNums.data.body.length : 0;
+            rows.push({
+              name: row.area,
+              number: num
+            });
+          }
         }
 
         setAreas(rows);
@@ -604,8 +608,16 @@ function AttendTurn(props) {
             }
             setAreas(auxAreas);
           }
+          else {
+            const auxAreas = [...areas];
+            const auxArea = auxAreas.find(a => a.name === res.data.body.turn.area);
+            if (auxArea) {
+              auxArea.number--;
+            }
+            setAreas(auxAreas);
+          }
 
-          const turn = {...res.data.body, ubication: module.name};
+          const turn = {...res.data.body.turn, ubication: module.name};
           const auxLastTurns = [...lastTurns];
           auxLastTurns.push(turn);
           auxLastTurns.sort(( a, b ) => {
@@ -621,8 +633,9 @@ function AttendTurn(props) {
           setCurrentTurn(turn);
           setLastTurns(auxLastTurns);
 
+          const socketData = {...res.data.body, ubication: module.name};
           if (socket) {
-            socket.emit('turnAttend', { sucursal: currentSucursal, data: turn });
+            socket.emit('turnAttend', { sucursal: currentSucursal, data: socketData });
           }
   
           const auxModule = {...module};
@@ -666,8 +679,8 @@ function AttendTurn(props) {
         showAlert("blue", `Ha re-llamado a: ${currentTurn.turn}`); 
 
         if (socket) {
-          const turn = {...res.data.body, ubication: module.name};
-          socket.emit('turnReCall', { sucursal: currentSucursal, data: turn });
+          const data = {...res.data.body, ubication: module.name};
+          socket.emit('turnReCall', { sucursal: currentSucursal, data: data });
         }
 
       } catch (error) {
@@ -716,8 +729,8 @@ function AttendTurn(props) {
         setLastTurns(auxLastTurns);
         
         if (socket) {
-          const turn = {...res.data.body, ubication: module.name};
-          socket.emit('turnFinish', { sucursal: currentSucursal, data: turn });
+          const data = {...res.data.body, ubication: module.name};
+          socket.emit('turnFinish', { sucursal: currentSucursal, data: data });
         }
 
         const auxModule = {...module};
@@ -770,10 +783,10 @@ function AttendTurn(props) {
         setLastTurns(auxLastTurns);
 
         if (socket) {
-          const turn = {...res.data.body, ubication: module.name};
-          socket.emit('turnFinish', { sucursal: currentSucursal, data: turn });
+          const data = {...res.data.body, ubication: module.name};
+          socket.emit('turnFinish', { sucursal: currentSucursal, data: data });
           if (currentTurn.area !== 'Resultados') {
-            socket.emit('newTurnTest', { sucursal: currentSucursal, type: 'toma', data: turn }); 
+            socket.emit('newTurnTest', { sucursal: currentSucursal, type: 'toma', data: res.data.body }); 
           }
         }
 

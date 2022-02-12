@@ -129,7 +129,17 @@ function Sucursales(props) {
                 });                
             });
 
-            setSucursals(auxData);
+            const auxSucursals = auxData.sort(( a, b ) => {
+                if ( a.sucursal < b.sucursal ){
+                  return -1;
+                }
+                if ( a.sucursal > b.sucursal ){
+                  return 1;
+                }
+                return 0;
+            });
+
+            setSucursals(auxSucursals);
         } catch (error) {
             if (error.response.data) {
                 console.log(error.response.data);
@@ -363,44 +373,46 @@ function Sucursales(props) {
             </DialogTitle>
             <form onSubmit={handleSubmit(onSubmit)}>
             <DialogContent>
-                <ChromePicker color={color} onChange={handleChangeColor}/>
-                <FormGroup>
-                <Controller
-                            name="color"
-                            control={control}
-                            render={({ field }) => <TextField
-                                    disabled
-                                    error={errors.color?.type === 'required'}
-                                    helperText={errors.color ? 'Campo obligatorio.' : ''}
-                                    autoFocus
-                                    margin="dense"
-                                    id="color"
-                                    label="Color"
-                                    type="text"
-                                    fullWidth
-                                    variant="standard"
-                                    {...field}
-                            />}
-                            rules={{ required: true }}
-                        />
-                <Controller
-                            name="timeLimit"
-                            control={control}
-                            render={({ field }) => <TextField
-                                    error={errors.timeLimit?.type === 'required'}
-                                    helperText={errors.timeLimit ? 'Campo obligatorio.' : ''}
-                                    margin="dense"
-                                    id="timeLimit"
-                                    label="Tiempo Limite"
-                                    type="number"
-                                    InputProps={{ inputProps: { min: 0 } }}
-                                    fullWidth
-                                    variant="standard"
-                                    {...field}
-                            />}
-                            rules={{ required: true }}
-                        />
-                </FormGroup>
+                <div className="content-modal-sucursal">
+                    <ChromePicker color={color} onChange={handleChangeColor}/>
+                    <FormGroup>
+                        <Controller
+                                    name="color"
+                                    control={control}
+                                    render={({ field }) => <TextField
+                                            disabled
+                                            error={errors.color?.type === 'required'}
+                                            helperText={errors.color ? 'Campo obligatorio.' : ''}
+                                            autoFocus
+                                            margin="dense"
+                                            id="color"
+                                            label="Color"
+                                            type="text"
+                                            fullWidth
+                                            variant="standard"
+                                            {...field}
+                                    />}
+                                    rules={{ required: true }}
+                                />
+                        <Controller
+                                    name="timeLimit"
+                                    control={control}
+                                    render={({ field }) => <TextField
+                                            error={errors.timeLimit?.type === 'required'}
+                                            helperText={errors.timeLimit ? 'Campo obligatorio.' : ''}
+                                            margin="dense"
+                                            id="timeLimit"
+                                            label="Tiempo Limite"
+                                            type="number"
+                                            InputProps={{ inputProps: { min: 0 } }}
+                                            fullWidth
+                                            variant="standard"
+                                            {...field}
+                                    />}
+                                    rules={{ required: true }}
+                                />
+                    </FormGroup>
+                </div>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleCloseConfig}>Cancelar</Button>

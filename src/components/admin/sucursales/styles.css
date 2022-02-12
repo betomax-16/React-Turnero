@@ -41,7 +41,7 @@ h2>.MuiCheckbox-root {
     padding-left: 0;
 }
 
-.MuiDialogContent-root {
+.content-modal-sucursal {
     display: flex;
     gap: 30px;
 }

@@ -39,3 +39,13 @@
     color: #5a8f80;
     text-align: center;
 }
+
+.attendTest-body .super-app-theme {
+    background-color: red !important;
+    color: white !important;
+    font-weight: bold;
+}
+
+.attendTest-body .super-app-theme:hover {
+    background-color: #f17171 !important;
+}
