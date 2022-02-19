@@ -1,0 +1,34 @@
+.reports-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.reports-container .content {
+    display: flex;
+    z-index: 1;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.reports-container .content .field{
+    margin-top: 33px;
+    margin-bottom: 0;
+}
+
+.reports-container .content .button {
+    background-color: #5a8f80;
+    height: 50px;
+    margin-top: 35px;
+}
+
+.reports-container .content .button:hover {
+    background-color: #487065;
+}
+
+.reports-container .table {
+    flex: 1 1 auto;
+    background-color: white;
+    z-index: 1;
+}
+

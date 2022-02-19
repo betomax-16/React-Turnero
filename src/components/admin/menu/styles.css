@@ -106,7 +106,7 @@
 }
 
 .down-sub {
-    max-height: 200px !important;
+    max-height: 265px !important;
     transition: max-height 0.25s ease-in !important;
 }
 
@@ -129,6 +129,11 @@
     .options .sub-option::before {
         left: -15px; 
     }
+
+    .down-sub {
+        max-height: 240px !important;
+        transition: max-height 0.25s ease-in !important;
+    }
 } 
 
 /* Large devices (laptops/desktops, 992px and up) */
@@ -139,6 +144,11 @@
 
     .options .sub-option::before {
         left: -15px; 
+    }
+
+    .down-sub {
+        max-height: 240px !important;
+        transition: max-height 0.25s ease-in !important;
     }
 } 
 
@@ -151,6 +161,11 @@
     .options .sub-option::before {
         left: -15px; 
     }
+
+    .down-sub {
+        max-height: 240px !important;
+        transition: max-height 0.25s ease-in !important;
+    }
 }
 
 @media only screen and (min-width: 1700px) {
@@ -160,5 +175,10 @@
 
     .options .sub-option::before {
         left: -15px; 
+    }
+
+    .down-sub {
+        max-height: 240px !important;
+        transition: max-height 0.25s ease-in !important;
     }
 }

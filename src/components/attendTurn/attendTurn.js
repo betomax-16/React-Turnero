@@ -84,7 +84,9 @@ function AttendTurn(props) {
   
       auxSocket.on('turnAttend', resTurn => {
         if (resTurn) {
-          setStateModule({ status: true, action: 'greenLed', data: resTurn });
+          if (resTurn.turn.state === 'en atencion') {
+            setStateModule({ status: true, action: 'greenLed', data: resTurn });  
+          }
         }
       });
   

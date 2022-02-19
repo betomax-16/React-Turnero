@@ -12,6 +12,7 @@ import Modules from "../components/admin/modules/modules";
 import Turns from "../components/admin/turns/turns";
 import Current from "../components/admin/turns/current/current";
 import History from "../components/admin/turns/history/history";
+import Reports from "../components/admin/turns/reports/reports";
 import Config from "../components/admin/config/config";
 
 const routes = [
@@ -75,6 +76,10 @@ const routes = [
                     {
                         path: '/admin/turnos/historicos',
                         component: History,
+                    },
+                    {
+                        path: '/admin/turnos/reportes',
+                        component: Reports,
                     }
                 ]
             },

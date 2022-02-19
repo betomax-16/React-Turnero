@@ -9,6 +9,7 @@ import { IoTicket, IoStorefront } from "react-icons/io5";
 import { BiLogOut, BiCurrentLocation, BiReset } from "react-icons/bi";
 import { BsClockHistory } from "react-icons/bs";
 import { MdSchema, MdLocalConvenienceStore } from "react-icons/md";
+import { HiDocumentReport } from "react-icons/hi";
 import { GiGears } from "react-icons/gi";
 import Tooltip from '@mui/material/Tooltip';
 import logo from "../../../public/img/logo.png";
@@ -115,6 +116,16 @@ function Menu(props) {
                                     </div> 
                                 </Tooltip>
                                 <span  className="title">Historicos</span>
+                            </div>
+                        </Link>
+                        <Link to="/admin/turnos/reportes">
+                            <div className="sub-option">
+                                <Tooltip title="Reportes">
+                                    <div className="icon">
+                                        <HiDocumentReport size={30}/>
+                                    </div> 
+                                </Tooltip>
+                                <span  className="title">Reportes</span>
                             </div>
                         </Link>
                         <div className="sub-option" onClick={() => {setOpenConfirm(true)}}>
