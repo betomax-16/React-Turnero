@@ -10,7 +10,7 @@
 }
 
 .attendTest-body {
-    width: calc(100% - 250px);
+    width: 100%;
     overflow: auto;
     box-sizing: border-box;
     padding: 25px;
@@ -24,6 +24,38 @@
     color: white;
     font-weight: bold;
     line-height: normal;
+    margin-right: 5px;
+}
+
+.blues {
+    background-color: rgb(50, 174, 205) !important;
+    color: white !important;
+}
+
+.blues:hover {
+    background-color: rgb(82, 208, 240) !important;
+}
+
+.button-associate+.green {
+    background-color: yellowgreen;
+    color: white;
+}
+
+.button-associate+.green:hover {
+    background-color: rgb(181, 241, 59);
+}
+
+.button-associate+.red {
+    background-color: rgb(207, 3, 3);
+    color: white;
+}
+
+.button-associate+.red:hover {
+    background-color: red;
+}
+
+.formDialog .MuiDialogContent-root {
+    padding-top: 0;
 }
 
 .attendTest-container .message {

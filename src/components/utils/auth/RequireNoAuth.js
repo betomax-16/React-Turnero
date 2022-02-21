@@ -3,11 +3,11 @@ import { useLocation, Redirect } from "react-router-dom";
 import AppContext from "../../../context/app/app-context";
 
 function RequireNoAuth({children}) {
-    const { user } = useContext(AppContext);
+    const { user, userLogout, showAlert } = useContext(AppContext);
     let location = useLocation();
 
     if (user) {
-        let path = '/atencion';
+        let path = '/login';
         if (location.pathname === '/login') {
           switch (user.rol.toLowerCase()) {
             case 'admin':
@@ -20,6 +20,8 @@ function RequireNoAuth({children}) {
                 path = '/atencion';
               break;
             default:
+              userLogout();
+              showAlert('red', 'Sin permisos de acceso.');
               break;
           }
         }
