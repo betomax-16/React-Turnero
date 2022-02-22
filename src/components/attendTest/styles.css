@@ -54,6 +54,15 @@
     background-color: red;
 }
 
+.button-associate+.orange {
+    background-color: rgb(245 152 37);
+    color: white;
+}
+
+.button-associate+.orange:hover {
+    background-color: rgb(247, 168, 72);
+}
+
 .formDialog .MuiDialogContent-root {
     padding-top: 0;
 }

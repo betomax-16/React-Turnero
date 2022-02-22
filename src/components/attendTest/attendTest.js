@@ -18,6 +18,7 @@ import logo from '../../public/img/logo.png';
 import { AiOutlineClose } from "react-icons/ai";
 import { GoMegaphone } from "react-icons/go";
 import { FiCheck } from "react-icons/fi";
+import { BsArrowReturnLeft } from "react-icons/bs";
 import "./styles.css";
 
 function AttendTest(props) {
@@ -215,6 +216,9 @@ function AttendTest(props) {
                     <Tooltip title="Terminar"><div className="button-associate green" onClick={async () => {
                         handleOpenDialog(turn, 'terminar');
                     }}><FiCheck size={15}/></div></Tooltip>
+                    <Tooltip title="Liberar"><div className="button-associate orange" onClick={async () => {
+                        handleOpenDialog(turn, 'liberar');
+                    }}><BsArrowReturnLeft size={15}/></div></Tooltip>
                 </>;
                 break;
             case 're-call':
@@ -228,6 +232,9 @@ function AttendTest(props) {
                     <Tooltip title="Terminar"><div className="button-associate green" onClick={async () => {
                         handleOpenDialog(turn, 'terminar');
                     }}><FiCheck size={15}/></div></Tooltip>
+                    <Tooltip title="Liberar"><div className="button-associate orange" onClick={async () => {
+                        handleOpenDialog(turn, 'liberar');
+                    }}><BsArrowReturnLeft size={15}/></div></Tooltip>
                 </>;
                 break;
             case 'pausa':
@@ -310,6 +317,7 @@ function AttendTest(props) {
                 let t = {...auxShifts[index]};
                 if (t.turn === shift) {
                     auxShifts[index] = {...res.data.body.turn, id:res.data.body.turn._id, call: res.data.body.turn};
+                    auxShifts[index].creationDate = moment(auxShifts[index].creationDate).format("YYYY-MM-DD HH:mm:ss")
                 }
             }
             setTurns(auxShifts);
@@ -445,6 +453,57 @@ function AttendTest(props) {
             const auxTraces = [...trace];
             const auxTrace = auxTraces.filter(t => t.turn !== res.data.body.trace.turn);
             setTrace(auxTrace);
+
+            const auxModule = {...module};
+            auxModule.status = false;
+            setModule(auxModule);
+        } catch (error) {
+            if (error.response && error.response.data) {
+                console.log(error.response.data);
+                showAlert("red", error.response.data.body.message); 
+            }
+            else {
+                console.log(error);
+                showAlert("red", error.message);
+            }
+        } 
+    }
+
+    const handlerFreeTurn = async () => {
+        try {
+            const shift = selectedTurn.turn;
+            const data = {
+                turn: shift,
+                sucursal: sucursal
+            };
+        
+            const res = await axios.post(`http://localhost:4000/api/action/free`, data);
+    
+            // setCurrentTurn({turn: ''});
+            const auxShifts = [...turns];
+            for (let index = 0; index < auxShifts.length; index++) {
+                let t = {...auxShifts[index]};
+                if (t.turn === shift) {
+                    auxShifts[index] = {...res.data.body.turn, id:res.data.body.turn._id, call: res.data.body.turn};
+                    auxShifts[index].creationDate = moment(auxShifts[index].creationDate).format("YYYY-MM-DD HH:mm:ss")
+                }
+            }
+            setTurns(auxShifts);
+
+            const auxTraces = [...trace];
+            for (let index = 0; index < auxTraces.length; index++) {
+                let t = {...auxTraces[index]};
+                if (t.turn === shift) {
+                    auxTraces[index] = res.data.body.trace;
+                }
+            }
+            setTrace(auxTraces);
+
+            if (socket) {
+                const data = {...res.data.body, ubication: modulo};
+                socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: data });
+                socket.emit('turnAttend', { sucursal: sucursal, data: data });
+            }
 
             const auxModule = {...module};
             auxModule.status = false;
@@ -650,18 +709,12 @@ function AttendTest(props) {
                 handleCloseDialog();
                 handlerAttendTurn(data.idExakta);
             }
-            else {
-                showAlert("yellow", "IdExakta no tiene rol de tomador de muestras.");
-            }
         }
         else if (selectedTurn && selectedTurn.action === 're-call') {
             const res = await validIdExakta(data.idExakta);
             if (res) {
                 handleCloseDialog();
                 handlerReCallTurn(data.idExakta);
-            }
-            else {
-                showAlert("yellow", "IdExakta no coincide conquien realizo la toma.");
             }
         }
         else if (selectedTurn && selectedTurn.action === 'cancelar') {
@@ -670,9 +723,6 @@ function AttendTest(props) {
                 handleCloseDialog();
                 handlerCancelationTurn(data.idExakta);
             }
-            else {
-                showAlert("yellow", "IdExakta no coincide conquien realizo la toma");
-            }
         }
         else if (selectedTurn && selectedTurn.action === 'terminar') {
             const res = await validIdExakta(data.idExakta);
@@ -680,8 +730,12 @@ function AttendTest(props) {
                 handleCloseDialog();
                 handlerAttendedTurn(data.idExakta);
             }
-            else {
-                showAlert("yellow", "IdExakta no coincide conquien realizo la toma");
+        }
+        else if (selectedTurn && selectedTurn.action === 'liberar') {
+            const res = await validIdExakta(data.idExakta);
+            if (res) {
+                handleCloseDialog();
+                handlerFreeTurn();
             }
         }
     }
