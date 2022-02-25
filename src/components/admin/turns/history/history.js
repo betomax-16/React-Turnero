@@ -27,8 +27,8 @@ const columnsTrace = [
 ];
 
 function History(props) {
-    const urlTurns = `http://localhost:4000/api/turnhistory`;
-    const urlTrace = `http://localhost:4000/api/trace-history`;
+    const urlTurns = `http://${window.location.hostname}:4000/api/turnhistory`;
+    const urlTrace = `http://${window.location.hostname}:4000/api/trace-history`;
     const { showAlert, reset } = useContext(AppContext);
     const [tab, setTab] = useState(0);
     const [turns, setTurns] = useState([]);
@@ -70,7 +70,7 @@ function History(props) {
             // const firstDate = moment(auxDate.add(-1, 'days').toDate());
             // const lastDate = moment(auxDate.toDate());
             // const sucursal = 'Angelópolis';
-            //`http://localhost:4000/api/turnhistory?firstDate=${firstDate.format('YYYY-MM-DD')}&lastDate=${lastDate.format('YYYY-MM-DD')}&sucursal=${sucursal}`
+            //`http://${window.location.hostname}:4000/api/turnhistory?firstDate=${firstDate.format('YYYY-MM-DD')}&lastDate=${lastDate.format('YYYY-MM-DD')}&sucursal=${sucursal}`
             const urlApi = url !== '' ? url : urlTurns;
             const res = await axios.get(urlApi, { 
                 headers: {
@@ -109,7 +109,7 @@ function History(props) {
             // const firstDate = moment(auxDate.add(-1, 'days').toDate());
             // const lastDate = moment(auxDate.toDate());
             // const sucursal = 'Angelópolis';
-            //`http://localhost:4000/api/trace-history?firstDate=${firstDate.format('YYYY-MM-DD')}&lastDate=${lastDate.format('YYYY-MM-DD')}&sucursal=${sucursal}`
+            //`http://${window.location.hostname}:4000/api/trace-history?firstDate=${firstDate.format('YYYY-MM-DD')}&lastDate=${lastDate.format('YYYY-MM-DD')}&sucursal=${sucursal}`
             const urlApi = url !== '' ? url : urlTrace;
             const res = await axios.get(urlApi, { 
                 headers: {

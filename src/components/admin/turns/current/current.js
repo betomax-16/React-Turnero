@@ -27,8 +27,8 @@ const columnsTrace = [
 ];
 
 function Current(props) {
-    const urlTurns = `http://localhost:4000/api/shifts`;
-    const urlTrace = `http://localhost:4000/api/trace`;
+    const urlTurns = `http://${window.location.hostname}:4000/api/shifts`;
+    const urlTrace = `http://${window.location.hostname}:4000/api/trace`;
     const { showAlert, reset } = useContext(AppContext);
     const [tab, setTab] = useState(0);
     const [turns, setTurns] = useState([]);

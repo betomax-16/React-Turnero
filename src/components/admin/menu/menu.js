@@ -21,7 +21,7 @@ function Menu(props) {
     const [openConfirm, setOpenConfirm] = useState(false);
     const handleAcceptConfirm = async () => {
         try {
-            const urlApi = 'http://localhost:4000/api/action/reset';
+            const urlApi = `http://${window.location.hostname}:4000/api/action/reset`;
             await axios.delete(urlApi, { 
                 headers: {
                     'auth': localStorage.getItem('token')

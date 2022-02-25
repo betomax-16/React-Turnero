@@ -117,15 +117,15 @@ function Reports(props) {
                 let url = '';
                 let op = '';
                 if (selectOptionReport === 'General') {
-                    url = `http://localhost:4000/api/reports/general?startDate=${req.startDate}&finalDate=${req.finalDate}`;
+                    url = `http://${window.location.hostname}:4000/api/reports/general?startDate=${req.startDate}&finalDate=${req.finalDate}`;
                     op = 'general';
                 }
                 else if (selectOptionReport === 'GeneralByHour') {
-                    url = `http://localhost:4000/api/reports/generalByHour?startDate=${req.startDate}&finalDate=${req.finalDate}`;
+                    url = `http://${window.location.hostname}:4000/api/reports/generalByHour?startDate=${req.startDate}&finalDate=${req.finalDate}`;
                     op = 'generalIntervalTime';
                 }
                 else if (selectOptionReport === 'Detail') {
-                    url = `http://localhost:4000/api/reports/detail?startDate=${req.startDate}&finalDate=${req.finalDate}`;
+                    url = `http://${window.location.hostname}:4000/api/reports/detail?startDate=${req.startDate}&finalDate=${req.finalDate}`;
                     op = 'detail';
                 }
 

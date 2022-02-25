@@ -51,7 +51,7 @@ function Sucursales(props) {
                     try {
                         const sucursal = params.value.name;
                         setSucursalSelected(sucursal);
-                        const res = await axios.get(`http://localhost:4000/api/sucursal/${sucursal}`, { 
+                        const res = await axios.get(`http://${window.location.hostname}:4000/api/sucursal/${sucursal}`, { 
                             headers: {
                                 'auth': localStorage.getItem('token')
                             }
@@ -107,7 +107,7 @@ function Sucursales(props) {
 
     const getSucursals = async () => {
         try {
-            const res = await axios.get(`http://localhost:4000/api/sucursal`, { 
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/sucursal`, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
@@ -154,7 +154,7 @@ function Sucursales(props) {
 
     const getAreas = async () => {
         try {
-            const res = await axios.get(`http://localhost:4000/api/areas`, { 
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/areas`, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
@@ -186,7 +186,7 @@ function Sucursales(props) {
 
     const getAreasBySucursal = async (sucursal) => {
         try {
-            const res = await axios.get(`http://localhost:4000/api/area-sucursal/${sucursal}`, { 
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/area-sucursal/${sucursal}`, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
@@ -259,7 +259,7 @@ function Sucursales(props) {
         try {
             if (deleteRow.length > 0) {
                 deleteRow.forEach(async element => {
-                    await axios.delete(`http://localhost:4000/api/area-sucursal/${element.sucursal}/${element.area}`, { 
+                    await axios.delete(`http://${window.location.hostname}:4000/api/area-sucursal/${element.sucursal}/${element.area}`, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
@@ -269,7 +269,7 @@ function Sucursales(props) {
     
             if (insertRow.length > 0) {
                 insertRow.forEach(async element => {
-                    await axios.post(`http://localhost:4000/api/area-sucursal`, element, { 
+                    await axios.post(`http://${window.location.hostname}:4000/api/area-sucursal`, element, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
@@ -313,7 +313,7 @@ function Sucursales(props) {
                 color: data.color,
                 timeLimit: data.timeLimit
             };
-            await axios.put(`http://localhost:4000/api/sucursal/${data.name}`, req, { 
+            await axios.put(`http://${window.location.hostname}:4000/api/sucursal/${data.name}`, req, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }

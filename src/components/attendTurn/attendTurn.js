@@ -18,8 +18,8 @@ moment.locale('es', {
 });
 
 function AttendTurn(props) {
-  const ENDPOINT = `http://localhost:4000`;
-  const urlModules = `http://localhost:4000/api/modules`;
+  const ENDPOINT = `http://${window.location.hostname}:4000`;
+  const urlModules = `http://${window.location.hostname}:4000/api/modules`;
   const { showAlert, module, user, getDataUser, setModule, setUser, setCurrentSucursal, currentSucursal } = useContext(AppContext);
   const [areas, setAreas] = useState([]);
   const [dateState, setDateState] = useState(moment());
@@ -212,7 +212,7 @@ function AttendTurn(props) {
 
   const getSucursals = async () =>  {
     try {
-      const urlApi = `http://localhost:5000/api/sucursal`;
+      const urlApi = `http://${window.location.hostname}:5000/api/sucursal`;
       const res = await axios.get(urlApi);
 
       if (res.data.body.length) {
@@ -293,7 +293,7 @@ function AttendTurn(props) {
 
   const getConfigSucursal = async (suc) => {
     try {
-        const urlApi = `http://localhost:4000/api/sucursal`;
+        const urlApi = `http://${window.location.hostname}:4000/api/sucursal`;
         const res = await axios.get(urlApi, { 
             headers: {
                 'auth': localStorage.getItem('token')
@@ -413,7 +413,7 @@ function AttendTurn(props) {
   const getMyModule = async (dataUser, auxSocket) => {
     try {
       if (dataUser) {
-        const urlApi = `http://localhost:4000/api/modules?username=${dataUser.username}|eq`;
+        const urlApi = `http://${window.location.hostname}:4000/api/modules?username=${dataUser.username}|eq`;
         const res = await axios.get(urlApi, { 
             headers: {
                 'auth': localStorage.getItem('token')
@@ -462,7 +462,7 @@ function AttendTurn(props) {
         const dataUser = getDataUser();
         if (dataUser) {
           const sucursal = modulo ? modulo.sucursal : currentSucursal;
-          const resAreas = await axios.get(`http://localhost:4000/api/area-sucursal/${sucursal}`, { 
+          const resAreas = await axios.get(`http://${window.location.hostname}:4000/api/area-sucursal/${sucursal}`, { 
             headers: {
                 'auth': localStorage.getItem('token')
             }
@@ -472,7 +472,7 @@ function AttendTurn(props) {
 
           for (let index = 0; index < resAreas.data.body.length; index++) {
             const row = resAreas.data.body[index];
-            const resNums = await axios.get(`http://localhost:4000/api/shifts?area=${row.area}|eq&sucursal=${sucursal}|eq|and&state=espera|eq|and`, { 
+            const resNums = await axios.get(`http://${window.location.hostname}:4000/api/shifts?area=${row.area}|eq&sucursal=${sucursal}|eq|and&state=espera|eq|and`, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
@@ -491,7 +491,7 @@ function AttendTurn(props) {
       }
       else if (modulo && modulo.mode === 'auto') {
         const sucursal = modulo ? modulo.sucursal : currentSucursal;
-        const resAreas = await axios.get(`http://localhost:4000/api/privilege/${modulo.id}`, { 
+        const resAreas = await axios.get(`http://${window.location.hostname}:4000/api/privilege/${modulo.id}`, { 
           headers: {
               'auth': localStorage.getItem('token')
           }
@@ -501,7 +501,7 @@ function AttendTurn(props) {
         for (let index = 0; index < resAreas.data.body.length; index++) {
           const row = resAreas.data.body[index];
           if (row.privilege > 0) {
-            const resNums = await axios.get(`http://localhost:4000/api/shifts?area=${row.area}|eq&sucursal=${sucursal}|eq|and&state=espera|eq|and`, { 
+            const resNums = await axios.get(`http://${window.location.hostname}:4000/api/shifts?area=${row.area}|eq&sucursal=${sucursal}|eq|and&state=espera|eq|and`, { 
               headers: {
                   'auth': localStorage.getItem('token')
               }
@@ -532,7 +532,7 @@ function AttendTurn(props) {
 
   const getPendingTurn = async (dataModule) => {
     try {
-      const res = await axios.get(`http://localhost:4000/api/trace?ubication=${dataModule.name}|eq&finalDate=null|eq|and`, { 
+      const res = await axios.get(`http://${window.location.hostname}:4000/api/trace?ubication=${dataModule.name}|eq&finalDate=null|eq|and`, { 
         headers: {
           'auth': localStorage.getItem('token')
         }
@@ -565,7 +565,7 @@ function AttendTurn(props) {
       const AuxUser = getDataUser();
       if (AuxUser) {
         const sucursal = suc ? suc : currentSucursal;
-        const res = await axios.get(`http://localhost:4000/api/action/pendding/${sucursal}`, { 
+        const res = await axios.get(`http://${window.location.hostname}:4000/api/action/pendding/${sucursal}`, { 
           headers: {
               'auth': localStorage.getItem('token')
           }
@@ -596,7 +596,7 @@ function AttendTurn(props) {
             sucursal: currentSucursal
           };
     
-          const res = await axios.post(`http://localhost:4000/api/action/next`, data, { 
+          const res = await axios.post(`http://${window.location.hostname}:4000/api/action/next`, data, { 
             headers: {
                 'auth': localStorage.getItem('token')
             }
@@ -672,7 +672,7 @@ function AttendTurn(props) {
           sucursal: currentSucursal
         };
   
-        const res = await axios.post(`http://localhost:4000/api/action/recall`, data, { 
+        const res = await axios.post(`http://${window.location.hostname}:4000/api/action/recall`, data, { 
           headers: {
               'auth': localStorage.getItem('token')
           }
@@ -710,7 +710,7 @@ function AttendTurn(props) {
           ubication: module.name
         };
   
-        const res = await axios.post(`http://localhost:4000/api/action/cancelation`, data, { 
+        const res = await axios.post(`http://${window.location.hostname}:4000/api/action/cancelation`, data, { 
           headers: {
               'auth': localStorage.getItem('token')
           }
@@ -764,7 +764,7 @@ function AttendTurn(props) {
           module: module.name
         };
   
-        const res = await axios.post(`http://localhost:4000/api/action/attended`, data, { 
+        const res = await axios.post(`http://${window.location.hostname}:4000/api/action/attended`, data, { 
           headers: {
               'auth': localStorage.getItem('token')
           }

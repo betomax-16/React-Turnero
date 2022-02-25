@@ -7,7 +7,7 @@ import logo from '../../public/img/logo.png';
 const W3CWebSocket = require('websocket').w3cwebsocket;
 
 function TakeTurn(props) {
-  const ENDPOINT = `http://localhost:4000`;
+  const ENDPOINT = `http://${window.location.hostname}:4000`;
   const [socket, setSocket] = useState(null);
   const [socketPrint, setSocketPrint] = useState(null);
   const [sucursal, setSucursal] = useState('');
@@ -20,7 +20,7 @@ function TakeTurn(props) {
       const suc = window.atob(props.match.params.suc);
       setSucursal(suc);
       setSocket(socketIOClient(ENDPOINT));
-      const client = new W3CWebSocket('ws://localhost:7000/');
+      const client = new W3CWebSocket('ws://${window.location.hostname}:7000/');
       client.onopen = function() {
           if (client.readyState === client.OPEN) {
             setSocketPrint(client);   
@@ -63,7 +63,7 @@ function TakeTurn(props) {
 
   const callGetAreas = async (suc) => {
     try {
-      const res = await axios.get(`http://localhost:4000/api/area-sucursal/${suc}`);
+      const res = await axios.get(`http://${window.location.hostname}:4000/api/area-sucursal/${suc}`);
       setAreas(res.data.body); 
     } catch (error) {
       throw error;
@@ -72,7 +72,7 @@ function TakeTurn(props) {
 
   const callGetSucursal = async (suc) => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/sucursal/${suc}`);
+      const res = await axios.get(`http://${window.location.hostname}:5000/api/sucursal/${suc}`);
       if (res.data.statusCode === 200) {
         setSucursalExist(true);
         callGetAreas(suc);
@@ -96,7 +96,7 @@ function TakeTurn(props) {
         area: area,
         sucursal: sucursal
       };
-      const res = await axios.post(`http://localhost:4000/api/action/take`, data, { 
+      const res = await axios.post(`http://${window.location.hostname}:4000/api/action/take`, data, { 
           headers: {
               'auth': localStorage.getItem('token')
           }

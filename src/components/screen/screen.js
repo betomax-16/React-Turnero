@@ -10,7 +10,7 @@ import logo from '../../public/img/logo.png';
 import './styles.css';
 
 function Screen(props) {
-    const ENDPOINT = `http://localhost:4000`;
+    const ENDPOINT = `http://${window.location.hostname}:4000`;
     const { showAlert } = useContext(AppContext);
     const { search } = useLocation();
     const query = useMemo(() => new URLSearchParams(search), [search]);
@@ -146,7 +146,7 @@ function Screen(props) {
 
     const callGetSucursal = async (sucursal) => {
         try {
-          const res = await axios.get(`http://localhost:5000/api/sucursal/${sucursal}`);
+          const res = await axios.get(`http://${window.location.hostname}:5000/api/sucursal/${sucursal}`);
           const exist = res.data.statusCode === 200;
           setSucursalExist(exist);
           return exist;
@@ -165,7 +165,7 @@ function Screen(props) {
 
     const getDataConfig = async () => {
         try {
-            const res = await axios.get(`http://localhost:4000/api/config`, { 
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/config`, { 
                 headers: {
                     'me': ''
                 }
@@ -218,7 +218,7 @@ function Screen(props) {
     const getLastTurns = async () => {
         try {
             const sucursal = window.atob(props.match.params.suc);
-            const res = await axios.get(`http://localhost:4000/api/action/pendding/${sucursal}`);
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/action/pendding/${sucursal}`);
             const auxTurns = [...res.data.body];
             auxTurns.sort(( a, b ) => {
                 if ( moment(a.creationDate) > moment(b.creationDate) ){

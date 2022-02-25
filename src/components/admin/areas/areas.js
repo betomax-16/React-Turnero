@@ -31,7 +31,7 @@ function Areas(props) {
             if (areasSelected.length > 0) {
                 for (let index = 0; index < areasSelected.length; index++) {
                     const item = areasSelected[index];
-                    await axios.delete(`http://localhost:4000/api/areas/${item.name}`, { 
+                    await axios.delete(`http://${window.location.hostname}:4000/api/areas/${item.name}`, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
@@ -105,7 +105,7 @@ function Areas(props) {
         try {
             const auxData = {...data};
             if (isNew) {
-                const res = await axios.post(`http://localhost:4000/api/areas`, auxData, { 
+                const res = await axios.post(`http://${window.location.hostname}:4000/api/areas`, auxData, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
@@ -121,7 +121,7 @@ function Areas(props) {
             }
             else {
                 const item = areasSelected[0];
-                const res = await axios.put(`http://localhost:4000/api/areas/${item.name}`, auxData, { 
+                const res = await axios.put(`http://${window.location.hostname}:4000/api/areas/${item.name}`, auxData, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
@@ -145,7 +145,7 @@ function Areas(props) {
 
     const getAreas = async () => {
         try {
-            const res = await axios.get(`http://localhost:4000/api/areas`, { 
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/areas`, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }

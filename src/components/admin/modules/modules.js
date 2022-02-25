@@ -32,7 +32,7 @@ import './styles.css';
 // const host = window.location.host;
 
 function Modules(props) {
-    const urlModules = `http://localhost:4000/api/modules`;
+    const urlModules = `http://${window.location.hostname}:4000/api/modules`;
     const [openConfirm, setOpenConfirm] = useState({
         state: false,
         title: '',
@@ -45,7 +45,7 @@ function Modules(props) {
                 if (modulesSelected.length > 0) {
                     for (let index = 0; index < modulesSelected.length; index++) {
                         const item = modulesSelected[index];
-                        await axios.delete(`http://localhost:4000/api/modules/${item.name}/${item.sucursal}`, { 
+                        await axios.delete(`http://${window.location.hostname}:4000/api/modules/${item.name}/${item.sucursal}`, { 
                             headers: {
                                 'auth': localStorage.getItem('token')
                             }
@@ -226,7 +226,7 @@ function Modules(props) {
             const req = {
                 isPrivilegeByArrivalTime: moduleSelected.isPrivilegeByArrivalTime
             };
-            axios.put(`http://localhost:4000/api/modules/${moduleSelected.name}/${moduleSelected.sucursal}`, req, { 
+            axios.put(`http://${window.location.hostname}:4000/api/modules/${moduleSelected.name}/${moduleSelected.sucursal}`, req, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
@@ -234,14 +234,14 @@ function Modules(props) {
 
             areas.forEach(element => {
                 if (!element.idAssociate) {
-                    axios.post(`http://localhost:4000/api/privilege`, element, { 
+                    axios.post(`http://${window.location.hostname}:4000/api/privilege`, element, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
                     });
                 }
                 else {
-                    axios.put(`http://localhost:4000/api/privilege/${element.idAssociate}`, element, { 
+                    axios.put(`http://${window.location.hostname}:4000/api/privilege/${element.idAssociate}`, element, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
@@ -298,7 +298,7 @@ function Modules(props) {
     ];
 
     const getSupervisors = async (idModule) => {
-        const res = await axios.get(`http://localhost:4000/api/supervisors/${idModule}`, { 
+        const res = await axios.get(`http://${window.location.hostname}:4000/api/supervisors/${idModule}`, { 
             headers: {
                 'auth': localStorage.getItem('token')
             }
@@ -344,7 +344,7 @@ function Modules(props) {
             auxData.isPrivilegeByArrivalTime = false;
             
             if (isNew) {
-                const res = await axios.post(`http://localhost:4000/api/modules`, auxData, { 
+                const res = await axios.post(`http://${window.location.hostname}:4000/api/modules`, auxData, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
@@ -360,7 +360,7 @@ function Modules(props) {
             }
             else {
                 const item = modulesSelected[0];
-                const res = await axios.put(`http://localhost:4000/api/modules/${item.name}/${item.sucursal}`, auxData, { 
+                const res = await axios.put(`http://${window.location.hostname}:4000/api/modules/${item.name}/${item.sucursal}`, auxData, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
@@ -384,7 +384,7 @@ function Modules(props) {
 
     const getSucursals = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/sucursal`);
+            const res = await axios.get(`http://${window.location.hostname}:5000/api/sucursal`);
             const auxSucursals = [];
             res.data.body.forEach(element => {
                 auxSucursals.push(element);
@@ -470,7 +470,7 @@ function Modules(props) {
 
     const getVigias = async (sucursal, type) => {
         try {
-            const res = await axios.get(`http://localhost:4000/api/modules?sucursal=${sucursal}|eq&type=${type}|eq`, { 
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/modules?sucursal=${sucursal}|eq&type=${type}|eq`, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
@@ -492,7 +492,7 @@ function Modules(props) {
 
     const getAreasBySucursal = async (idModule, sucursal) => {
         try {
-            const res = await axios.get(`http://localhost:4000/api/area-sucursal/${sucursal}`, { 
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/area-sucursal/${sucursal}`, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
@@ -511,7 +511,7 @@ function Modules(props) {
                 index++;
             });
 
-            const resPrivilege = await axios.get(`http://localhost:4000/api/privilege/${idModule}`, { 
+            const resPrivilege = await axios.get(`http://${window.location.hostname}:4000/api/privilege/${idModule}`, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
@@ -695,7 +695,7 @@ function Modules(props) {
     const addSupervisor = (idModule, idVigia) => {
         try {
             const data = { idVigia, idModule };
-            axios.post(`http://localhost:4000/api/supervisors`, data, { 
+            axios.post(`http://${window.location.hostname}:4000/api/supervisors`, data, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
@@ -708,7 +708,7 @@ function Modules(props) {
 
     const deleteSupervisor = (id) => {
         try {
-            axios.delete(`http://localhost:4000/api/supervisors/${id}`, { 
+            axios.delete(`http://${window.location.hostname}:4000/api/supervisors/${id}`, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }

@@ -22,7 +22,7 @@ import { BsArrowReturnLeft } from "react-icons/bs";
 import "./styles.css";
 
 function AttendTest(props) {
-    const ENDPOINT = `http://localhost:4000`;
+    const ENDPOINT = `http://${window.location.hostname}:4000`;
     const columnsTurns = [
         { field: 'turn', headerName: 'Turno', flex: 1, mytype: 'string' },
         { field: 'area', headerName: 'Area', flex: 1, mytype: 'string' },
@@ -249,7 +249,7 @@ function AttendTest(props) {
 
     const callGetSucursal = async (suc, mod) => {
         try {
-          const res = await axios.get(`http://localhost:4000/api/modules?sucursal=${suc}|eq&name=${mod}|eq|and`, {
+          const res = await axios.get(`http://${window.location.hostname}:4000/api/modules?sucursal=${suc}|eq&name=${mod}|eq|and`, {
             headers: {
                 'me': ''
             }
@@ -272,7 +272,7 @@ function AttendTest(props) {
 
     const getConfigSucursal = async (suc) => {
         try {
-            const urlApi = `http://localhost:4000/api/sucursal`;
+            const urlApi = `http://${window.location.hostname}:4000/api/sucursal`;
             const res = await axios.get(urlApi, { 
                 headers: {
                     'me': ''
@@ -304,7 +304,7 @@ function AttendTest(props) {
 
             console.log(data);
     
-            const res = await axios.post(`http://localhost:4000/api/action/assistance`, data);
+            const res = await axios.post(`http://${window.location.hostname}:4000/api/action/assistance`, data);
 
             // const turn = {...res.data.body.turn, ubication: modulo};
             // setCurrentTurn(turn);
@@ -365,7 +365,7 @@ function AttendTest(props) {
                 username: idExakta
             };
         
-            const res = await axios.post(`http://localhost:4000/api/action/recall`, data, { 
+            const res = await axios.post(`http://${window.location.hostname}:4000/api/action/recall`, data, { 
                 headers: { 'me': '' }
             });
             
@@ -397,7 +397,7 @@ function AttendTest(props) {
                 username: idExakta
             };
         
-            const res = await axios.post(`http://localhost:4000/api/action/cancelation`, data);
+            const res = await axios.post(`http://${window.location.hostname}:4000/api/action/cancelation`, data);
             // setCurrentTurn({turn: ''});
     
             if (socket) {
@@ -437,7 +437,7 @@ function AttendTest(props) {
                 username: idExakta
             };
         
-            const res = await axios.post(`http://localhost:4000/api/action/finished`, data);
+            const res = await axios.post(`http://${window.location.hostname}:4000/api/action/finished`, data);
     
             // setCurrentTurn({turn: ''});
 
@@ -477,7 +477,7 @@ function AttendTest(props) {
                 sucursal: sucursal
             };
         
-            const res = await axios.post(`http://localhost:4000/api/action/free`, data);
+            const res = await axios.post(`http://${window.location.hostname}:4000/api/action/free`, data);
     
             // setCurrentTurn({turn: ''});
             const auxShifts = [...turns];
@@ -522,7 +522,7 @@ function AttendTest(props) {
 
     const getTurns = async (suc, mod, url = '') => {
         try {
-            const urlTurns = `http://localhost:4000/api/action/attended/${suc}`;
+            const urlTurns = `http://${window.location.hostname}:4000/api/action/attended/${suc}`;
             const urlApi = url !== '' ? url : urlTurns;
             const res = await axios.get(urlApi);
 
@@ -554,7 +554,7 @@ function AttendTest(props) {
 
     const getTrace = async (suc) => {
         try {
-            const res = await axios.get(`http://localhost:4000/api/trace?sucursal=${suc}|eq&state=espera toma|eq|and&finalDate=null|eq|and`, {
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/trace?sucursal=${suc}|eq&state=espera toma|eq|and&finalDate=null|eq|and`, {
                 headers: {
                     'me': ''
                 }
@@ -587,7 +587,7 @@ function AttendTest(props) {
 
     const getModule = async (suc, mod) => {
         try {
-            const auxModule = await axios.get(`http://localhost:4000/api/modules/${mod}/${suc}`);
+            const auxModule = await axios.get(`http://${window.location.hostname}:4000/api/modules/${mod}/${suc}`);
             setModule(auxModule.data.body);
         } catch (error) {
             console.log(error);
@@ -602,7 +602,7 @@ function AttendTest(props) {
 
     // const getCurrentTurn = async (suc, mod) => {
     //     try {
-    //         const res = await axios.get(`http://localhost:4000/api/trace?ubication=${mod}|eq&sucursal=${suc}|eq|and&finalDate=null|eq|and`,{ 
+    //         const res = await axios.get(`http://${window.location.hostname}:4000/api/trace?ubication=${mod}|eq&sucursal=${suc}|eq|and&finalDate=null|eq|and`,{ 
     //             headers: { 'me': '' }
     //         });
 
@@ -630,7 +630,7 @@ function AttendTest(props) {
 
     const validIdExakta = async (id, isNew = false) => {
         try {
-            const res = await axios.get(`http://localhost:4000/api/users?username=${id}|eq`, {
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/users?username=${id}|eq`, {
                 headers: {
                     'me': ''
                 }
@@ -639,7 +639,7 @@ function AttendTest(props) {
             let exist = false;
             if (res.data.body.length) { 
                 if (res.data.body[0].rol.toLowerCase() === 'tomador') {
-                    const resTrace = await axios.get(`http://localhost:4000/api/trace?username=${id}|eq&finalDate=null|eq|and`, {
+                    const resTrace = await axios.get(`http://${window.location.hostname}:4000/api/trace?username=${id}|eq&finalDate=null|eq|and`, {
                         headers: {
                             'me': ''
                         }

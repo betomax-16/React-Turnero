@@ -36,7 +36,7 @@ const columns = [
 
 
 function Users(props) {
-    const urlUsers = `http://localhost:4000/api/users`;
+    const urlUsers = `http://${window.location.hostname}:4000/api/users`;
     const [openConfirm, setOpenConfirm] = useState(false);
 
     const handleAcceptConfirm = async () => {
@@ -44,7 +44,7 @@ function Users(props) {
             if (usersSelected.length > 0) {
                 for (let index = 0; index < usersSelected.length; index++) {
                     const user = usersSelected[index];
-                    await axios.delete(`http://localhost:4000/api/users/${user.username}`, { 
+                    await axios.delete(`http://${window.location.hostname}:4000/api/users/${user.username}`, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
@@ -135,7 +135,7 @@ function Users(props) {
     const callSaveData = async (data) => {
         try {
             if (isNew) {
-                const res = await axios.post(`http://localhost:4000/api/users`, data, { 
+                const res = await axios.post(`http://${window.location.hostname}:4000/api/users`, data, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
@@ -150,7 +150,7 @@ function Users(props) {
                 }
             }
             else {
-                const res = await axios.put(`http://localhost:4000/api/users/${data.username}`, data, { 
+                const res = await axios.put(`http://${window.location.hostname}:4000/api/users/${data.username}`, data, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
@@ -174,7 +174,7 @@ function Users(props) {
 
     const getSucursals = async () => {
         try {
-            const res = await axios.get(`http://localhost:5000/api/sucursal`);
+            const res = await axios.get(`http://${window.location.hostname}:5000/api/sucursal`);
             setSucursals(res.data.body);
         } catch (error) {
             if (error.response.data) {
@@ -190,7 +190,7 @@ function Users(props) {
 
     const getRoles = async () => {
         try {
-            const res = await axios.get(`http://localhost:4000/api/roles`, { 
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/roles`, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }

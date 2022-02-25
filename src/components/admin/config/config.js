@@ -28,7 +28,7 @@ function Config(props) {
             const auxData = {
                 timer: data.timer * 1000
             };
-            await axios.post(`http://localhost:4000/api/config`, auxData, { 
+            await axios.post(`http://${window.location.hostname}:4000/api/config`, auxData, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
@@ -48,7 +48,7 @@ function Config(props) {
 
     const getData = async () => {
         try {
-            const res = await axios.get(`http://localhost:4000/api/config`, { 
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/config`, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }

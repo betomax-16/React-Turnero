@@ -31,10 +31,10 @@ const columnsTrace = [
 ];
 
 function LookOut(props) {
-    const ENDPOINT = `http://localhost:4000`;
-    const urlModules = `http://localhost:4000/api/modules`;
-    const urlTurns = `http://localhost:4000/api/shifts`;
-    const urlTrace = `http://localhost:4000/api/trace`;
+    const ENDPOINT = `http://${window.location.hostname}:4000`;
+    const urlModules = `http://${window.location.hostname}:4000/api/modules`;
+    const urlTurns = `http://${window.location.hostname}:4000/api/shifts`;
+    const urlTrace = `http://${window.location.hostname}:4000/api/trace`;
     const { showAlert, module, user, setUser, setModule, getDataUser, setCurrentSucursal, currentSucursal } = useContext(AppContext);
     const [moduleSelect, setModuleSelect] = useState('');
     const [sucursalSelect, setSucursalSelect] = useState('');
@@ -318,7 +318,7 @@ function LookOut(props) {
 
     const getSucursals = async () =>  {
         try {
-            const urlApi = `http://localhost:5000/api/sucursal`;
+            const urlApi = `http://${window.location.hostname}:5000/api/sucursal`;
             const res = await axios.get(urlApi);
         
             if (res.data.body.length) {
@@ -504,7 +504,7 @@ function LookOut(props) {
             const dataUser = getDataUser();
             if (dataUser) {
                 if (module === undefined || module === null) {
-                    const urlApi = `http://localhost:4000/api/modules?username=${dataUser.username}|eq`;
+                    const urlApi = `http://${window.location.hostname}:4000/api/modules?username=${dataUser.username}|eq`;
                     const res = await axios.get(urlApi, { 
                         headers: {
                             'auth': localStorage.getItem('token')
@@ -538,7 +538,7 @@ function LookOut(props) {
 
     const getSlaves = async (idVigia) => {
         try {
-            const urlApi = `http://localhost:4000/api/slaves/${idVigia}`;
+            const urlApi = `http://${window.location.hostname}:4000/api/slaves/${idVigia}`;
             const res = await axios.get(urlApi, { 
                 headers: {
                     'auth': localStorage.getItem('token')
@@ -560,7 +560,7 @@ function LookOut(props) {
 
                 let user = {};
                 if (element.modulo.username && element.modulo.username !== '') {
-                    const resUser = await axios.get(`http://localhost:4000/api/users?username=${element.modulo.username}|eq`, { 
+                    const resUser = await axios.get(`http://${window.location.hostname}:4000/api/users?username=${element.modulo.username}|eq`, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
@@ -572,7 +572,7 @@ function LookOut(props) {
                 }
 
                 let privileges = [];
-                const resPrivilage = await axios.get(`http://localhost:4000/api/privilege/${element.modulo._id}`, { 
+                const resPrivilage = await axios.get(`http://${window.location.hostname}:4000/api/privilege/${element.modulo._id}`, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
@@ -623,7 +623,7 @@ function LookOut(props) {
 
     const getConfigSucursal = async (suc) => {
         try {
-            const urlApi = `http://localhost:4000/api/sucursal`;
+            const urlApi = `http://${window.location.hostname}:4000/api/sucursal`;
             const res = await axios.get(urlApi, { 
                 headers: {
                     'auth': localStorage.getItem('token')
