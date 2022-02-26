@@ -20,7 +20,7 @@ function TakeTurn(props) {
       const suc = window.atob(props.match.params.suc);
       setSucursal(suc);
       setSocket(socketIOClient(ENDPOINT));
-      const client = new W3CWebSocket('ws://${window.location.hostname}:7000/');
+      const client = new W3CWebSocket(`ws://${window.location.hostname}:7000/`);
       client.onopen = function() {
           if (client.readyState === client.OPEN) {
             setSocketPrint(client);   
