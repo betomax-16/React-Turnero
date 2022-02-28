@@ -36,6 +36,10 @@ function Screen(props) {
     useEffect(() => {
         async function init() {
             try {
+                setRecall({state: false, data: {
+                    turn: '',
+                    ubication: ''
+                }});
                 const sucursal = window.atob(props.match.params.suc);
                 if (await callGetSucursal(sucursal)) {
                     const auxSocket = socketIOClient(ENDPOINT);
@@ -45,6 +49,7 @@ function Screen(props) {
                     setInterval(() => setDateState(moment()), 1000);
     
                     auxSocket.on('turnAttend', resTurn => {
+                        console.log(resTurn);
                         setStateDataTurns({ status: true, action: 'addTurn', data: resTurn });  
                     });
     
@@ -86,35 +91,51 @@ function Screen(props) {
                     auxShifts.push(stateDataTurns.data.turn);
                     setShifts(auxShifts);
 
+                    let data = {};
+                    if (typeof stateDataTurns.data.turn === 'object') {
+                        data = {...stateDataTurns.data};
+                    }
+                    else {
+                        data = {
+                            turn: {...stateDataTurns.data},
+                            ubication: stateDataTurns.data.ubication
+                        }
+                    }
+
+
                     if (recall.state) {
                         setTimeout(() => { 
-                            emphasis(stateDataTurns.data);
+                            emphasis(data);
                         }, timer*(auxShifts.length - 1));
                     }
                     else {
-                        emphasis(stateDataTurns.data);
+                        emphasis(data);
                     }
 
                     const auxLastTurns = [...lastTurns];
-                    auxLastTurns.push({...stateDataTurns.data.turn, ubication: stateDataTurns.data.ubication});
-                    
-                    //Mayor a menor
-                    auxLastTurns.sort(( a, b ) => {
-                        if ( moment(a.creationDate) > moment(b.creationDate) ){
-                            return -1;
-                        }
-                        if ( moment(a.creationDate) < moment(b.creationDate) ){
-                            return 1;
-                        }
-                        return 0;
-                    });
 
-                    if (auxLastTurns.length > 3) {
-                        auxLastTurns.pop();
+                    if (!auxLastTurns.find(t => t.turn === data.turn.turn)) {
+                        auxLastTurns.push({...data.turn});
+
+                         //Mayor a menor
+                        auxLastTurns.sort(( a, b ) => {
+                            if ( moment(a.creationDate) > moment(b.creationDate) ){
+                                return -1;
+                            }
+                            if ( moment(a.creationDate) < moment(b.creationDate) ){
+                                return 1;
+                            }
+                            return 0;
+                        });
+
+                        if (auxLastTurns.length > 3) {
+                            auxLastTurns.pop();
+                        }
+
+                        setCurrentTurn(data.turn);
+
+                        setLastTurns(auxLastTurns);
                     }
-
-                    setCurrentTurn({turn: auxLastTurns[0].turn, ubication: auxLastTurns[0].ubication});
-                    setLastTurns(auxLastTurns);
                 }
             }
             else if (stateDataTurns.action === 'finishTurn') {

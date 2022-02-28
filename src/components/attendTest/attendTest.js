@@ -332,7 +332,8 @@ function AttendTest(props) {
             setTrace(auxTraces);
 
             if (socket) {
-                const data = {...res.data.body, ubication: modulo};
+                const auxData = {...res.data.body.turn, ubication: modulo};
+                const data = {...auxData, ubication: modulo};
                 socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: data });
                 socket.emit('turnAttend', { sucursal: sucursal, data: data });
             }
@@ -501,8 +502,9 @@ function AttendTest(props) {
 
             if (socket) {
                 const data = {...res.data.body, ubication: modulo};
-                socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: data });
-                socket.emit('turnAttend', { sucursal: sucursal, data: data });
+                // socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: data });
+                // socket.emit('turnAttend', { sucursal: sucursal, data: data });
+                socket.emit('turnFinish', { sucursal: sucursal, data: data });
             }
 
             const auxModule = {...module};
@@ -526,6 +528,7 @@ function AttendTest(props) {
             const urlApi = url !== '' ? url : urlTurns;
             const res = await axios.get(urlApi);
 
+            console.log(res);
             const rows = [];
             res.data.body.forEach(row => {
                 rows.push({

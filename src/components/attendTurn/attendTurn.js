@@ -84,9 +84,7 @@ function AttendTurn(props) {
   
       auxSocket.on('turnAttend', resTurn => {
         if (resTurn) {
-          if (resTurn.turn.state === 'en atencion') {
-            setStateModule({ status: true, action: 'greenLed', data: resTurn });  
-          }
+          setStateModule({ status: true, action: 'greenLed', data: resTurn });  
         }
       });
   
@@ -135,21 +133,34 @@ function AttendTurn(props) {
     else if (stateModule.status && stateModule.data !== null && stateModule.data.turn) {
       setStateModule({ status: false, action: '', data: null });
       if (stateModule.action === 'greenLed') {
-        const auxAreas = [...areas];
-        for (let index = 0; index < auxAreas.length; index++) {
-          const element = {...auxAreas[index]};
-          if (element.name === stateModule.data.turn.area && element.number > 0) {
-            element.number--;
-            auxAreas[index] = element;
-            setAreas(auxAreas);
-            break;
+        if (stateModule.data.turn.state === 'en atencion') {
+          const auxAreas = [...areas];
+          for (let index = 0; index < auxAreas.length; index++) {
+            const element = {...auxAreas[index]};
+            if (element.name === stateModule.data.turn.area && element.number > 0) {
+              element.number--;
+              auxAreas[index] = element;
+              setAreas(auxAreas);
+              break;
+            }
           }
         }
+        
+        let data = {};
+        if (typeof stateModule.data.turn === 'object') {
+            data = {...stateModule.data.turn};
+        }
+        else {
+            data = {
+                turn: {...stateModule.data},
+                ubication: stateModule.data.ubication
+            }
+        }
 
-        const auxTurn = lastTurns.find(t => t.turn === stateModule.data.turn.turn);
+        const auxTurn = lastTurns.find(t => t.turn === data.turn.turn);
         if (!auxTurn) {
             const auxLastTurns = [...lastTurns];
-            auxLastTurns.push(stateModule.data.turn);
+            auxLastTurns.push(data.turn);
 
             //Mayor a menor
             auxLastTurns.sort(( a, b ) => {
