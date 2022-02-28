@@ -554,11 +554,7 @@ function AttendTest(props) {
 
     const getTrace = async (suc) => {
         try {
-            const res = await axios.get(`http://${window.location.hostname}:4000/api/trace?sucursal=${suc}|eq&state=espera toma|eq|and&finalDate=null|eq|and`, {
-                headers: {
-                    'me': ''
-                }
-            });
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/action/attended-traces/${suc}`);
 
             const rows = [];
             res.data.body.forEach(row => {
