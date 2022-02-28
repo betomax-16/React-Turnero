@@ -57,6 +57,7 @@ function Sucursales(props) {
                             }
                         }); 
             
+                        let existPrint = false;
                         for (const property in res.data.body) {
                             setValue(property, res.data.body[property], {
                                 shouldValidate: true
@@ -65,7 +66,16 @@ function Sucursales(props) {
                             if (property === 'color') {
                                 setColor({hex: res.data.body[property]});
                             }
+
+                            if (property === 'print') {
+                                existPrint = true;
+                            }
                         }
+
+                        if (!existPrint) {
+                            setValue("print", '');
+                        }
+                        
                         setOpenConfig(true);
                     } catch (error) {
                         if (error.response && error.response.data) {
@@ -85,7 +95,8 @@ function Sucursales(props) {
 
     const { control, handleSubmit, setValue, formState: { errors } } = useForm({defaultValues: {
         color: '',
-        timeLimit: 0
+        timeLimit: 0,
+        print: ''
     }});
     const onSubmit = data => handleSaveConfig(data);
 
@@ -311,7 +322,8 @@ function Sucursales(props) {
         try {
             const req = {
                 color: data.color,
-                timeLimit: data.timeLimit
+                timeLimit: data.timeLimit,
+                print: data.print
             };
             await axios.put(`http://${window.location.hostname}:4000/api/sucursal/${data.name}`, req, { 
                 headers: {
@@ -410,6 +422,19 @@ function Sucursales(props) {
                                             {...field}
                                     />}
                                     rules={{ required: true }}
+                                />
+                        <Controller
+                                    name="print"
+                                    control={control}
+                                    render={({ field }) => <TextField
+                                            margin="dense"
+                                            id="print"
+                                            label="Impresora"
+                                            type="text"
+                                            fullWidth
+                                            variant="standard"
+                                            {...field}
+                                    />}
                                 />
                     </FormGroup>
                 </div>
