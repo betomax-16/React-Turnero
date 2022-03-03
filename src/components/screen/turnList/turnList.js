@@ -22,6 +22,9 @@ function TurnList(props) {
                 }
             </div>
             <div className="turnList">
+                <div className="sub-title">
+                    Ultimos llamados
+                </div>
                 <div className="turns">
                     {props.lastTurns.map((item, index) => <div key={index} className="turn-card">
                         <div className="title">{item.ubication}</div>

@@ -632,7 +632,7 @@ function AttendTest(props) {
 
     const validIdExakta = async (id, isNew = false) => {
         try {
-            const res = await axios.get(`http://${window.location.hostname}:4000/api/users?username=${id}|eq`, {
+            const res = await axios.get(`http://${window.location.hostname}:4000/api/users?username=${id.toUpperCase()}|eq`, {
                 headers: {
                     'me': ''
                 }
@@ -657,7 +657,7 @@ function AttendTest(props) {
                     }
                     else {
                         if (resTrace.data.body.length > 0) {
-                            if (resTrace.data.body[0].username === id) {
+                            if (resTrace.data.body[0].username.toUpperCase() === id.toUpperCase()) {
                                 exist = true;
                             }
                             else {

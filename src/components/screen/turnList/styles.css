@@ -23,6 +23,15 @@
     background-color: #f7fbdea3;
 }
 
+.turnList .sub-title {
+    font-size: 50px;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    color: #fafcea;
+    background-color: #6dc19f;
+}
+
 .turns{
     display: grid;
     grid-template-columns: 1fr;
