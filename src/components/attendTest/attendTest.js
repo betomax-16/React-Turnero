@@ -363,7 +363,8 @@ function AttendTest(props) {
                 turn: shift,
                 sucursal: sucursal,
                 ubication: modulo,
-                username: idExakta
+                username: idExakta,
+                source: 'toma'
             };
         
             const res = await axios.post(`http://${window.location.hostname}:4000/api/action/recall`, data, { 
@@ -395,7 +396,8 @@ function AttendTest(props) {
                 turn: shift,
                 sucursal: sucursal,
                 ubication: modulo,
-                username: idExakta
+                username: idExakta,
+                source: 'toma'
             };
         
             const res = await axios.post(`http://${window.location.hostname}:4000/api/action/cancelation`, data);
@@ -435,7 +437,8 @@ function AttendTest(props) {
                 turn: shift,
                 sucursal: sucursal,
                 ubication: modulo,
-                username: idExakta
+                username: idExakta,
+                source: 'toma'
             };
         
             const res = await axios.post(`http://${window.location.hostname}:4000/api/action/finished`, data);
@@ -637,7 +640,7 @@ function AttendTest(props) {
 
             let exist = false;
             if (res.data.body.length) { 
-                if (res.data.body[0].rol.toLowerCase() === 'tomador') {
+                if (res.data.body[0].rol.toLowerCase() === 'recepcionista') {
                     const resTrace = await axios.get(`http://${window.location.hostname}:4000/api/trace?username=${id}|eq&finalDate=null|eq|and`, {
                         headers: {
                             'me': ''
@@ -667,7 +670,7 @@ function AttendTest(props) {
                     }
                 }
                 else {
-                    throw new Error('IdExakta no corresponde a un tomador de muestras.');
+                    throw new Error('IdExakta no corresponde a un tomador o recepcionista de muestras.');
                 }
             }
             else {

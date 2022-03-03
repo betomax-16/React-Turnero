@@ -58,6 +58,7 @@ function Sucursales(props) {
                         }); 
             
                         let existPrint = false;
+                        let existMessageTicket = false;
                         for (const property in res.data.body) {
                             setValue(property, res.data.body[property], {
                                 shouldValidate: true
@@ -70,10 +71,18 @@ function Sucursales(props) {
                             if (property === 'print') {
                                 existPrint = true;
                             }
+
+                            if (property === 'messageTicket') {
+                                existMessageTicket = true;
+                            }
                         }
 
                         if (!existPrint) {
                             setValue("print", '');
+                        }
+
+                        if (!existMessageTicket) {
+                            setValue("messageTicket", '');
                         }
                         
                         setOpenConfig(true);
@@ -96,7 +105,8 @@ function Sucursales(props) {
     const { control, handleSubmit, setValue, formState: { errors } } = useForm({defaultValues: {
         color: '',
         timeLimit: 0,
-        print: ''
+        print: '',
+        messageTicket: ''
     }});
     const onSubmit = data => handleSaveConfig(data);
 
@@ -323,7 +333,8 @@ function Sucursales(props) {
             const req = {
                 color: data.color,
                 timeLimit: data.timeLimit,
-                print: data.print
+                print: data.print,
+                messageTicket: data.messageTicket
             };
             await axios.put(`http://${window.location.hostname}:4000/api/sucursal/${data.name}`, req, { 
                 headers: {
@@ -414,7 +425,7 @@ function Sucursales(props) {
                                             helperText={errors.timeLimit ? 'Campo obligatorio.' : ''}
                                             margin="dense"
                                             id="timeLimit"
-                                            label="Tiempo Limite"
+                                            label="Tiempo Limite de espera (min.)"
                                             type="number"
                                             InputProps={{ inputProps: { min: 0 } }}
                                             fullWidth
@@ -430,6 +441,19 @@ function Sucursales(props) {
                                             margin="dense"
                                             id="print"
                                             label="Impresora"
+                                            type="text"
+                                            fullWidth
+                                            variant="standard"
+                                            {...field}
+                                    />}
+                                />
+                        <Controller
+                                    name="messageTicket"
+                                    control={control}
+                                    render={({ field }) => <TextField
+                                            margin="dense"
+                                            id="print"
+                                            label="Mensaje en el turno"
                                             type="text"
                                             fullWidth
                                             variant="standard"

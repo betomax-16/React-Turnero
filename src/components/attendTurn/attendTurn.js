@@ -646,7 +646,7 @@ function AttendTurn(props) {
           setCurrentTurn(turn);
           setLastTurns(auxLastTurns);
 
-          const socketData = {...res.data.body, ubication: module.name};
+          const socketData = {turn: turn, ubication: module.name, trace: res.data.body.trace};
           if (socket) {
             socket.emit('turnAttend', { sucursal: currentSucursal, data: socketData });
           }
@@ -680,7 +680,8 @@ function AttendTurn(props) {
       try {
         const data = {
           turn: currentTurn.turn,
-          sucursal: currentSucursal
+          sucursal: currentSucursal,
+          source: 'recepcion'
         };
   
         const res = await axios.post(`http://${window.location.hostname}:4000/api/action/recall`, data, { 
@@ -718,7 +719,8 @@ function AttendTurn(props) {
         const data = {
           turn: currentTurn.turn,
           sucursal: currentSucursal,
-          ubication: module.name
+          ubication: module.name,
+          source: 'recepcion'
         };
   
         const res = await axios.post(`http://${window.location.hostname}:4000/api/action/cancelation`, data, { 
