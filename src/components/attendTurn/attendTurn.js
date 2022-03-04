@@ -133,11 +133,13 @@ function AttendTurn(props) {
     else if (stateModule.status && stateModule.data !== null && stateModule.data.turn) {
       setStateModule({ status: false, action: '', data: null });
       if (stateModule.action === 'greenLed') {
+
+        const areaName = typeof stateModule.data.turn === 'object' ? stateModule.data.turn.area : stateModule.data.area;
         if (stateModule.data.turn.state === 'en atencion') {
           const auxAreas = [...areas];
           for (let index = 0; index < auxAreas.length; index++) {
             const element = {...auxAreas[index]};
-            if (element.name === stateModule.data.turn.area && element.number > 0) {
+            if (element.name === areaName && element.number > 0) {
               element.number--;
               auxAreas[index] = element;
               setAreas(auxAreas);
@@ -148,7 +150,7 @@ function AttendTurn(props) {
         
         let data = {};
         if (typeof stateModule.data.turn === 'object') {
-            data = {...stateModule.data.turn};
+            data = {turn: {...stateModule.data.turn}};
         }
         else {
             data = {
@@ -502,7 +504,9 @@ function AttendTurn(props) {
       }
       else if (modulo && modulo.mode === 'auto') {
         const sucursal = modulo ? modulo.sucursal : currentSucursal;
-        const resAreas = await axios.get(`http://${window.location.hostname}:4000/api/privilege/${modulo.id}`, { 
+        const id = modulo.id ? modulo.id : modulo._id;
+        
+        const resAreas = await axios.get(`http://${window.location.hostname}:4000/api/privilege/${id}`, { 
           headers: {
               'auth': localStorage.getItem('token')
           }

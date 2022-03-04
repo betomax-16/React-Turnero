@@ -46,7 +46,12 @@ function Screen(props) {
                     auxSocket.emit('join-sucursal', sucursal);
                     getDataConfig();
                     getLastTurns();
-                    setInterval(() => setDateState(moment()), 1000);
+                    setInterval(() => {
+                        if (moment().hour() === 22 && moment().minute() === 0 && moment().second() === 1) {
+                            window.location.reload();
+                        }
+                        setDateState(moment())
+                    }, 1000);
     
                     auxSocket.on('turnAttend', resTurn => {
                         console.log(resTurn);
@@ -141,20 +146,20 @@ function Screen(props) {
             else if (stateDataTurns.action === 'finishTurn') {
                 const auxTurns = lastTurns.filter(t => t.turn !== stateDataTurns.data.turn.turn);
                 auxTurns.sort(( a, b ) => {
-                if ( moment(a.creationDate) > moment(b.creationDate) ){
-                    return -1;
-                }
-                if ( moment(a.creationDate) < moment(b.creationDate) ){
-                    return 1;
-                }
-                return 0;
+                    if ( moment(a.creationDate) > moment(b.creationDate) ){
+                        return -1;
+                    }
+                    if ( moment(a.creationDate) < moment(b.creationDate) ){
+                        return 1;
+                    }
+                    return 0;
                 });
 
                 if (auxTurns.length) {
-                    if (lastTurns[0].turn === stateDataTurns.data.turn.turn) {
-                        setCurrentTurn({turn: '', ubication: ''});    
-                    }
-                    // setCurrentTurn({turn: auxTurns[0].turn, ubication: auxTurns[0].ubication});    
+                    // if (auxTurns[0].turn === stateDataTurns.data.turn.turn) {
+                    //     setCurrentTurn({turn: '', ubication: ''});    
+                    // }
+                    setCurrentTurn({turn: auxTurns[0].turn, ubication: auxTurns[0].ubication});    
                 }
                 else {
                     setCurrentTurn({turn: '', ubication: ''});    
@@ -164,6 +169,7 @@ function Screen(props) {
             }
         }
     }, [stateDataTurns]);// eslint-disable-line react-hooks/exhaustive-deps
+
 
     const callGetSucursal = async (sucursal) => {
         try {
