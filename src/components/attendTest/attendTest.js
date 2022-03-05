@@ -24,11 +24,11 @@ import "./styles.css";
 function AttendTest(props) {
     const ENDPOINT = `http://${window.location.hostname}:4000`;
     const columnsTurns = [
-        { field: 'turn', headerName: 'Turno', flex: 1, mytype: 'string' },
-        { field: 'area', headerName: 'Area', flex: 1, mytype: 'string' },
-        { field: 'sucursal', headerName: 'Sucursal', flex: 1, mytype: 'string' },
-        { field: 'state', headerName: 'Estado', flex: 1, mytype: 'number' },
-        { field: 'creationDate', headerName: 'Fecha creación', flex: 1, mytype: 'string' },
+        { field: 'turn', headerName: 'Turno', width: 100, mytype: 'string' },
+        { field: 'area', headerName: 'Area', width: 150, mytype: 'string' },
+        { field: 'sucursal', headerName: 'Sucursal', width: 300, mytype: 'string' },
+        { field: 'state', headerName: 'Estado', width: 200, mytype: 'number' },
+        { field: 'creationDate', headerName: 'Fecha creación', width: 200, mytype: 'string' },
         { field: 'call', headerName: 'Atender', flex: 1,
             renderCell: (params) => (
                 printButtons(params.value)
@@ -747,10 +747,6 @@ function AttendTest(props) {
             {sucursalExist ?
                 <><AttendMenu isModuleFree={true} sucursal={sucursal} module={modulo} configSuc={configSucursal}/>
                 {module ? <div className="attendTest-content">
-                    {/* <Attend currentTurn={currentTurn} isModuleFree={true}
-                            handlerAttendedTurn={handlerAttendedTurn}
-                            handlerCancelationTurn={handlerCancelationTurn}
-                            handlerReCallTurn={handlerReCallTurn}/> */}
                     <div className="attendTest-body">
                         <DataGrid
                             localeText={esES.components.MuiDataGrid.defaultProps.localeText}
