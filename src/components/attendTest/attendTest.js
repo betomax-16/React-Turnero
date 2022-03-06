@@ -159,12 +159,14 @@ function AttendTest(props) {
                 setTrace(auxTraces);
             }
             else if (socketTurns.action === 'removeTurn') {
-                const auxShifts = turns.filter(t => t.turn !== socketTurns.data.turn.turn);
-                setTurns(auxShifts);
-
-                const auxTraces = [...trace];
-                const auxTrace = auxTraces.filter(t => t.turn !== socketTurns.data.trace.turn);
-                setTrace(auxTrace);
+                if (!socketTurns.data.type) {
+                    const auxShifts = turns.filter(t => t.turn !== socketTurns.data.turn.turn);
+                    setTurns(auxShifts);
+    
+                    const auxTraces = [...trace];
+                    const auxTrace = auxTraces.filter(t => t.turn !== socketTurns.data.trace.turn);
+                    setTrace(auxTrace);
+                }
             }
         }
     }, [socketTurns]);// eslint-disable-line react-hooks/exhaustive-deps
@@ -332,8 +334,7 @@ function AttendTest(props) {
             setTrace(auxTraces);
 
             if (socket) {
-                const auxData = {...res.data.body.turn, ubication: modulo};
-                const data = {...auxData, ubication: modulo};
+                const data = {turn:{...res.data.body.turn, ubication: modulo}, trace: {...res.data.body.trace}, ubication: modulo};
                 socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: data });
                 socket.emit('turnAttend', { sucursal: sucursal, data: data });
             }
@@ -504,9 +505,8 @@ function AttendTest(props) {
             setTrace(auxTraces);
 
             if (socket) {
-                const data = {...res.data.body, ubication: modulo};
-                // socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: data });
-                // socket.emit('turnAttend', { sucursal: sucursal, data: data });
+                const data = {...res.data.body, ubication: modulo, type: 'freeTurn'};
+                socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: data });
                 socket.emit('turnFinish', { sucursal: sucursal, data: data });
             }
 

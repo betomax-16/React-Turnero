@@ -3,14 +3,10 @@ import { DataGrid, esES } from '@mui/x-data-grid';
 import axios from "axios";
 import moment from "moment";
 import socketIOClient from "socket.io-client";
-import Tooltip from '@mui/material/Tooltip';
 import AppContext from "../../context/app/app-context";
 import AttendMenu from "../attendTurn/menu/menu";
 import ModuleCard from "./modulesCards/moduleCard";
 import RequireAuth from "../utils/auth/RequireAuth";
-import FilterMenu from "../utils/filter/filter";
-import { FaFilter } from "react-icons/fa";
-import { getOperatorMongo } from "../../utils/operatorsMongoQuery";
 import './styles.css';
 
 const columnsTurns = [
@@ -33,8 +29,6 @@ const columnsTrace = [
 function LookOut(props) {
     const ENDPOINT = `http://${window.location.hostname}:4000`;
     const urlModules = `http://${window.location.hostname}:4000/api/modules`;
-    const urlTurns = `http://${window.location.hostname}:4000/api/shifts`;
-    const urlTrace = `http://${window.location.hostname}:4000/api/trace`;
     const { showAlert, module, user, setUser, setModule, getDataUser, setCurrentSucursal, currentSucursal } = useContext(AppContext);
     const [moduleSelect, setModuleSelect] = useState('');
     const [sucursalSelect, setSucursalSelect] = useState('');
@@ -67,19 +61,13 @@ function LookOut(props) {
     const handlerChangeTab = (index) => {
         setTab(index);
 
-        const auxFilters = [...filters];
-        if (index === 0) {
-            setFiltersTrace(auxFilters);
-            const auxFilterTurns = [...filtersTurns];
-            setFilters(auxFilterTurns);
-            setColumns(columnsTurns);
-        }
-
-        if (index === 1) {
-            setFiltersTurns(auxFilters);
-            const auxFilterTrace = [...filtersTrace];
-            setFilters(auxFilterTrace);
-            setColumns(columnsTrace);
+        if (currentSucursal) {
+            if (index === 0) {
+                getTrace(currentSucursal);
+            }
+            else if (index === 1) {
+                getTurns(currentSucursal);
+            }
         }
     }
 
@@ -92,6 +80,8 @@ function LookOut(props) {
             if (auxMyModule) {
                 getSlaves(auxMyModule._id);
                 getConfigSucursal(auxMyModule.sucursal);
+                getTurns(auxMyModule.sucursal);
+                getTrace(auxMyModule.sucursal);
             }
             
             const dataUser = getDataUser();
@@ -141,9 +131,7 @@ function LookOut(props) {
         }
         
         init();
-        getTurns();
-        getTrace();
-        setColumns(columnsTurns);
+        
     }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
@@ -277,8 +265,8 @@ function LookOut(props) {
     useEffect(() => {
         if (stateDataTurns.status && stateDataTurns.data !== null) {
             setStateDataTurns({ status: false, action: '', data: null });
-            const auxTurns = [...turns];
-            const auxTraces = [...trace];
+            let auxTurns = [...turns];
+            let auxTraces = [...trace];
             if (stateDataTurns.action === 'addTurn') {
                 const row = {id: stateDataTurns.data.turn._id, ...stateDataTurns.data.turn};
                 const rowTrace = {id: stateDataTurns.data.trace._id, ...stateDataTurns.data.trace};
@@ -289,29 +277,41 @@ function LookOut(props) {
             }
             else if (stateDataTurns.action === 'updateTurn') {
                 const turn = stateDataTurns.data.turn.turn;
-                for (let index = 0; index < auxTurns.length; index++) {
-                    const element = {...auxTurns[index]};
-                    if (element.turn === turn) {
-                        element.state = stateDataTurns.data.turn.state;
-                        auxTurns[index] = element;
-                        setTurns(auxTurns);
-                        break;
-                    }
-                }
+                const state = stateDataTurns.data.turn.state;
 
-                const auxTraces = [...trace];
-                const rowTrace = {id: stateDataTurns.data.trace._id, ...stateDataTurns.data.trace};
+                if (state === 'terminado' || state === 'cancelado') {
+                    auxTurns = auxTurns.filter(t => t.turn !== turn);
+                    setTurns(auxTurns);
 
-                for (let index = 0; index < auxTraces.length; index++) {
-                    let element = {...auxTraces[index]};
-                    if (!element.finalDate) {
-                        element.finalDate = moment().format("YYYY-MM-DD HH:mm:ss");
-                        auxTraces[index] = element;
-                        break;
-                    }
+                    auxTraces = auxTraces.filter(t => t.turn !== turn);
+                    setTrace(auxTraces);
                 }
-                auxTraces.push(rowTrace);
-                setTrace(auxTraces);
+                else {
+                    const turn = stateDataTurns.data.turn.turn;
+                    for (let index = 0; index < auxTurns.length; index++) {
+                        const element = {...auxTurns[index]};
+                        if (element.turn === turn) {
+                            element.state = stateDataTurns.data.turn.state;
+                            auxTurns[index] = element;
+                            setTurns(auxTurns);
+                            break;
+                        }
+                    }
+
+                    const auxTraces = [...trace];
+                    const rowTrace = {id: stateDataTurns.data.trace._id, ...stateDataTurns.data.trace};
+
+                    for (let index = 0; index < auxTraces.length; index++) {
+                        let element = {...auxTraces[index]};
+                        if (!element.finalDate) {
+                            element.finalDate = moment().format("YYYY-MM-DD HH:mm:ss");
+                            auxTraces[index] = element;
+                            break;
+                        }
+                    }
+                    auxTraces.push(rowTrace);
+                    setTrace(auxTraces);
+                }
             }
         }
     }, [stateDataTurns]);// eslint-disable-line react-hooks/exhaustive-deps
@@ -424,9 +424,9 @@ function LookOut(props) {
         }
     }
 
-    const getTurns = async (url = '') => {
+    const getTurns = async (suc) => {
         try {
-            const urlApi = url !== '' ? url : `${urlTurns}?sucursal=${currentSucursal}|eq`;
+            const urlApi = `http://${window.location.hostname}:4000/api/action/lookout/shifts/${suc}`;
             const res = await axios.get(urlApi, { 
                 headers: {
                     'auth': localStorage.getItem('token')
@@ -436,6 +436,7 @@ function LookOut(props) {
             const rows = [];
             res.data.body.forEach(row => {
                 rows.push({
+                    _id: row._id,
                     id: row._id,
                     turn: row.turn,
                     area: row.area,
@@ -459,9 +460,9 @@ function LookOut(props) {
         }
     }
 
-    const getTrace = async (url = '') => {
+    const getTrace = async (suc) => {
         try {
-            const urlApi = url !== '' ? url : `${urlTrace}?sucursal=${currentSucursal}|eq`;
+            const urlApi = `http://${window.location.hostname}:4000/api/action/lookout/traces/${suc}`;
             const res = await axios.get(urlApi, { 
                 headers: {
                     'auth': localStorage.getItem('token')
@@ -475,6 +476,7 @@ function LookOut(props) {
                     finalDate = moment(row.finalDate).format("YYYY-MM-DD HH:mm:ss"); 
                 }
                 rows.push({
+                    _id: row._id,
                     id: row._id,
                     turn: row.turn,
                     sucursal: row.sucursal,
@@ -643,201 +645,6 @@ function LookOut(props) {
             }
         }
     }
-    // -------------------------------------------------------------
-    //                        OPEN MENU FILTER
-    // -------------------------------------------------------------
-    const [anchorEl, setAnchorEl] = useState(null);
-    const open = Boolean(anchorEl);
-    const openMenu = (event) => {
-        setAnchorEl(event.currentTarget);
-    }
-    const closeMenu = () => {
-        setAnchorEl(null);
-    };
-
-    // -------------------------------------------------------------
-    //                  STATES FILTERS & COLUMNS
-    // -------------------------------------------------------------
-    const [indexFilter, setIndexFilter] = useState(0);
-    const [filters, setFilters] = useState([
-        {
-            index: indexFilter,
-            type: columnsTurns[0].mytype,
-            field: columnsTurns[0].field,
-            operator: '%',
-            value: ''
-        }
-    ]);
-
-    const [columns, setColumns] = useState();
-    const [filtersTurns, setFiltersTurns] = useState([
-        {
-            index: indexFilter,
-            type: columnsTurns[0].mytype,
-            field: columnsTurns[0].field,
-            operator: '%',
-            value: ''
-        }
-    ]);
-    const [filtersTrace, setFiltersTrace] = useState([
-        {
-            index: indexFilter,
-            type: columnsTrace[0].mytype,
-            field: columnsTrace[0].field,
-            operator: '%',
-            value: ''
-        }
-    ]);
-
-    useEffect(() => {
-        let query = '?';
-        filters.forEach(filter => {
-            const op = getOperatorMongo(filter.operator);
-            const logicOp = filter.logicOperator !== undefined ? `|${filter.logicOperator}` : '';
-            let val = filter.value;
-            if (typeof val === 'object') {
-                const m = moment(filter.value);
-                if (m.isValid()) {
-                    val = m.format('YYYY-MM-DD HH:mm');
-                }
-            }
-            
-            query += `${filter.field}=${val}|${op}${logicOp}&`
-        });
-        query = query.substring(0, query.length - 1);
-
-        let auxUrlUsers = tab === 0 ? urlTurns : urlTrace;
-        auxUrlUsers += query;
-
-        if (tab === 0) {
-            getTurns(auxUrlUsers);
-        }
-        else {
-            getTrace(auxUrlUsers);
-        }
-    }, [filters]);// eslint-disable-line react-hooks/exhaustive-deps
-
-    const addFilter = () => {
-        let auxIndex = indexFilter;
-        auxIndex++;
-        const auxData = [ ...filters ];
-
-        const filter = {
-            index: auxIndex,
-            logicOperator: 'and',
-            type: columns[0].mytype,
-            field: columns[0].field,
-            operator: '=',
-            value: ''
-        };
-
-        if (columns[0].mytype === 'date') {
-            filter.value = new Date();
-        }
-
-        if (auxData.length === 0) {
-            delete filter.logicOperator;
-        }
-
-        auxData.push(filter);
-
-        setFilters(auxData);
-        setIndexFilter(auxIndex);
-    }
-
-    const removeFilter = (index) => {
-        const auxData = [ ...filters ];
-        const removeIndex = auxData.map(item => item.index).indexOf(index);
-        if (removeIndex !== -1) {
-            if (removeIndex === 0) {
-                if (auxData.length > 1) {
-                    delete auxData[1].logicOperator;
-                }
-                auxData.splice(removeIndex, 1);
-            }
-            else {
-                auxData.splice(removeIndex, 1);
-            }
-        }
-
-        setFilters(auxData);
-    }
-
-    const handlerChangeSelectColumn = (event, index) => {
-        const auxData = [ ...filters ];
-        const editIndex = auxData.map(item => item.index).indexOf(index);
-        if (editIndex !== -1) {
-            auxData[editIndex].field = event.target.value;
-            const auxCol = columns.find(col => col.field === event.target.value);
-            if (auxCol.mytype === 'date') {
-                auxData[editIndex].value = new Date();
-            }
-            else {
-                auxData[editIndex].value = '';
-            }
-
-            auxData[editIndex].operator = '=';
-            auxData[editIndex].type = auxCol.mytype;
-        }
-
-        setFilters(auxData);
-    };
-
-    const handlerChangeSelectOperator = (event, index) => {
-        const auxData = [ ...filters ];
-        const editIndex = auxData.map(item => item.index).indexOf(index);
-        if (editIndex !== -1) {
-            auxData[editIndex].operator = event.target.value;
-        }
-
-        setFilters(auxData);
-    };
-
-    const handlerChangeValue = (event, index, type) => {
-        const auxData = [ ...filters ];
-        const editIndex = auxData.map(item => item.index).indexOf(index);
-        if (editIndex !== -1) {
-            if (event) {
-                if (event.target) {
-                    if (type !== 'date') {
-                        auxData[editIndex].value = event.target.value;
-                    }
-                    else if (moment(event.target.value).isValid()) {
-                        auxData[editIndex].value = event.target.value;
-                    }
-                    else {
-                        return;
-                    }
-                }
-                else {
-                    if (type !== 'date') {
-                        auxData[editIndex].value = event;    
-                    }
-                    else if (moment(event).isValid()) {
-                        auxData[editIndex].value = event;    
-                    }
-                    else {
-                        return;
-                    }
-                }
-            }
-            else {
-                return;
-            }
-        }
-
-        setFilters(auxData);
-    };
-
-    const handlerChangeSelectLogicOperator = (event, index) => {
-        const auxData = [ ...filters ];
-        const editIndex = auxData.map(item => item.index).indexOf(index);
-        if (editIndex !== -1) {
-            auxData[editIndex].logicOperator = event.target.value;
-        }
-
-        setFilters(auxData);
-    };
     
     //------------------------------------------------------------------------
     const updateStateModule = async (username, isLogout = false) => {
@@ -909,8 +716,8 @@ function LookOut(props) {
         const res = await updateStateModule(user.username);
         if (res) {
             getSlaves(res._id);
-            getTurns();
-            getTrace();
+            getTurns(currentSucursal);
+            getTrace(currentSucursal);
         }
     }
 
@@ -962,11 +769,6 @@ function LookOut(props) {
                     </div>
                     <div className="down">
                         <span className="title">Turnos</span>
-                        <Tooltip title="Filtros">
-                            <div onClick={openMenu} className="button-filter">
-                                <FaFilter className="icon"/>
-                            </div>
-                        </Tooltip>
                         <div className="tab-container">
                             <div className="tab-buttons">
                                 <div className={tab === 0 ? 'tab select' : 'tab'} onClick={()=>handlerChangeTab(0)}>En proceso</div>
@@ -1013,18 +815,6 @@ function LookOut(props) {
                     }
                 </div>
             </div>
-            <FilterMenu 
-            open={open} 
-            anchorEl={anchorEl} 
-            handleClose={closeMenu} 
-            columns={columns} 
-            filters={filters}
-            add={addFilter}
-            remove={removeFilter}
-            handlerSelectColumn={handlerChangeSelectColumn}
-            handlerSelectOperator={handlerChangeSelectOperator}
-            handlerValue={handlerChangeValue}
-            handlerSelectLogicOperator={handlerChangeSelectLogicOperator}/>
         </RequireAuth>
     </>);
 }
