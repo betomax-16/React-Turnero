@@ -65,6 +65,15 @@ function Modules(props) {
                 saveSupervisors();
                 setOpenSupervisor(false)
             }
+            else if (openConfirm.title === 'Liberación de módulo') {
+                await axios.put(`http://${window.location.hostname}:4000/api/modules/${openConfirm.module}/${openConfirm.sucursal}`, {status: false}, { 
+                    headers: {
+                        'auth': localStorage.getItem('token')
+                    }
+                });
+
+                showAlert("green", `${openConfirm.module} liberado exitosamente.`); 
+            }
         } catch (error) {
             console.log(error);
             showAlert("red", 'algo salio mal');
@@ -141,6 +150,7 @@ function Modules(props) {
     useEffect(() => {
         getSucursals();
         getModules();
+        console.log(props.socket);
     }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
 
@@ -260,13 +270,33 @@ function Modules(props) {
     const printButtonAssociate = (val) => {
         if (val) {
             if (val.type === 'modulo') {
-                return  <div className="button-associate-privilege" onClick={async () => {
-                    const module = modules.find(m => m.id === val.val);
-                    handleOpenAssociate(module);
-                }}>Asignar Privilegios</div> 
+                return  <>
+                    <div className="button-associate-privilege" onClick={async () => {
+                        const auxModule = modules.find(m => m.id === val.val);
+                        handleOpenAssociate(auxModule);
+                    }}>Asignar Privilegios</div> 
+                    <div className="button-associate-privilege" onClick={() => {
+                        const auxModule = modules.find(m => m.id === val.val);
+                        freeModule(auxModule.name, auxModule.sucursal);
+                    }}>Liberar</div>
+                    <div className="button-associate-privilege" onClick={() => {
+                        if (props.socket) {
+                            const auxModule = modules.find(m => m.id === val.val);
+                            props.socket.emit('refresh', {sucursal: auxModule.sucursal, module: auxModule.name});
+                        }
+                    }}>Actualizar</div>
+                </>
             }
             else if (val.type === 'toma') {
-                return  <Link className="button-associate-privilege" to={`/toma/${val.val}`} target={'_blank'}>Abrir Módulo</Link> 
+                return <>
+                    <Link className="button-associate-privilege" to={`/toma/${val.val}`} target={'_blank'}>Abrir Módulo</Link>
+                    <div className="button-associate-privilege" onClick={() => {
+                        const data = val.val.split('/');
+                        const name = window.atob(data[1]);
+                        const sucursal = window.atob(data[0]);
+                        console.log({name: name, sucursal: sucursal});
+                    }}>Actualizar</div>
+                </>
             }
         }
         else {
@@ -275,24 +305,24 @@ function Modules(props) {
     }
 
     const columns = [
-        { field: 'name', headerName: 'Modulo', flex: 1, mytype: 'string' }, 
-        { field: 'type', headerName: 'Tipo', flex: 1, mytype: 'string' },
-        { field: 'status', headerName: 'Estado', flex: 1, mytype: 'bool',
+        { field: 'name', headerName: 'Modulo', width: 120, mytype: 'string' }, 
+        { field: 'type', headerName: 'Tipo', width: 100, mytype: 'string' },
+        { field: 'status', headerName: 'Estado', width: 80, mytype: 'bool',
             renderCell: (params) => (
                 params.value === null ? <></> :
                 params.value ? 
                 <FaUserCheck className="icon-green" size={20}/> : 
                 <FaUserTimes className="icon-red" size={20}/>
           ), },
-        { field: 'sucursal', headerName: 'Sucursal', flex: 1, mytype: 'string' },
-        { field: 'username', headerName: 'Atendiendo', flex: 1, mytype: 'string' },
-        { field: 'pattern', headerName: 'Supervisado por', flex: 1, 
+        { field: 'sucursal', headerName: 'Sucursal', width: 180, mytype: 'string' },
+        { field: 'username', headerName: 'Atendiendo', width: 180, mytype: 'string' },
+        { field: 'pattern', headerName: 'Supervisado por', width: 150, 
             renderCell: (params) => (
                 params.value === null ? <></> :
                 params.value.type !== 'modulo' ? <></> :
                 <div className="button-associate-privilege" onClick={() => handlerOpenModalSupervisor(params.value)}>Asignar</div>
         ) },
-        { field: 'mode', headerName: 'Modalidad', flex: 1, mytype: 'string' },
+        { field: 'mode', headerName: 'Modalidad', width: 100, mytype: 'string' },
         { field: 'associate', headerName: 'Acciones', flex: 1, 
             renderCell: (params) => (printButtonAssociate(params.value)),},
     ];
@@ -331,6 +361,21 @@ function Modules(props) {
             showAlert("red", 'algo salio mal');
         }
     };
+
+    const freeModule = async (moduleName, sucursal) => {
+        try {
+            setOpenConfirm({
+                state: true,
+                title: `Liberación de módulo`,
+                ask: `¿Esta seguro de liberar el Módulo: ${moduleName}?`,
+                module: moduleName,
+                sucursal: sucursal
+            });
+        } catch (error) {
+            console.log(error);
+            showAlert("red", 'algo salio mal');
+        }
+    }
 
     const callSaveData = async (data) => {
         try {

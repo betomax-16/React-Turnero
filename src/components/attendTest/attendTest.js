@@ -80,7 +80,8 @@ function AttendTest(props) {
                     const auxSocket = socketIOClient(ENDPOINT);
                     setSocket(auxSocket);
                     auxSocket.emit('join-sucursal', suc);
-                    auxSocket.emit('join-type', {sucursal:suc, type:'toma', name:modulo, username: ''});
+                    auxSocket.emit('join-type', {sucursal:suc, type:'toma', name:mod, username: ''});
+                    auxSocket.emit('join-module', {sucursal:suc, module:mod});
     
                     auxSocket.on('newTurnTest', data => {
                         if (data) {
@@ -100,6 +101,10 @@ function AttendTest(props) {
                         if (data) {
                             setSocketTurns({ status: true, action: 'removeTurn', data: data });   
                         }
+                    });
+
+                    auxSocket.on('refresh', () => {
+                        window.location.reload();
                     });
                 }
 
@@ -144,6 +149,8 @@ function AttendTest(props) {
                 for (let index = 0; index < auxShifts.length; index++) {
                     let t = {...auxShifts[index]};
                     if (t.turn === socketTurns.data.turn.turn) {
+                        const auxTurn = {...socketTurns.data.turn};
+                        auxTurn.creationDate = moment(socketTurns.data.turn.creationDate).format("YYYY-MM-DD HH:mm:ss");
                         auxShifts[index] = {...socketTurns.data.turn, id: socketTurns.data.turn._id, call: socketTurns.data.turn};
                     }
                 }

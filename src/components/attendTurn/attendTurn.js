@@ -94,6 +94,10 @@ function AttendTurn(props) {
         }
       });
 
+      auxSocket.on('refresh', () => {
+        window.location.reload();
+      });
+
       setTimer(setInterval(() => setDateState(moment()), 1000));
     };
 
@@ -361,6 +365,7 @@ function AttendTurn(props) {
 
               if (socket) {
                 socket.emit('join-type', {sucursal:currentSucursal, type:data.type, name:data.name, username: user.username, user: user});
+                socket.emit('join-module', {sucursal:currentSucursal, module:data.name});
               }
           }  
         }      
@@ -443,6 +448,7 @@ function AttendTurn(props) {
             if (auxSocket) {
               auxSocket.emit('join-sucursal', auxModule.sucursal);
               auxSocket.emit('join-type', {sucursal:auxModule.sucursal, type:auxModule.type, name:auxModule.name, username: dataUser.username});
+              auxSocket.emit('join-module', {sucursal:auxModule.sucursal, module:auxModule.name});
 
               if (resPending) {
                 auxSocket.emit('turnAttend', { sucursal: auxModule.sucursal, data: resPending });

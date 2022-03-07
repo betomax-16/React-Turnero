@@ -84,7 +84,7 @@ function ModuleCard(props) {
           {props.data.mode === 'auto' && <><h3>Privilegios:</h3><ul>{getPrivilages()}</ul></>}
       </>}
     >
-      <div data-tip="Hola" data-for="global" className="module-card-container">
+      <div data-tip="Hola" data-for="global" className="module-card-container" onClick={props.clic}>
         <div className={getStatusColor()}>
           <div className="card-body">
             <span>{props.data.number}</span>          

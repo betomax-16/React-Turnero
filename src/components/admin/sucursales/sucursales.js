@@ -29,10 +29,19 @@ function Sucursales(props) {
                </Link> 
         ),},
         { field: 'urlScreen', headerName: 'Pantalla', flex: 1,
-            renderCell: (params) => (
+            renderCell: (params) => (<>
                <Link className="button-link" to={`/pantalla/${params.value}`} target={'_blank'}>
                    Abrir Pantalla
-               </Link> 
+               </Link>
+               <div className="button-associate" onClick={async () => {
+                    if (props.socket) {
+                        const sucursal = window.atob(params.value);
+                        props.socket.emit('refresh', {sucursal: sucursal, module: 'screen'});
+                    }
+               }}>
+                   Actualizar
+               </div> 
+            </>
         ),},
         { field: 'associate', headerName: 'Asociar', flex: 1,
             renderCell: (params) => (
@@ -124,6 +133,7 @@ function Sucursales(props) {
     useEffect(() => {
         getSucursals();
         getAreas();
+        console.log(props.socket);
     }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
     const getSucursals = async () => {

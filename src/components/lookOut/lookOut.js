@@ -7,6 +7,7 @@ import AppContext from "../../context/app/app-context";
 import AttendMenu from "../attendTurn/menu/menu";
 import ModuleCard from "./modulesCards/moduleCard";
 import RequireAuth from "../utils/auth/RequireAuth";
+import Confirm from "../utils/confirm/confirm";
 import './styles.css';
 
 const columnsTurns = [
@@ -54,6 +55,12 @@ function LookOut(props) {
         status: false,
         action: '',
         data: null
+    });
+
+    const [openConfirm, setOpenConfirm] = useState({
+        state: false,
+        title: '',
+        ask: ''
     });
 
     const [slaveModules, setSlaveModules] = useState([]);
@@ -123,7 +130,8 @@ function LookOut(props) {
             });
 
             auxSocket.on('turnReCall', resTurn => {
-                showAlert("blue", `${resTurn.turn.ubication} ha re-llamado a: ${resTurn.turn.turn}`); 
+                const ubication = resTurn.turn.ubication ? resTurn.turn.ubication : resTurn.ubication;
+                showAlert("blue", `${ubication} ha re-llamado a: ${resTurn.turn.turn}`); 
                 setStateDataTurns({ status: true, action: 'updateTurn', data: resTurn });   
             });
 
@@ -299,7 +307,8 @@ function LookOut(props) {
                     }
 
                     const auxTraces = [...trace];
-                    const rowTrace = {id: stateDataTurns.data.trace._id, ...stateDataTurns.data.trace};
+                    const id = stateDataTurns.data.trace._id ? stateDataTurns.data.trace._id : stateDataTurns.data.trace.id;
+                    const rowTrace = {id: id, ...stateDataTurns.data.trace};
 
                     for (let index = 0; index < auxTraces.length; index++) {
                         let element = {...auxTraces[index]};
@@ -746,6 +755,88 @@ function LookOut(props) {
         getConfigSucursal(sucursalSelect);
     }
 
+    const freeModule = async (moduleName, sucursal) => {
+        try {
+            let flagAction = false;
+            const auxSlaveModules = [...slaveModules];
+            for (let index = 0; index < auxSlaveModules.length; index++) {
+                const element = {...auxSlaveModules[index]};
+
+                if (element.name === moduleName && element.status === 'Activo') {
+                    flagAction = true;
+                    break;
+                }
+            }
+
+            if (flagAction) {
+                setOpenConfirm({
+                    state: true,
+                    title: `Liberación de módulo`,
+                    ask: `¿Esta seguro de liberar el Módulo: ${moduleName}?`,
+                    module: moduleName,
+                    sucursal: sucursal
+                });
+            }
+            else {
+                showAlert("yellow", `EL módulo ${moduleName} no se encuentra activo.`);
+            }
+        } catch (error) {
+            console.log(error);
+            showAlert("red", 'algo salio mal');
+        }
+    }
+
+    const handleAcceptConfirm = async () => {
+        try {
+            if (openConfirm.title === 'Liberación de módulo') {
+                await axios.put(`http://${window.location.hostname}:4000/api/modules/${openConfirm.module}/${openConfirm.sucursal}`, {status: false}, { 
+                    headers: {
+                        'auth': localStorage.getItem('token')
+                    }
+                });
+
+
+                const auxSlaveModules = [...slaveModules];
+                for (let index = 0; index < auxSlaveModules.length; index++) {
+                    const element = {...auxSlaveModules[index]};
+                    if (element.name === openConfirm.module) {
+                        element.status = 'Inactivo';
+                    }
+                    auxSlaveModules[index] = element;
+                }
+
+                auxSlaveModules.sort(( a, b ) => {
+                    if ( a.number < b.number ){
+                    return -1;
+                    }
+                    if ( a.number > b.number ){
+                    return 1;
+                    }
+                    return 0;
+                });
+
+                setSlaveModules(auxSlaveModules);
+                showAlert("green", `${openConfirm.module} liberado exitosamente.`); 
+            }
+        } catch (error) {
+            console.log(error);
+            showAlert("red", 'algo salio mal');
+        }
+        setOpenConfirm({
+            state: false,
+            title: '',
+            ask: ''
+        });
+    };
+
+    const handleCloseConfirm = () => {
+        setOpenConfirm({
+            state: false,
+            title: '',
+            ask: ''
+        });
+    };
+
     return (<>
         <RequireAuth>
             <div className="lookout-container">
@@ -764,7 +855,9 @@ function LookOut(props) {
                     <div className="up">
                         <span className="title">Modulos</span>
                         <div className="list">
-                            {slaveModules.map((element, index) => <ModuleCard key={index} data={element}/>)}
+                            {slaveModules.map((element, index) => <ModuleCard key={index} data={element} clic={() => {
+                               freeModule(element.name, currentSucursal);
+                            }}/>)}
                         </div>
                     </div>
                     <div className="down">
@@ -816,6 +909,13 @@ function LookOut(props) {
                 </div>
             </div>
         </RequireAuth>
+        <Confirm 
+                open={openConfirm.state}
+                title={openConfirm.title} 
+                message={openConfirm.ask} 
+                handleClose={handleCloseConfirm}
+                handleAccept={handleAcceptConfirm}
+                 />
     </>);
 }
 

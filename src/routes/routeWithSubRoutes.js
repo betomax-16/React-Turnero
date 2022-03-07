@@ -1,5 +1,6 @@
 import { Route } from 'react-router-dom';
 
+//pasar socket
 const RouteWithSubRoutes = (route) => {
     return (
     <Route

@@ -44,6 +44,7 @@ function Screen(props) {
                 if (await callGetSucursal(sucursal)) {
                     const auxSocket = socketIOClient(ENDPOINT);
                     auxSocket.emit('join-sucursal', sucursal);
+                    auxSocket.emit('join-module', {sucursal:sucursal, module:'screen'});
                     getDataConfig();
                     getLastTurns();
                     setInterval(() => {
@@ -66,7 +67,10 @@ function Screen(props) {
                         emphasis(resTurn);
                     });
     
-                    
+                    auxSocket.on('refresh', () => {
+                        window.location.reload();
+                    });
+
                     if (query.get('tv') && query.get('tv').toLowerCase() === 'si') {
                         setShowTV(true);
                     }

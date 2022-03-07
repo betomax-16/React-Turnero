@@ -201,7 +201,7 @@
     .card-footer {
         display: flex;
         z-index: 0;
-        height: 45%;
+        height: 55%;
     }
 
     .card-footer .title {
