@@ -294,7 +294,9 @@ function Modules(props) {
                         const data = val.val.split('/');
                         const name = window.atob(data[1]);
                         const sucursal = window.atob(data[0]);
-                        console.log({name: name, sucursal: sucursal});
+                        if (props.socket) {
+                            props.socket.emit('refresh', {sucursal: sucursal, module: name});
+                        }
                     }}>Actualizar</div>
                 </>
             }
