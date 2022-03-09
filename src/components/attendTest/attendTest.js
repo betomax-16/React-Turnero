@@ -1,45 +1,67 @@
-import { useState, useEffect, useContext } from "react";
-import { useForm, Controller  } from "react-hook-form";
-import { DataGrid, esES } from '@mui/x-data-grid';
+import { useState, useEffect, useContext, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
+import InputBase from '@mui/material/InputBase';
+import IconButton from '@mui/material/IconButton';
+import { FiSearch } from "react-icons/fi";
 import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
+import { styled } from '@mui/material/styles';
 import axios from "axios";
 import moment from "moment";
 import socketIOClient from "socket.io-client";
 import AppContext from "../../context/app/app-context";
 import AttendMenu from "../attendTurn/menu/menu";
+import TurnCard from "./cardTurn/turnCard";
 // import Attend from "../attendTurn/attend/attend";
 import logo from '../../public/img/logo.png';
-import { AiOutlineClose } from "react-icons/ai";
-import { GoMegaphone } from "react-icons/go";
-import { FiCheck } from "react-icons/fi";
-import { BsArrowReturnLeft } from "react-icons/bs";
+import { blue, green, red, orange, purple } from '@mui/material/colors';
 import "./styles.css";
+
+const ButtonGreen = styled(Button)(({ theme }) => ({
+    color: theme.palette.getContrastText(purple[500]),
+    backgroundColor: green[500],
+    '&:hover': {
+      backgroundColor: green[700],
+    },
+}));
+const ButtonGreen2 = styled(Button)(({ theme }) => ({
+    color: theme.palette.getContrastText(purple[300]),
+    backgroundColor: green[300],
+    '&:hover': {
+      backgroundColor: green[400],
+    },
+}));
+const ButtonBlue = styled(Button)(({ theme }) => ({
+    color: theme.palette.getContrastText(purple[500]),
+    backgroundColor: blue[500],
+    '&:hover': {
+      backgroundColor: blue[700],
+    },
+}));
+const ButtonRed = styled(Button)(({ theme }) => ({
+    color: theme.palette.getContrastText(purple[500]),
+    backgroundColor: red[500],
+    '&:hover': {
+      backgroundColor: red[700],
+    },
+}));
+const ButtonOrange = styled(Button)(({ theme }) => ({
+    color: theme.palette.getContrastText(purple[500]),
+    backgroundColor: orange[500],
+    '&:hover': {
+      backgroundColor: orange[700],
+    },
+}));
 
 function AttendTest(props) {
     const ENDPOINT = `http://${window.location.hostname}:4000`;
-    const columnsTurns = [
-        { field: 'turn', headerName: 'Turno', width: 100, mytype: 'string' },
-        { field: 'area', headerName: 'Area', width: 150, mytype: 'string' },
-        { field: 'sucursal', headerName: 'Sucursal', width: 300, mytype: 'string' },
-        { field: 'state', headerName: 'Estado', width: 200, mytype: 'number' },
-        { field: 'creationDate', headerName: 'Fecha creación', width: 200, mytype: 'string' },
-        { field: 'call', headerName: 'Atender', flex: 1,
-            renderCell: (params) => (
-                printButtons(params.value)
-        ),},
-    ];
 
-    const { control, handleSubmit, setValue, formState: { errors } } = useForm({defaultValues: {
-        idExakta: ''
-    }});
-    const onSubmit = data => updateTurnAndTrace(data);
-
+    const { search } = useLocation();
+    const query = useMemo(() => new URLSearchParams(search), [search]);
     const { showAlert, setModule, module } = useContext(AppContext);
     const [sucursalExist, setSucursalExist] = useState(false);
 
@@ -50,8 +72,15 @@ function AttendTest(props) {
     const [selectedTurn, setSelectedTurn] = useState(null);
     const [dateState, setDateState] = useState(moment());
     const [socket, setSocket] = useState(null);
-    const [turns, setTurns] = useState([]);
+    // const [turns, setTurns] = useState([]);
     const [trace, setTrace] = useState([]);
+    const [area, setArea] = useState(null);
+    const [filterLaboratorio, setFilterLab] = useState('');
+    const [filterImgen, setFilterImg] = useState('');
+    const [idExakta, setIdExakta] = useState({
+        value: '',
+        error: false
+    });
     // const [currentTurn, setCurrentTurn] = useState({
     //     turn:''
     // });
@@ -67,6 +96,9 @@ function AttendTest(props) {
     useEffect(() => {
         async function init() {
             try {
+                if (query.get('area')) {
+                    setArea(query.get('area'));
+                }
                 const suc = window.atob(props.match.params.suc);
                 const mod = window.atob(props.match.params.module);
                 setSucursal(suc);
@@ -74,7 +106,7 @@ function AttendTest(props) {
                 if (await callGetSucursal(suc, mod)) {
                     await getConfigSucursal(suc);
                     await getModule(suc, mod);
-                    await getTurns(suc, mod);
+                    // await getTurns(suc, mod);
                     await getTrace(suc);
                     // await getCurrentTurn(suc, mod);
                     const auxSocket = socketIOClient(ENDPOINT);
@@ -128,48 +160,35 @@ function AttendTest(props) {
         if (socketTurns.status && socketTurns.data !== null) {
             setSocketTurns({ status: false, action: '', data: null });
             if (socketTurns.action === 'addTurn') {
-                const auxShifts = [...turns];
-                auxShifts.push({
-                    id: socketTurns.data.turn._id,
-                    turn: socketTurns.data.turn.turn,
-                    area: socketTurns.data.turn.area,
-                    creationDate: moment(socketTurns.data.turn.creationDate).format("YYYY-MM-DD HH:mm:ss"),
-                    state: socketTurns.data.turn.state,
-                    sucursal: socketTurns.data.turn.sucursal,
-                    call: socketTurns.data.turn
-                });
-                setTurns(auxShifts);
-
                 const auxTrace = [...trace];
-                auxTrace.push(socketTurns.data.trace);
-                setTrace(auxTrace);
+                const aux = {...socketTurns.data.trace};
+                aux.startDate = moment(socketTurns.data.trace.startDate).format("YYYY-MM-DD HH:mm:ss");
+                aux.status = 'Libre';
+                aux.area = socketTurns.data.turn.area;
+                auxTrace.push(aux);
+                setTrace(aux);
             }
             else if (socketTurns.action === 'attendTurn') {
-                const auxShifts = [...turns];
-                for (let index = 0; index < auxShifts.length; index++) {
-                    let t = {...auxShifts[index]};
-                    if (t.turn === socketTurns.data.turn.turn) {
-                        const auxTurn = {...socketTurns.data.turn};
-                        auxTurn.creationDate = moment(socketTurns.data.turn.creationDate).format("YYYY-MM-DD HH:mm:ss");
-                        auxShifts[index] = {...socketTurns.data.turn, id: socketTurns.data.turn._id, call: socketTurns.data.turn};
-                    }
-                }
-                setTurns(auxShifts);
-
                 const auxTraces = [...trace];
                 for (let index = 0; index < auxTraces.length; index++) {
                     let t = {...auxTraces[index]};
+                    let status = 'Libre';
+                    if (socketTurns.data.trace.state === 'espera toma') {
+                        status = 'Libre';
+                    }
+                    else if (socketTurns.data.trace.state === 'en toma' || socketTurns.data.trace.state === 're-call') {
+                        status = 'Activo';
+                    }
                     if (t.turn === socketTurns.data.turn.turn) {
                         auxTraces[index] = socketTurns.data.trace;
+                        auxTraces[index].startDate = moment(auxTraces[index].startDate).format("YYYY-MM-DD HH:mm:ss");
+                        auxTraces[index].status = status;
                     }
                 }
                 setTrace(auxTraces);
             }
             else if (socketTurns.action === 'removeTurn') {
                 if (!socketTurns.data.type) {
-                    const auxShifts = turns.filter(t => t.turn !== socketTurns.data.turn.turn);
-                    setTurns(auxShifts);
-    
                     const auxTraces = [...trace];
                     const auxTrace = auxTraces.filter(t => t.turn !== socketTurns.data.trace.turn);
                     setTrace(auxTrace);
@@ -180,81 +199,21 @@ function AttendTest(props) {
 
     useEffect(() => {
         if (configSucursal.timeLimit) {
-            const result = trace.filter(r => r.finalDate === undefined && 
-                r.state === 'espera toma' && 
-                moment(r.startDate).add(configSucursal.timeLimit, 'minutes') < moment());
-
-            if (result.length) {
-                const copyTurns = [...turns]; 
-                for (let index = 0; index < result.length; index++) {
-                    const element = result[index];
-
-                    for (let j = 0; j < copyTurns.length; j++) {
-                        const t = {...copyTurns[j]};
-                        if (t.turn === element.turn) {
-                            t.limit = true;
-                            copyTurns[j] = t;
-                        }
-                    }
-
+            const auxTrace = [...trace];
+            for (let index = 0; index < auxTrace.length; index++) {
+                const element = {...auxTrace[index]};
+                if (element.finalDate === undefined && element.state === 'espera toma' &&
+                    moment(element.startDate).add(configSucursal.timeLimit, 'minutes') < moment()) {
+                        element.status = 'Tarde';
                 }
 
-                setTurns(copyTurns);
-            }  
+                auxTrace[index] = element;
+            }
+
+            setTrace(auxTrace);  
         }
          
     }, [dateState]);// eslint-disable-line react-hooks/exhaustive-deps
-
-    const printButtons = (data) => {
-        let buttons = <></>;
-        const turn = data.turn;
-        switch (data.state) {
-            case 'espera toma':
-                buttons = <Tooltip title="Atender turno"><div className="button-associate" onClick={async () => {
-                    handleOpenDialog(turn, 'toma');
-               }}><GoMegaphone size={15}/></div></Tooltip>;
-                break;
-            case 'en toma':
-                buttons = <>
-                    <Tooltip title="Rellamar"><div className="button-associate blues" onClick={async () => {
-                        handleOpenDialog(turn, 're-call');
-                    }}><GoMegaphone size={15}/></div></Tooltip>
-                    <Tooltip title="Cancelar"><div className="button-associate red" onClick={async () => {
-                        handleOpenDialog(turn, 'cancelar');
-                    }}><AiOutlineClose size={15}/></div></Tooltip>
-                    <Tooltip title="Terminar"><div className="button-associate green" onClick={async () => {
-                        handleOpenDialog(turn, 'terminar');
-                    }}><FiCheck size={15}/></div></Tooltip>
-                    <Tooltip title="Liberar"><div className="button-associate orange" onClick={async () => {
-                        handleOpenDialog(turn, 'liberar');
-                    }}><BsArrowReturnLeft size={15}/></div></Tooltip>
-                </>;
-                break;
-            case 're-call':
-                buttons = <>
-                    <Tooltip title="Rellamar"><div className="button-associate blues" onClick={async () => {
-                        handleOpenDialog(turn, 're-call');
-                    }}><GoMegaphone size={15}/></div></Tooltip>
-                    <Tooltip title="Cancelar"><div className="button-associate red" onClick={async () => {
-                        handleOpenDialog(turn, 'cancelar');
-                    }}><AiOutlineClose size={15}/></div></Tooltip>
-                    <Tooltip title="Terminar"><div className="button-associate green" onClick={async () => {
-                        handleOpenDialog(turn, 'terminar');
-                    }}><FiCheck size={15}/></div></Tooltip>
-                    <Tooltip title="Liberar"><div className="button-associate orange" onClick={async () => {
-                        handleOpenDialog(turn, 'liberar');
-                    }}><BsArrowReturnLeft size={15}/></div></Tooltip>
-                </>;
-                break;
-            case 'pausa':
-        
-                break;
-            default:
-                break;
-        }
-
-        return buttons;
-    }
 
     const callGetSucursal = async (suc, mod) => {
         try {
@@ -303,7 +262,7 @@ function AttendTest(props) {
 
     const handlerAttendTurn = async (idExakta) => {
         try {
-            const shift = selectedTurn.turn;
+            const shift = selectedTurn.turn.turn;
             const data = {
                 turn: shift,
                 sucursal: sucursal,
@@ -321,23 +280,17 @@ function AttendTest(props) {
             // const auxShifts = turns.filter(t => t.turn !== shift);
             // setTurns(auxShifts);
 
-            const auxShifts = [...turns];
-            for (let index = 0; index < auxShifts.length; index++) {
-                let t = {...auxShifts[index]};
-                if (t.turn === shift) {
-                    auxShifts[index] = {...res.data.body.turn, id:res.data.body.turn._id, call: res.data.body.turn};
-                    auxShifts[index].creationDate = moment(auxShifts[index].creationDate).format("YYYY-MM-DD HH:mm:ss")
-                }
-            }
-            setTurns(auxShifts);
-
             const auxTraces = [...trace];
             for (let index = 0; index < auxTraces.length; index++) {
                 let t = {...auxTraces[index]};
                 if (t.turn === shift) {
                     auxTraces[index] = res.data.body.trace;
+                    auxTraces[index].startDate = moment(auxTraces[index].startDate).format("YYYY-MM-DD HH:mm:ss");
+                    auxTraces[index].status = 'Activo';
+                    auxTraces[index].area = res.data.body.turn.area;
                 }
             }
+            console.log(auxTraces);
             setTrace(auxTraces);
 
             if (socket) {
@@ -355,7 +308,7 @@ function AttendTest(props) {
         } catch (error) {
             if (error.response && error.response.data) {
                 console.log(error.response.data);
-                // showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message); 
             }
             else {
                 console.log(error);
@@ -366,7 +319,7 @@ function AttendTest(props) {
     
     const handlerReCallTurn = async (idExakta) => {
         try {
-            const shift = selectedTurn.turn;
+            const shift = selectedTurn.turn.turn;
             const data = {
                 turn: shift,
                 sucursal: sucursal,
@@ -399,7 +352,7 @@ function AttendTest(props) {
     
     const handlerCancelationTurn = async (idExakta) => {
         try {
-            const shift = selectedTurn.turn;
+            const shift = selectedTurn.turn.turn;
             const data = {
                 turn: shift,
                 sucursal: sucursal,
@@ -415,9 +368,6 @@ function AttendTest(props) {
                 const turn = {...res.data.body, ubication: modulo};
                 socket.emit('turnFinish', { sucursal: sucursal, data: turn });
             }
-
-            const auxShifts = turns.filter(t => t.turn !== res.data.body.turn.turn);
-            setTurns(auxShifts);
 
             const auxTraces = [...trace];
             const auxTrace = auxTraces.filter(t => t.turn !== res.data.body.trace.turn);
@@ -440,7 +390,7 @@ function AttendTest(props) {
     
     const handlerAttendedTurn = async (idExakta) => {
         try {
-            const shift = selectedTurn.turn;
+            const shift = selectedTurn.turn.turn;
             const data = {
                 turn: shift,
                 sucursal: sucursal,
@@ -457,10 +407,6 @@ function AttendTest(props) {
                 const turn = {...res.data.body, ubication: modulo};
                 socket.emit('turnFinish', { sucursal: sucursal, data: turn });
             }
-
-
-            const auxShifts = turns.filter(t => t.turn !== res.data.body.turn.turn);
-            setTurns(auxShifts);
 
             const auxTraces = [...trace];
             const auxTrace = auxTraces.filter(t => t.turn !== res.data.body.trace.turn);
@@ -483,7 +429,7 @@ function AttendTest(props) {
 
     const handlerFreeTurn = async () => {
         try {
-            const shift = selectedTurn.turn;
+            const shift = selectedTurn.turn.turn;
             const data = {
                 turn: shift,
                 sucursal: sucursal
@@ -492,21 +438,15 @@ function AttendTest(props) {
             const res = await axios.post(`http://${window.location.hostname}:4000/api/action/free`, data);
     
             // setCurrentTurn({turn: ''});
-            const auxShifts = [...turns];
-            for (let index = 0; index < auxShifts.length; index++) {
-                let t = {...auxShifts[index]};
-                if (t.turn === shift) {
-                    auxShifts[index] = {...res.data.body.turn, id:res.data.body.turn._id, call: res.data.body.turn};
-                    auxShifts[index].creationDate = moment(auxShifts[index].creationDate).format("YYYY-MM-DD HH:mm:ss")
-                }
-            }
-            setTurns(auxShifts);
 
             const auxTraces = [...trace];
             for (let index = 0; index < auxTraces.length; index++) {
                 let t = {...auxTraces[index]};
                 if (t.turn === shift) {
                     auxTraces[index] = res.data.body.trace;
+                    auxTraces[index].startDate = moment(auxTraces[index].startDate).format("YYYY-MM-DD HH:mm:ss");
+                    auxTraces[index].status = 'Libre';
+                    auxTraces[index].area = res.data.body.turn.area;
                 }
             }
             setTrace(auxTraces);
@@ -532,52 +472,69 @@ function AttendTest(props) {
         } 
     }
 
-    const getTurns = async (suc, mod, url = '') => {
-        try {
-            const urlTurns = `http://${window.location.hostname}:4000/api/action/attended/${suc}`;
-            const urlApi = url !== '' ? url : urlTurns;
-            const res = await axios.get(urlApi);
+    // const getTurns = async (suc) => {
+    //     try {
+    //         let url = `http://${window.location.hostname}:4000/api/action/attended/${suc}`;
+    //         if (query.get('area')) {
+    //             url += `?area=${query.get('area')}`;
+    //         }
+    //         const res = await axios.get(url);
 
-            console.log(res);
-            const rows = [];
-            res.data.body.forEach(row => {
-                rows.push({
-                    id: row._id,
-                    turn: row.turn,
-                    area: row.area,
-                    creationDate: moment(row.creationDate).format("YYYY-MM-DD HH:mm:ss"),
-                    state: row.state,
-                    sucursal: row.sucursal,
-                    call: row
-                });
-            });
+    //         console.log(res);
+    //         const rows = [];
+    //         res.data.body.forEach(row => {
+    //             rows.push({
+    //                 id: row._id,
+    //                 turn: row.turn,
+    //                 area: row.area,
+    //                 creationDate: moment(row.creationDate).format("YYYY-MM-DD HH:mm:ss"),
+    //                 state: row.state,
+    //                 sucursal: row.sucursal,
+    //                 call: row
+    //             });
+    //         });
 
-            setTurns(rows);
-        } catch (error) {
-            if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
-            }
-            else {
-                console.log(error);
-                showAlert("red", error.message);
-            }
-        }
-    }
+    //         setTurns(rows);
+    //     } catch (error) {
+    //         if (error.response && error.response.data) {
+    //             console.log(error.response.data);
+    //             showAlert("red", error.response.data.body.message); 
+    //         }
+    //         else {
+    //             console.log(error);
+    //             showAlert("red", error.message);
+    //         }
+    //     }
+    // }
 
     const getTrace = async (suc) => {
         try {
-            const res = await axios.get(`http://${window.location.hostname}:4000/api/action/attended-traces/${suc}`);
+            let url = `http://${window.location.hostname}:4000/api/action/attended-traces/${suc}`;
+            if (query.get('area')) {
+                url += `?area=${query.get('area')}`;
+            }
+            const res = await axios.get(url);
 
             const rows = [];
+            let status = 'Libre';
             res.data.body.forEach(row => {
+                if (row.state === 'espera toma') {
+                    status = 'Libre';
+                }
+                else if (row.state === 'en toma' || row.state === 're-call') {
+                    status = 'Activo';
+                }
+
                 rows.push({
                     id: row._id,
                     turn: row.turn,
                     startDate: moment(row.startDate).format("YYYY-MM-DD HH:mm:ss"),
                     ubication: row.ubication,
                     state: row.state,
-                    sucursal: row.sucursal
+                    sucursal: row.sucursal,
+                    status: status, 
+                    area: row.area,
+                    username: row.username,
                 });
             });
 
@@ -699,8 +656,9 @@ function AttendTest(props) {
     const handleCloseDialog = () => {
         setOpenDialog(false);
         setSelectedTurn(null);
-        setValue('idExakta', '', {
-            shouldValidate: false,
+        setIdExakta({
+            value: '',
+            error: false
         });
     };
 
@@ -709,44 +667,180 @@ function AttendTest(props) {
         setSelectedTurn({turn, action});
     };
 
-    const updateTurnAndTrace = async(data) => {
-        
+    const selectTurn = (data) => {
+        if (data.state === 'espera toma') {
+            handleOpenDialog(data, 'atender');
+        }
+        else if (data.state === 'en toma' || data.state === 're-call') {
+            handleOpenDialog(data, 'otra accion');
+        }
+    }
 
-        if (selectedTurn && selectedTurn.action === 'toma') {
-            const res = await validIdExakta(data.idExakta, true);
-            if (res) {
-                handleCloseDialog();
-                handlerAttendTurn(data.idExakta);
+    const submit = async (action) => {
+        if (!idExakta.error) {
+            if (action === 'Atender') {
+                const res = await validIdExakta(idExakta.value, true);
+                if (res) {
+                    handleCloseDialog();
+                    handlerAttendTurn(idExakta.value);
+                }
+            }
+            else if (action === 'Rellamar') {
+                const res = await validIdExakta(idExakta.value);
+                if (res) {
+                    handleCloseDialog();
+                    handlerReCallTurn(idExakta.value);
+                }
+            }
+            else if (action === 'Cancelar') {
+                const res = await validIdExakta(idExakta.value);
+                if (res) {
+                    handleCloseDialog();
+                    handlerCancelationTurn(idExakta.value);
+                }
+            }
+            else if (action === 'Terminar') {
+                const res = await validIdExakta(idExakta.value);
+                if (res) {
+                    handleCloseDialog();
+                    handlerAttendedTurn(idExakta.value);
+                }
+            }
+            else if (action === 'Liberar') {
+                const res = await validIdExakta(idExakta.value);
+                if (res) {
+                    handleCloseDialog();
+                    handlerFreeTurn();
+                }
             }
         }
-        else if (selectedTurn && selectedTurn.action === 're-call') {
-            const res = await validIdExakta(data.idExakta);
-            if (res) {
-                handleCloseDialog();
-                handlerReCallTurn(data.idExakta);
+    }
+
+    const handlerChangeIdExakta = (e) => {
+        if (e.target.value === '') {
+            setIdExakta({
+                value: '',
+                error: true
+            });
+        }
+        else {
+            setIdExakta({
+                value: e.target.value,
+                error: false
+            });
+        }
+    }
+
+
+    const filterLab = async () => {
+        try {
+            const suc = window.atob(props.match.params.suc);
+            let url = `http://${window.location.hostname}:4000/api/action/attended-traces/${suc}?area=Laboratorio`;
+            if (filterLaboratorio !== '') {
+                url += `&turn=${filterLaboratorio.toUpperCase()}`;
+            }
+            const res = await axios.get(url);
+
+            const rows = [];
+            let status = 'Libre';
+            res.data.body.forEach(row => {
+                if (row.state === 'espera toma') {
+                    status = 'Libre';
+                }
+                else if (row.state === 'en toma' || row.state === 're-call') {
+                    status = 'Activo';
+                }
+
+                rows.push({
+                    id: row._id,
+                    turn: row.turn,
+                    startDate: moment(row.startDate).format("YYYY-MM-DD HH:mm:ss"),
+                    ubication: row.ubication,
+                    state: row.state,
+                    sucursal: row.sucursal,
+                    status: status, 
+                    area: row.area,
+                    username: row.username,
+                });
+            });
+
+            const auxImageTraces = trace.filter(t => t.area === 'Imagen');
+            auxImageTraces.forEach(element => {
+                rows.push(element);
+            });
+
+            setTrace(rows);
+        } catch (error) {
+            if (error.response && error.response.data) {
+                console.log(error.response.data);
+                showAlert("red", error.response.data.body.message); 
+            }
+            else {
+                console.log(error);
+                showAlert("red", error.message);
             }
         }
-        else if (selectedTurn && selectedTurn.action === 'cancelar') {
-            const res = await validIdExakta(data.idExakta);
-            if (res) {
-                handleCloseDialog();
-                handlerCancelationTurn(data.idExakta);
+    }
+
+    const filterImg = async () => {
+        try {
+            const suc = window.atob(props.match.params.suc);
+            let url = `http://${window.location.hostname}:4000/api/action/attended-traces/${suc}?area=Imagen`;
+            if (filterImgen !== '') {
+                url += `&turn=${filterImgen.toUpperCase()}`;
+            }
+            const res = await axios.get(url);
+
+            const rows = [];
+            let status = 'Libre';
+            res.data.body.forEach(row => {
+                if (row.state === 'espera toma') {
+                    status = 'Libre';
+                }
+                else if (row.state === 'en toma' || row.state === 're-call') {
+                    status = 'Activo';
+                }
+
+                rows.push({
+                    id: row._id,
+                    turn: row.turn,
+                    startDate: moment(row.startDate).format("YYYY-MM-DD HH:mm:ss"),
+                    ubication: row.ubication,
+                    state: row.state,
+                    sucursal: row.sucursal,
+                    status: status, 
+                    area: row.area,
+                    username: row.username,
+                });
+            });
+
+            const auxLabTraces = trace.filter(t => t.area === 'Laboratorio');
+            auxLabTraces.forEach(element => {
+                rows.push(element);
+            });
+
+            setTrace(rows);
+        } catch (error) {
+            if (error.response && error.response.data) {
+                console.log(error.response.data);
+                showAlert("red", error.response.data.body.message); 
+            }
+            else {
+                console.log(error);
+                showAlert("red", error.message);
             }
         }
-        else if (selectedTurn && selectedTurn.action === 'terminar') {
-            const res = await validIdExakta(data.idExakta);
-            if (res) {
-                handleCloseDialog();
-                handlerAttendedTurn(data.idExakta);
+    }
+
+    const keyPress = (e, source) => {
+        if(e.keyCode === 13){
+            if (source === 'Imagen') {
+                filterImg();   
             }
-        }
-        else if (selectedTurn && selectedTurn.action === 'liberar') {
-            const res = await validIdExakta(data.idExakta);
-            if (res) {
-                handleCloseDialog();
-                handlerFreeTurn();
+            else if (source === 'Laboratorio') {
+                filterLab();
             }
-        }
+         }
     }
 
     return (<>
@@ -755,20 +849,54 @@ function AttendTest(props) {
                 <><AttendMenu isModuleFree={true} sucursal={sucursal} module={modulo} configSuc={configSucursal}/>
                 {module ? <div className="attendTest-content">
                     <div className="attendTest-body">
-                        <DataGrid
-                            localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-                            rows={turns}
-                            columns={columnsTurns}
-                            pageSize={10}
-                            rowsPerPageOptions={[10]}
-                            disableSelectionOnClick
-                            onSelectionModelChange={(ids) => {
-                                console.log(ids[0]);
-                            }}
-                            getRowClassName={(params) => {
-                                return params.row.limit && params.row.state === 'espera toma' ? `super-app-theme ` : '';
-                            }}
-                        />
+                        {(area === null || area === 'Laboratorio') &&
+                            <div className="area-content">
+                                <div className="title">
+                                    Laboratorio
+                                    <div className="text-search">
+                                        <InputBase
+                                            sx={{ ml: 1, flex: 1 }}
+                                            placeholder="Búsqueda"
+                                            value={filterLaboratorio}
+                                            onKeyDown={(e) => keyPress(e, 'Laboratorio')}
+                                            onChange={(e) => setFilterLab(e.target.value)}
+                                        />
+                                        <IconButton type="submit" sx={{ p: '10px' }} aria-label="search" onClick={filterLab}>
+                                            <FiSearch />
+                                        </IconButton>
+                                    </div>
+                                </div>
+                                <div className="body">
+                                    <div className="grid">
+                                        {trace.filter(t => t.area === 'Laboratorio').map((element, index) => <TurnCard key={index} data={element} click={() => selectTurn(element)}/> )}
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        {(area === null || area === 'Imagen') &&
+                            <div className="area-content">
+                                <div className="title">
+                                    Imagen
+                                    <div className="text-search">
+                                        <InputBase
+                                            sx={{ ml: 1, flex: 1 }}
+                                            placeholder="Búsqueda"
+                                            value={filterImgen}
+                                            onKeyDown={(e) => keyPress(e, 'Imagen')}
+                                            onChange={(e) => setFilterImg(e.target.value)}
+                                        />
+                                        <IconButton type="submit" sx={{ p: '10px' }} aria-label="search" onClick={filterImg}>
+                                            <FiSearch />
+                                        </IconButton>
+                                    </div>
+                                </div>
+                                <div className="body">
+                                    <div className="grid">
+                                        {trace.filter(t => t.area === 'Imagen').map((element, index) => <TurnCard key={index} data={element} click={() => selectTurn(element)}/> )}
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
             </div> :
             <div className="message">
@@ -785,32 +913,32 @@ function AttendTest(props) {
         </div>
         
         <Dialog open={openDialog} onClose={handleCloseDialog}>
-            <DialogTitle>IdExakta</DialogTitle>
-            <form onSubmit={handleSubmit(onSubmit)} className='formDialog'>
+            <DialogTitle>Turno seleccionado: {selectedTurn ? selectedTurn.turn ? selectedTurn.turn.turn : '' : ''}</DialogTitle>
             <DialogContent>
-                <Controller
-                    name="idExakta"
-                    control={control}
-                    render={({ field }) => <TextField
-                            error={errors.idExakta?.type === 'required'}
-                            helperText={errors.idExakta ? 'Campo obligatorio.' : ''}                            
-                            autoFocus
-                            margin="dense"
-                            id="idExakta"
-                            label="idExakta"
-                            type="text"
-                            fullWidth
-                            variant="standard"
-                            {...field}
-                    />}
-                    rules={{ required: true }}
+                <TextField
+                    error={idExakta.error}
+                    helperText={idExakta.error ? 'Campo obligatorio.' : ''}                            
+                    autoFocus
+                    margin="dense"
+                    label="idExakta"
+                    type="text"
+                    fullWidth
+                    variant="standard"
+                    value={idExakta.value}
+                    onChange={handlerChangeIdExakta}
                 />
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleCloseDialog}>Cancelar</Button>
-                <Button type="submit" >Aceptar</Button>
+                {selectedTurn && selectedTurn.action === 'otra accion' && <>
+                    <ButtonBlue onClick={() => submit("Rellamar")}>Rellamar</ButtonBlue>
+                    <ButtonGreen2 onClick={() => submit("Terminar")}>Terminar</ButtonGreen2>
+                    <ButtonRed onClick={() => submit("Cancelar")}>Cancelar</ButtonRed>
+                    <ButtonOrange onClick={() => submit("Liberar")}>Liberar</ButtonOrange>
+                </>}
+                {selectedTurn && selectedTurn.action === 'atender' && <>
+                    <ButtonGreen onClick={() => submit("Atender")}>Atender</ButtonGreen>
+                </>}
             </DialogActions>
-            </form>
         </Dialog>
     </>);
 }

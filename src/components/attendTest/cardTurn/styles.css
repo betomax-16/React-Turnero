@@ -1,0 +1,59 @@
+.turnCard .container-box {
+    display: flex;
+    flex-direction: column;
+    color: white;
+    border-radius: 5px;
+    transition: transform .2s;
+}
+
+.turnCard .container-box:hover {
+    transform: scale(1.1);
+}
+
+.turnCard .free{
+    background-color: green;
+}
+
+.turnCard .free:hover{
+    cursor: pointer;
+    background-color: rgb(2, 109, 2);
+}
+
+.turnCard .active{
+    background-color: orange;
+}
+
+.turnCard .active:hover{
+    cursor: pointer;
+    background-color: rgb(231, 154, 12);
+}
+
+.turnCard .late{
+    background-color: red;
+}
+
+.turnCard .late:hover{
+    cursor: pointer;
+    background-color: rgb(228, 8, 8);
+}
+
+.turnCard .container-box .turnCard-body{
+    flex: 1 1 auto;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-size: 250%;
+    font-weight: bold;
+}
+
+.turnCard .container-box .turnCard-footer{
+    width: 100%;
+    height: inherit;
+    text-align: center;
+    overflow: hidden;
+    font-weight: bold;
+    padding: 5px 0;
+    border-top: white 1px dashed;
+}
