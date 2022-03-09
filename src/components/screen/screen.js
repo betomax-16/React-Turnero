@@ -49,7 +49,9 @@ function Screen(props) {
                     getLastTurns();
                     setInterval(() => {
                         if (moment().hour() === 22 && moment().minute() === 0 && moment().second() === 1) {
-                            window.location.reload();
+                            setShifts([]);
+                            setCurrentTurn({ turn:'', ubication: '' });
+                            setLastTurns([]);
                         }
                         setDateState(moment())
                     }, 1000);

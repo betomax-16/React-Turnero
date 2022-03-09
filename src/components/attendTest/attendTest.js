@@ -166,7 +166,7 @@ function AttendTest(props) {
                 aux.status = 'Libre';
                 aux.area = socketTurns.data.turn.area;
                 auxTrace.push(aux);
-                setTrace(aux);
+                setTrace(auxTrace);
             }
             else if (socketTurns.action === 'attendTurn') {
                 const auxTraces = [...trace];
@@ -514,7 +514,6 @@ function AttendTest(props) {
                 url += `?area=${query.get('area')}`;
             }
             const res = await axios.get(url);
-
             const rows = [];
             let status = 'Libre';
             res.data.body.forEach(row => {
@@ -785,7 +784,7 @@ function AttendTest(props) {
     const filterImg = async () => {
         try {
             const suc = window.atob(props.match.params.suc);
-            let url = `http://${window.location.hostname}:4000/api/action/attended-traces/${suc}?area=Imagen`;
+            let url = `http://${window.location.hostname}:4000/api/action/attended-traces/${suc}?area=Imagen&area=Citas`;
             if (filterImgen !== '') {
                 url += `&turn=${filterImgen.toUpperCase()}`;
             }
@@ -876,7 +875,7 @@ function AttendTest(props) {
                         {(area === null || area === 'Imagen') &&
                             <div className="area-content">
                                 <div className="title">
-                                    Imagen
+                                    Imagen y Citas
                                     <div className="text-search">
                                         <InputBase
                                             sx={{ ml: 1, flex: 1 }}
@@ -892,7 +891,8 @@ function AttendTest(props) {
                                 </div>
                                 <div className="body">
                                     <div className="grid">
-                                        {trace.filter(t => t.area === 'Imagen').map((element, index) => <TurnCard key={index} data={element} click={() => selectTurn(element)}/> )}
+                                        {/*Agregar filtro para citas*/ }
+                                        {trace.filter(t => t.area === 'Imagen' || t.area === 'Citas').map((element, index) => <TurnCard key={index} data={element} click={() => selectTurn(element)}/> )}
                                     </div>
                                 </div>
                             </div>
