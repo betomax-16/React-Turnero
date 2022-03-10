@@ -18,9 +18,10 @@ moment.locale('es', {
 });
 
 function AttendTurn(props) {
+  const timeLogout = 60;
   const ENDPOINT = `http://${window.location.hostname}:4000`;
   const urlModules = `http://${window.location.hostname}:4000/api/modules`;
-  const { showAlert, module, user, getDataUser, setModule, setUser, setCurrentSucursal, currentSucursal } = useContext(AppContext);
+  const { userLogout, showAlert, module, user, getDataUser, setModule, setUser, setCurrentSucursal, currentSucursal } = useContext(AppContext);
   const [areas, setAreas] = useState([]);
   const [dateState, setDateState] = useState(moment());
   const [lastTurns, setLastTurns] = useState([]);
@@ -35,7 +36,8 @@ function AttendTurn(props) {
   });
   
   const [currentTurn, setCurrentTurn] = useState({
-    turn:''
+    turn:'',
+    lastHourActivity: moment().add(timeLogout, 'm')
   });
 
   const [stateModule, setStateModule] = useState({
@@ -99,6 +101,17 @@ function AttendTurn(props) {
       });
 
       setTimer(setInterval(() => setDateState(moment()), 1000));
+
+      // window.addEventListener("beforeunload", (ev) => 
+      // {  
+      //     ev.preventDefault();
+      //     updateStateModule('', true);
+      //     handlerChangeSucursal();
+      //     userLogout();
+      //     return ev.returnValue = 'Are you sure you want to close?';
+
+          
+      // });
     };
 
     init();
@@ -226,6 +239,16 @@ function AttendTurn(props) {
     
     // console.log('stateDataTurns');
   }, [stateDataTurns]);// eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const aux = moment(currentTurn.lastHourActivity);
+    if (aux <= moment()) {
+      //Cerrar sesion
+      updateStateModule('', true);
+      handlerChangeSucursal();
+      userLogout();
+    }
+  }, [dateState]);// eslint-disable-line react-hooks/exhaustive-deps
 
   const getSucursals = async () =>  {
     try {
@@ -364,7 +387,7 @@ function AttendTurn(props) {
               // setAnchorEl(null);
 
               if (socket) {
-                socket.emit('join-type', {sucursal:currentSucursal, type:data.type, name:data.name, username: user.username, user: user});
+                socket.emit('join-type', {sucursal:currentSucursal, type:data.type, name:data.name, username: user.username, user: user, status: data.status});
                 socket.emit('join-module', {sucursal:currentSucursal, module:data.name});
               }
           }  
@@ -562,10 +585,10 @@ function AttendTurn(props) {
       let turn = null;
       if (res.data.body.length) {
         turn = res.data.body[0];
-        setCurrentTurn(turn);
+        setCurrentTurn({...turn, lastHourActivity: moment().add(timeLogout, 'm')});
       }
       else {
-        setCurrentTurn({turn: ''});
+        setCurrentTurn({turn: '', lastHourActivity: moment().add(timeLogout, 'm')});
       }
 
       return turn;
@@ -640,7 +663,7 @@ function AttendTurn(props) {
             setAreas(auxAreas);
           }
 
-          const turn = {...res.data.body.turn, ubication: module.name};
+          const turn = {...res.data.body.turn, ubication: module.name, lastHourActivity: moment().add(timeLogout, 'm')};
           const auxLastTurns = [...lastTurns];
           auxLastTurns.push(turn);
           auxLastTurns.sort(( a, b ) => {
@@ -707,6 +730,8 @@ function AttendTurn(props) {
           socket.emit('turnReCall', { sucursal: currentSucursal, data: data });
         }
 
+        const auxCurrentTurn = {...currentTurn , lastHourActivity: moment().add(timeLogout, 'm')};
+        setCurrentTurn(auxCurrentTurn);
       } catch (error) {
           if (error.response && error.response.data) {
               console.log(error.response.data);
@@ -750,7 +775,7 @@ function AttendTurn(props) {
           return 0;
         });
 
-        setCurrentTurn({turn: ''});
+        setCurrentTurn({turn: '', lastHourActivity: moment().add(timeLogout, 'm')});
         setLastTurns(auxLastTurns);
         
         if (socket) {
@@ -804,7 +829,7 @@ function AttendTurn(props) {
           return 0;
         });
 
-        setCurrentTurn({turn: ''});
+        setCurrentTurn({turn: '', lastHourActivity: moment().add(timeLogout, 'm')});
         setLastTurns(auxLastTurns);
 
         if (socket) {

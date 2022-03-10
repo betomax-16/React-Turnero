@@ -158,10 +158,11 @@ function LookOut(props) {
                 //Actualizar estado de las tarjetas de modulos
                 for (let index = 0; index < auxSlaveModules.length; index++) {
                     const element = {...auxSlaveModules[index]};
+                    const status = stateModule.data.status ? 'Activo' : 'Inactivo';
                     if (element.name === stateModule.data.name) {
                         element.username = stateModule.data.username;
                         element.user = stateModule.data.user;
-                        element.status = 'Inactivo';
+                        element.status = status;
                     }
                     auxSlaveModules[index] = element;
                 }
@@ -306,20 +307,23 @@ function LookOut(props) {
                         }
                     }
 
-                    const auxTraces = [...trace];
-                    const id = stateDataTurns.data.trace._id ? stateDataTurns.data.trace._id : stateDataTurns.data.trace.id;
-                    const rowTrace = {id: id, ...stateDataTurns.data.trace};
+                    
+                    if (stateDataTurns.data.trace) {
+                        const auxTraces = [...trace];
+                        const id = stateDataTurns.data.trace._id ? stateDataTurns.data.trace._id : stateDataTurns.data.trace.id;    
+                        const rowTrace = {id: id, ...stateDataTurns.data.trace};
 
-                    for (let index = 0; index < auxTraces.length; index++) {
-                        let element = {...auxTraces[index]};
-                        if (!element.finalDate) {
-                            element.finalDate = moment().format("YYYY-MM-DD HH:mm:ss");
-                            auxTraces[index] = element;
-                            break;
+                        for (let index = 0; index < auxTraces.length; index++) {
+                            let element = {...auxTraces[index]};
+                            if (!element.finalDate) {
+                                element.finalDate = moment().format("YYYY-MM-DD HH:mm:ss");
+                                auxTraces[index] = element;
+                                break;
+                            }
                         }
+                        auxTraces.push(rowTrace);
+                        setTrace(auxTraces);
                     }
-                    auxTraces.push(rowTrace);
-                    setTrace(auxTraces);
                 }
             }
         }

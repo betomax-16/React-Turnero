@@ -604,7 +604,7 @@ function AttendTest(props) {
             let exist = false;
             if (res.data.body.length) { 
                 if (res.data.body[0].rol.toLowerCase() === 'recepcionista') {
-                    const resTrace = await axios.get(`http://${window.location.hostname}:4000/api/trace?username=${id}|eq&finalDate=null|eq|and`, {
+                    const resTrace = await axios.get(`http://${window.location.hostname}:4000/api/trace?username=${id}|eq&finalDate=null|eq|and&turn=${selectedTurn.turn.turn}|eq|and`, {
                         headers: {
                             'me': ''
                         }
