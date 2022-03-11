@@ -17,7 +17,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Tooltip from '@mui/material/Tooltip';
 import { DataGrid, esES } from '@mui/x-data-grid';
-import { MdModeEdit } from "react-icons/md";
+import { MdModeEdit, MdPassword } from "react-icons/md";
 import { AiFillDelete } from "react-icons/ai";
 import { BsPlusLg } from "react-icons/bs";
 import { FaFilter } from "react-icons/fa";
@@ -243,6 +243,48 @@ function Users(props) {
         }
     }
 
+
+    const [pass, setPass] = useState({
+        value: '',
+        error: false
+    });
+    const [openChangePass, setOpenChangePass] = useState(false);
+
+    const handleCloseChangePass = () => {
+        setOpenChangePass(false);
+    };
+
+    const callSaveDataChangePass = async () => {
+        try {
+            if (pass !== '') {
+                const user = usersSelected[0];
+                await axios.put(`http://${window.location.hostname}:5000/api/credentials/${user.username}`, {password: pass});
+
+                setPass({
+                    value: '',
+                    error: false
+                });
+                setOpenChangePass(false);
+                showAlert("green", "Cambio de contraseña efectuado exitosamente.");
+            }
+            else {
+                setPass({
+                    value: '',
+                    error: true
+                });
+            }
+        } catch (error) {
+            console.log(error);
+            if (error.response && error.response.data) {
+                console.log(error.response.data);
+                showAlert("red", error.response.data.body.message); 
+            }
+            else {
+                console.log(error);
+                showAlert("red", 'algo salio mal');
+            }
+        }
+    }
     // -------------------------------------------------------------
     //                        OPEN MENU FILTER
     // -------------------------------------------------------------
@@ -401,13 +443,18 @@ function Users(props) {
                         <BsPlusLg className="icon"/>
                     </div>
                 </Tooltip>
-                {usersSelected.length === 1 &&
+                {usersSelected.length === 1 &&<>
                 <Tooltip title="Editar">
                     <div className="button-edit" onClick={() => handleClickOpen(false)}>
                         <MdModeEdit className="icon"/>
                     </div>
                 </Tooltip>
-                }
+                <Tooltip title="Cambiar contraseña">
+                    <div className="button-edit" onClick={() => setOpenChangePass(true)}>
+                        <MdPassword className="icon"/>
+                    </div>
+                </Tooltip>
+                </>}
                 {usersSelected.length >= 1 &&
                 <Tooltip title="Eliminar">
                     <div className="button-delete" onClick={() => setOpenConfirm(true)}>
@@ -529,6 +576,22 @@ function Users(props) {
                     <Button type="submit" >Guardar</Button>
                 </DialogActions>
                 </form>
+            </Dialog>
+
+            <Dialog open={openChangePass} onClose={handleCloseChangePass}>
+                <DialogTitle>Cambiar contraseña para: {usersSelected.length ? usersSelected[0].username : ''}</DialogTitle>
+                <DialogContent>
+                    <TextField 
+                        value={pass}
+                        onChange={(e) => setPass(e.target.value)}
+                        error={errors.password?.type === 'required'}
+                        helperText={errors.password ? 'Campo obligatorio.' : ''}
+                        label="Contraseña" type="password" margin="dense" variant="standard" fullWidth />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseChangePass}>Cancelar</Button>
+                    <Button onClick={callSaveDataChangePass}>Guardar</Button>
+                </DialogActions>
             </Dialog>
 
             <Confirm 
