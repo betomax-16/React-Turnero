@@ -776,7 +776,7 @@ function LookOut(props) {
                 setOpenConfirm({
                     state: true,
                     title: `Liberación de módulo`,
-                    ask: `¿Esta seguro de liberar el Módulo: ${moduleName}?`,
+                    ask: `¿Estás seguro de terminar la atención en el Módulo: ${moduleName}?`,
                     module: moduleName,
                     sucursal: sucursal
                 });

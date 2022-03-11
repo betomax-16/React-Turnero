@@ -24,11 +24,12 @@ function TurnCard(props) {
     }
 
     const getMessageToolTip = () => {
-        return props.data.username ? `En atención con: ${props.data.username}` : 'Libre';
+        const message = props.data.username ? `En atención con: ${props.data.username.toUpperCase()}` : 'Libre';
+        return <span style={{fontSize: 15}}>{message}</span>;
     }
   
     return (<>
-        <Tooltip title={getMessageToolTip()} followCursor>
+        <Tooltip title={getMessageToolTip()} >
             <div className="turnCard" onClick={props.click}>
                 <div className={'container-box ' + getStatusColor()}>
                     <div className="turnCard-body">
