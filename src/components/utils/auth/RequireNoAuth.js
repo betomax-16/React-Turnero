@@ -13,6 +13,9 @@ function RequireNoAuth({children}) {
             case 'admin':
                 path = '/admin';
               break;
+            case 'sub-admin':
+                path = '/admin';
+              break;
             case 'vigia':
                 path = '/vigia';
               break;

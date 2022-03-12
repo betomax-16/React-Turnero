@@ -84,21 +84,18 @@ function Users(props) {
     const [usersSelected, setUsersSelected] = useState([]);
     const [usersSelectedID, setUsersSelectedID] = useState([]);
 
-    useEffect(() => {
-        getSucursals();
-        getRoles();
-        getUsers();
-    }, []);// eslint-disable-line react-hooks/exhaustive-deps
-
-
-    
-
-
-    const { showAlert } = useContext(AppContext);
+    const { showAlert, getDataUser } = useContext(AppContext);
     const [open, setOpen] = useState(false);
     const [isNew, setisNew] = useState(true);
     
     const onSubmit = data => callSaveData(data);
+
+    useEffect(() => {
+        getUsers();
+        getSucursals();
+        getRoles();
+    }, []);// eslint-disable-line react-hooks/exhaustive-deps
+
 
     const handleClickOpen = (val) => {
         setisNew(val);
@@ -195,7 +192,15 @@ function Users(props) {
                     'auth': localStorage.getItem('token')
                 }
             });
-            setRoles(res.data.body);
+
+            const auxUserData = getDataUser();
+            if (auxUserData && auxUserData.rol === 'Admin') {
+                setRoles(res.data.body);
+            }
+            else if (auxUserData && auxUserData.rol === 'Sub-Admin') {
+                const auxRoles = res.data.body.filter(r => r.name !== 'Admin' && r.name !== 'Sub-Admin');
+                setRoles(auxRoles);
+            }
         } catch (error) {
             if (error.response && error.response.data) {
                 console.log(error.response.data);
@@ -210,6 +215,7 @@ function Users(props) {
 
     const getUsers = async (url = '') => {
         try {
+            const auxUserData = getDataUser();
             const urlApi = url !== '' ? url : urlUsers;
             const res = await axios.get(urlApi, { 
                 headers: {
@@ -219,22 +225,39 @@ function Users(props) {
 
             const rows = [];
             res.data.body.forEach(row => {
-                rows.push({
-                    id: row._id,
-                    username: row.username,
-                    name: row.name,
-                    firstLastName: row.firstLastName,
-                    secondLastName: row.secondLastName,
-                    sucursal: row.sucursal,
-                    rol: row.rol
-                });
+                if (auxUserData && auxUserData.rol === 'Sub-Admin') {
+                    if (row.rol !== 'Admin' && row.rol !== 'Sub-Admin') {
+                        rows.push({
+                            id: row._id,
+                            username: row.username,
+                            name: row.name,
+                            firstLastName: row.firstLastName,
+                            secondLastName: row.secondLastName,
+                            sucursal: row.sucursal,
+                            rol: row.rol
+                        });
+                    }
+                }
+                else if (auxUserData && auxUserData.rol === 'Admin') {
+                    rows.push({
+                        id: row._id,
+                        username: row.username,
+                        name: row.name,
+                        firstLastName: row.firstLastName,
+                        secondLastName: row.secondLastName,
+                        sucursal: row.sucursal,
+                        rol: row.rol
+                    });
+                }
             });
 
             setUsers(rows);
         } catch (error) {
             if (error.response && error.response.data) {
                 console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                if (error.response.data.body && error.response.data.body.message) {
+                    showAlert("red", error.response.data.body.message); 
+                }
             }
             else {
                 console.log(error);

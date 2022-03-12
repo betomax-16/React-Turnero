@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import AppContext from "../../../context/app/app-context";
@@ -15,7 +15,7 @@ import Tooltip from '@mui/material/Tooltip';
 import logo from "../../../public/img/logo.png";
 
 function Menu(props) {
-    const { userLogout, showAlert, setReset, reset } = useContext(AppContext);
+    const { userLogout, showAlert, setReset, reset, getDataUser, setUser, user } = useContext(AppContext);
     const [toggleTurn, setToggleTurn] = useState(false);
 
     const [openConfirm, setOpenConfirm] = useState(false);
@@ -41,6 +41,12 @@ function Menu(props) {
         setOpenConfirm(false);
     };
 
+    useEffect(() => {
+        const aux_user = getDataUser();
+        setUser(aux_user);
+        console.log(aux_user);
+    }, []);// eslint-disable-line react-hooks/exhaustive-deps
+
     return (<>
         <nav className="menu-container">
             <div className="logo">
@@ -48,7 +54,7 @@ function Menu(props) {
                 {/* <span className="capital">E</span> */}
             </div>
             <div className="options">
-                <Link to="/admin/sucursales">
+                {user && user.rol === 'Admin' && <Link to="/admin/sucursales">
                     <div className="option">
                         <Tooltip title="Sucursales">
                             <div className="icon">
@@ -57,7 +63,7 @@ function Menu(props) {
                         </Tooltip>
                         <span className="title">Sucursales</span>
                     </div>
-                </Link>
+                </Link>}
                 <Link to="/admin/usuarios">
                     <div className="option">
                         <Tooltip title="Usuarios">
@@ -78,7 +84,7 @@ function Menu(props) {
                         <span  className="title">Modulos</span>
                     </div>
                 </Link>
-                <Link to="/admin/areas">
+                {user && user.rol === 'Admin' && <Link to="/admin/areas">
                     <div className="option">
                         <Tooltip title="Areas">
                             <div className="icon">
@@ -87,7 +93,7 @@ function Menu(props) {
                         </Tooltip>
                         <span  className="title">Areas</span>
                     </div>
-                </Link>
+                </Link>}
                 <div>
                     <div className="option" onClick={() => {setToggleTurn(!toggleTurn)}}>
                         <Tooltip title="Turnos">
@@ -138,7 +144,7 @@ function Menu(props) {
                         </div>
                     </div>
                 </div>
-                <Link to="/admin/configurations">
+                {user && user.rol === 'Admin' && <Link to="/admin/configurations">
                     <div className="option">
                         <Tooltip title="Configuraciones">
                             <div className="icon">
@@ -147,7 +153,7 @@ function Menu(props) {
                         </Tooltip>
                         <span  className="title">Configuraciones</span>
                     </div>
-                </Link>
+                </Link>}
                 <div className="option" onClick={() => {userLogout()}}>
                     <Tooltip title="Cerrar Sesión">
                         <div className="icon">

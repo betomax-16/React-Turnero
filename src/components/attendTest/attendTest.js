@@ -19,6 +19,7 @@ import TurnCard from "./cardTurn/turnCard";
 // import Attend from "../attendTurn/attend/attend";
 import logo from '../../public/img/logo.png';
 import { blue, green, red, orange, purple } from '@mui/material/colors';
+import { AiOutlineClose } from "react-icons/ai";
 import "./styles.css";
 
 const ButtonGreen = styled(Button)(({ theme }) => ({
@@ -917,14 +918,19 @@ function AttendTest(props) {
         </div>
         
         <Dialog open={openDialog} onClose={handleCloseDialog}>
-            <DialogTitle>Turno seleccionado: {selectedTurn ? selectedTurn.turn ? selectedTurn.turn.turn : '' : ''}</DialogTitle>
+            <DialogTitle>
+                <div className="title-content">
+                    <span>Turno seleccionado: {selectedTurn ? selectedTurn.turn ? selectedTurn.turn.turn : '' : ''}</span>
+                    <AiOutlineClose className="button-close" onClick={handleCloseDialog}/>
+                </div>
+            </DialogTitle>
             <DialogContent>
                 <TextField
                     error={idExakta.error}
                     helperText={idExakta.error ? 'Campo obligatorio.' : ''}                            
                     autoFocus
                     margin="dense"
-                    label="idExakta"
+                    label="IdExakta"
                     type="text"
                     fullWidth
                     variant="standard"

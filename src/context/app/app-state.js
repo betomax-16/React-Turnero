@@ -74,16 +74,19 @@ const AppState = (props) => {
             if (location.pathname === '/login') {
                 switch (user.rol.toLowerCase()) {
                     case 'admin':
-                      history.push('/admin');
-                      break;
+                        history.push('/admin');
+                        break;
+                    case 'sub-admin':
+                        history.push('/admin');
+                        break;
                     case 'vigia':
-                      history.push('/vigia');
-                      break;
+                        history.push('/vigia');
+                        break;
                     case 'recepcionista':
-                      history.push('/atencion');
-                      break;
+                        history.push('/atencion');
+                        break;
                     default:
-                      break;
+                        break;
                 }
             }
         }
