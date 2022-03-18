@@ -124,7 +124,7 @@ function Menu(props) {
                                 <span  className="title">Historicos</span>
                             </div>
                         </Link>
-                        <Link to="/admin/turnos/reportes">
+                        {user && user.rol === 'Admin' &&<Link to="/admin/turnos/reportes">
                             <div className="sub-option">
                                 <Tooltip title="Reportes">
                                     <div className="icon">
@@ -133,7 +133,7 @@ function Menu(props) {
                                 </Tooltip>
                                 <span  className="title">Reportes</span>
                             </div>
-                        </Link>
+                        </Link>}
                         <div className="sub-option" onClick={() => {setOpenConfirm(true)}}>
                             <Tooltip title="Re-iniciar turnos">
                                 <div className="icon">
