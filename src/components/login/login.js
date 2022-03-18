@@ -24,8 +24,6 @@ function Login() {
     try {
       const res = await axios.post(`http://${window.location.hostname}:4000/api/login`, data);
       userLogin(res.data.body.token);
-      // const user = getDataUser();
-      // history.push('/atencion')
     } catch (error) {
       if (error.response && error.response.data) {
         console.log(error.response.data);

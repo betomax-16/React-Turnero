@@ -64,14 +64,17 @@ const AppState = (props) => {
     }
 
     const userLogin = (token) => {
-        localStorage.setItem("token", token);
+        if (token) {
+            localStorage.setItem("token", token);
+        }
+        
         const user = getDataUser();
         if (user) {
             dispatch({
                 type: 'SET_USER',
                 payload: { ...user }
             });
-            if (location.pathname === '/login') {
+            if (!location.pathname.includes('/toma-turno') && !location.pathname.includes('/toma') && !location.pathname.includes('/pantalla')) {
                 switch (user.rol.toLowerCase()) {
                     case 'admin':
                         history.push('/admin');

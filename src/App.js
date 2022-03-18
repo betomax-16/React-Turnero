@@ -7,12 +7,9 @@ import MessageDown from "./components/messageDown/messageDown";
 import './App.css';
 
 function App() {
-  const { getDataUser, userLogin } = useContext(AppContext);
+  const { userLogin } = useContext(AppContext);
   useEffect(() => {
-    const user = getDataUser();
-    if (user) {
-      userLogin(localStorage.getItem("token"));
-    }
+    userLogin();
   }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
   return (<>

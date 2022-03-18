@@ -1,11 +1,16 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLocation, Redirect } from "react-router-dom";
 import AppContext from "../../../context/app/app-context";
 
 function RequireNoAuth({children}) {
-    const { user, userLogout, showAlert } = useContext(AppContext);
+    const { getDataUser, userLogout, showAlert } = useContext(AppContext);
     let location = useLocation();
 
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+      setUser(getDataUser());
+    }, []);// eslint-disable-line react-hooks/exhaustive-deps
+    
     if (user) {
         let path = '/login';
         if (location.pathname === '/login') {
