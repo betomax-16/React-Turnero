@@ -10,23 +10,13 @@ function TakeTurn(props) {
   const ENDPOINT = `http://${window.location.hostname}:4000`;
   const [socket, setSocket] = useState(null);
   const [socketPrint, setSocketPrint] = useState(null);
-  const [sucursal, setSucursal] = useState('');
+  const [sucursal, setSucursal] = useState(null);
   const { showAlert } = useContext(AppContext);
   const [areas, setAreas] = useState([]);
-  const [sucursalExist, setSucursalExist] = useState(false);
 
   useEffect(() => {
     try {
-      const suc = window.atob(props.match.params.suc);
-      setSucursal(suc);
-      setSocket(socketIOClient(ENDPOINT));
-      const client = new W3CWebSocket(`ws://${window.location.hostname}:7000/`);
-      client.onopen = function() {
-          if (client.readyState === client.OPEN) {
-            setSocketPrint(client);   
-          }
-      };
-      callGetSucursal(suc); 
+      callGetSucursal(); 
     } catch (error) {
       if (error.response && error.response.data) {
         console.log(error.response.data);
@@ -39,12 +29,73 @@ function TakeTurn(props) {
     }
   }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
+  const callGetSucursal = async () => {
+    try {
+      const suc = window.atob(props.match.params.suc);      
+      const res = await axios.get(`http://${window.location.hostname}:5000/api/sucursal/${suc}`);
+      if (res.data.statusCode === 200) {
+        setSucursal(res.data.body);
+        callGetAreas(suc);
+        setSocket(socketIOClient(ENDPOINT));
+        const client = new W3CWebSocket(`ws://${window.location.hostname}:7000/`);
+        client.onopen = function() {
+            if (client.readyState === client.OPEN) {
+              setSocketPrint(client);   
+            }
+        };
+        // setSucursalExist(true);
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        console.log(error.response.data);
+        showAlert("red", error.response.data.body.message); 
+      }
+      else {
+        console.log(error);
+        showAlert("red", error.message);
+      }
+    }
+    
+  };
+
+  const callGetAreas = async (suc) => {
+    try {
+      const res = await axios.get(`http://${window.location.hostname}:4000/api/area-sucursal/${suc}`);
+      setAreas(res.data.body); 
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const takeTurn = async (area) => {
+    try {
+      const data = {
+        area: area,
+        sucursal: sucursal.name
+      };
+      const res = await axios.post(`http://${window.location.hostname}:4000/api/action/take`, data);
+
+      socket.emit('newTurn', {sucursal:sucursal.name, data:res.data.body});
+      sendPrint(res.data.body);
+      showAlert("green", "Turno creado."); 
+    } catch (error) {
+        if (error.response && error.response.data) {
+            console.log(error.response.data);
+            showAlert("red", error.response.data.body.message); 
+        }
+        else {
+            console.log(error);
+            showAlert("red", error.message);
+        }
+    }
+  }
+
   const sendPrint = (dataSend) => {
     try {
       if (socketPrint && socketPrint.readyState === socketPrint.OPEN) {
         const data = JSON.stringify({
             acction: 'emit',
-            sucursal: sucursal,
+            sucursal: sucursal.name,
             data: dataSend
         });
         socketPrint.send(data);
@@ -61,69 +112,13 @@ function TakeTurn(props) {
     }
   };
 
-  const callGetAreas = async (suc) => {
-    try {
-      const res = await axios.get(`http://${window.location.hostname}:4000/api/area-sucursal/${suc}`);
-      setAreas(res.data.body); 
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const callGetSucursal = async (suc) => {
-    try {
-      const res = await axios.get(`http://${window.location.hostname}:5000/api/sucursal/${suc}`);
-      if (res.data.statusCode === 200) {
-        setSucursalExist(true);
-        callGetAreas(suc);
-      }
-    } catch (error) {
-      if (error.response && error.response.data) {
-        console.log(error.response.data);
-        showAlert("red", error.response.data.body.message); 
-      }
-      else {
-        console.log(error);
-        showAlert("red", error.message);
-      }
-    }
-    
-  };
-
-  const takeTurn = async (area) => {
-    try {
-      const data = {
-        area: area,
-        sucursal: sucursal
-      };
-      const res = await axios.post(`http://${window.location.hostname}:4000/api/action/take`, data, { 
-          headers: {
-              'auth': localStorage.getItem('token')
-          }
-      });
-
-      socket.emit('newTurn', {sucursal:sucursal, data:res.data.body});
-      sendPrint(res.data.body);
-      showAlert("green", "Turno creado."); 
-    } catch (error) {
-        if (error.response && error.response.data) {
-            console.log(error.response.data);
-            showAlert("red", error.response.data.body.message); 
-        }
-        else {
-            console.log(error);
-            showAlert("red", error.message);
-        }
-    }
-  }
-
   return (
     <div className="takeTurn-container">
-      {sucursalExist ? (<>
+      {sucursal ? (<>
         <div className="takeTurn-header">
           <h1 className="takeTurn-title">Hola bienvenido a:</h1>
           <img className="takeTurn-logo" src={logo} alt="logo"></img>
-          <span className="takeTurn-sucursal">{sucursal}</span>
+          <span className="takeTurn-sucursal">{sucursal.name}</span>
         </div><div className="takeTurn-body">
             <h3 className="takeTurn-subTitle">Tome su turno</h3>
             <div className="takeTurn-buttons">

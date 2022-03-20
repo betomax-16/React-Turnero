@@ -76,9 +76,9 @@ function AttendMenu(props) {
         if (module) {
             await props.updateStateModule('', true);
         }
-        userLogout();
         setCurrentSucursal(null);
         props.setConfigSucursal({ color: '#05805e' });
+        userLogout();
     }
 
     const handlerChangeOption = (e) => {

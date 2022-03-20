@@ -118,11 +118,11 @@ function AttendTurn(props) {
   }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (stateModule.status && stateModule.data !== null && stateModule.data.name) {
+    if (stateModule.status && stateModule.data !== null && stateModule.data.module) {
       setStateModule({ status: false, action: '', data: null });
       if (stateModule.action === 'greenLed') {
         //Actualizar listado de modulos a seleccionar
-        const auxModules = modules.filter(m => m.name !== stateModule.data.name);
+        const auxModules = modules.filter(m => m.name !== stateModule.data.module.name);
         if (auxModules.length) {
             setModules(auxModules);
             setModuleSelect(auxModules[0].name);
@@ -131,9 +131,9 @@ function AttendTurn(props) {
       else if (stateModule.action === 'grayLed') {
         //Actualizar listado de modulos a seleccionar
         const auxModules = [...modules];
-        const res = auxModules.find(m => m.name === stateModule.data.name);
+        const res = auxModules.find(m => m.name === stateModule.data.module.name);
         if (res === undefined && (stateModule.data !== undefined || stateModule.data !== null)) {
-            auxModules.push(stateModule.data);
+            auxModules.push(stateModule.data.module);
             auxModules.sort(( a, b ) => {
                 if ( a.name < b.name ){
                 return -1;
@@ -150,13 +150,11 @@ function AttendTurn(props) {
     else if (stateModule.status && stateModule.data !== null && stateModule.data.turn) {
       setStateModule({ status: false, action: '', data: null });
       if (stateModule.action === 'greenLed') {
-
-        const areaName = typeof stateModule.data.turn === 'object' ? stateModule.data.turn.area : stateModule.data.area;
         if (stateModule.data.turn.state === 'en atencion') {
           const auxAreas = [...areas];
           for (let index = 0; index < auxAreas.length; index++) {
             const element = {...auxAreas[index]};
-            if (element.name === areaName && element.number > 0) {
+            if (element.name === stateModule.data.turn.area && element.number > 0) {
               element.number--;
               auxAreas[index] = element;
               setAreas(auxAreas);
@@ -164,29 +162,18 @@ function AttendTurn(props) {
             }
           }
         }
-        
-        let data = {};
-        if (typeof stateModule.data.turn === 'object') {
-            data = {turn: {...stateModule.data.turn}};
-        }
-        else {
-            data = {
-                turn: {...stateModule.data},
-                ubication: stateModule.data.ubication
-            }
-        }
 
-        const auxTurn = lastTurns.find(t => t.turn === data.turn.turn);
+        const auxTurn = lastTurns.find(t => t.turn === stateModule.data.turn.turn);
         if (!auxTurn) {
             const auxLastTurns = [...lastTurns];
-            auxLastTurns.push(data.turn);
+            auxLastTurns.push(stateModule.data.trace);
 
             //Mayor a menor
             auxLastTurns.sort(( a, b ) => {
-              if ( moment(a.creationDate) > moment(b.creationDate) ){
+              if ( moment(a.startDate) > moment(b.startDate) ){
                 return -1;
               }
-              if ( moment(a.creationDate) < moment(b.creationDate) ){
+              if ( moment(a.startDate) < moment(b.startDate) ){
                 return 1;
               }
               return 0;
@@ -224,10 +211,10 @@ function AttendTurn(props) {
       else if (stateDataTurns.action === 'finishTurn') {
         const auxTurns = lastTurns.filter(t => t.turn !== stateDataTurns.data.turn.turn);
         auxTurns.sort(( a, b ) => {
-          if ( moment(a.creationDate) > moment(b.creationDate) ){
+          if ( moment(a.startDate) > moment(b.startDate) ){
             return -1;
           }
-          if ( moment(a.creationDate) < moment(b.creationDate) ){
+          if ( moment(a.startDate) < moment(b.startDate) ){
             return 1;
           }
           return 0;
@@ -281,27 +268,27 @@ function AttendTurn(props) {
             }
         });
 
-        const rows = [];
-        res.data.body.forEach(row => {
-            let mode = undefined;
-            let associate = undefined;
-            if (row.type === 'modulo') {
-                mode = row.mode;
-                associate = row._id
-            }
+        const rows = [...res.data.body];
+        // res.data.body.forEach(row => {
+        //     let mode = undefined;
+        //     let associate = undefined;
+        //     if (row.type === 'modulo') {
+        //         mode = row.mode;
+        //         associate = row._id
+        //     }
 
-            rows.push({
-                id: row._id,
-                name: row.name,
-                type: row.type,
-                status: row.status,
-                sucursal: row.sucursal,
-                username: row.username,
-                pattern: row.pattern,
-                mode: mode,
-                associate: associate
-            });
-        });
+        //     rows.push({
+        //         id: row._id,
+        //         name: row.name,
+        //         type: row.type,
+        //         status: row.status,
+        //         sucursal: row.sucursal,
+        //         username: row.username,
+        //         pattern: row.pattern,
+        //         mode: mode,
+        //         associate: associate
+        //     });
+        // });
 
         rows.sort(( a, b ) => {
             if ( a.name < b.name ){
@@ -366,7 +353,7 @@ function AttendTurn(props) {
 
           if (username === '') {
               if (module) {
-                socket.emit('addModule', {sucursal:currentSucursal, data: module});
+                socket.emit('addModule', {sucursal:currentSucursal, module: module});
               }
               setModule(null);
               if (isLogout) {
@@ -387,7 +374,7 @@ function AttendTurn(props) {
               // setAnchorEl(null);
 
               if (socket) {
-                socket.emit('join-type', {sucursal:currentSucursal, type:data.type, name:data.name, username: user.username, user: user, status: data.status});
+                socket.emit('join-type', {sucursal:currentSucursal, module:data, user: user });
                 socket.emit('join-module', {sucursal:currentSucursal, module:data.name});
               }
           }  
@@ -432,6 +419,7 @@ function AttendTurn(props) {
       setCurrentSucursal(null);
       setModules([]);
       setModuleSelect('');
+      getSucursals();
       socket.emit('leave-sucursal', currentSucursal);
       if (module) {
         socket.emit('leave-type', { sucursal: currentSucursal, type: module.type }); 
@@ -467,15 +455,16 @@ function AttendTurn(props) {
             getAreas(auxModule);
             getLastTurns(auxModule.sucursal);
             getConfigSucursal(auxModule.sucursal);
-            const resPending = await getPendingTurn(auxModule);
+            await getPendingTurn(auxModule);
+            // const resPending = await getPendingTurn(auxModule);
             if (auxSocket) {
               auxSocket.emit('join-sucursal', auxModule.sucursal);
-              auxSocket.emit('join-type', {sucursal:auxModule.sucursal, type:auxModule.type, name:auxModule.name, username: dataUser.username});
+              auxSocket.emit('join-type', {sucursal:auxModule.sucursal, module:auxModule, user:dataUser});
               auxSocket.emit('join-module', {sucursal:auxModule.sucursal, module:auxModule.name});
 
-              if (resPending) {
-                auxSocket.emit('turnAttend', { sucursal: auxModule.sucursal, data: resPending });
-              }
+              // if (resPending) {
+              //   auxSocket.emit('turnAttend', { sucursal: auxModule.sucursal, data: resPending });
+              // }
             }
         }
         else {
@@ -486,6 +475,8 @@ function AttendTurn(props) {
         setCurrentSucursal(auxModule.sucursal);
         return true;
       } 
+
+      return false;
     } catch (error) {
         if (error.response && error.response.data) {
             console.log(error.response.data);
@@ -576,7 +567,7 @@ function AttendTurn(props) {
 
   const getPendingTurn = async (dataModule) => {
     try {
-      const res = await axios.get(`http://${window.location.hostname}:4000/api/trace?ubication=${dataModule.name}|eq&finalDate=null|eq|and`, { 
+      const res = await axios.get(`http://${window.location.hostname}:4000/api/trace?sucursal=${dataModule.sucursal}|eq&ubication=${dataModule.name}|eq|and&finalDate=null|eq|and`, { 
         headers: {
           'auth': localStorage.getItem('token')
         }
@@ -663,14 +654,14 @@ function AttendTurn(props) {
             setAreas(auxAreas);
           }
 
-          const turn = {...res.data.body.turn, ubication: module.name, lastHourActivity: moment().add(timeLogout, 'm')};
+          const turn = {...res.data.body.trace, lastHourActivity: moment().add(timeLogout, 'm')};
           const auxLastTurns = [...lastTurns];
           auxLastTurns.push(turn);
           auxLastTurns.sort(( a, b ) => {
-            if ( moment(a.creationDate) > moment(b.creationDate) ){
+            if ( moment(a.startDate) > moment(b.startDate) ){
               return -1;
             }
-            if ( moment(a.creationDate) < moment(b.creationDate) ){
+            if ( moment(a.startDate) < moment(b.startDate) ){
               return 1;
             }
             return 0;
@@ -679,7 +670,7 @@ function AttendTurn(props) {
           setCurrentTurn(turn);
           setLastTurns(auxLastTurns);
 
-          const socketData = {turn: turn, ubication: module.name, trace: res.data.body.trace};
+          const socketData = {...res.data.body};
           if (socket) {
             socket.emit('turnAttend', { sucursal: currentSucursal, data: socketData });
           }
@@ -726,7 +717,7 @@ function AttendTurn(props) {
         showAlert("blue", `Ha re-llamado a: ${currentTurn.turn}`); 
 
         if (socket) {
-          const data = {...res.data.body, ubication: module.name};
+          const data = {...res.data.body};
           socket.emit('turnReCall', { sucursal: currentSucursal, data: data });
         }
 
@@ -766,10 +757,10 @@ function AttendTurn(props) {
   
         const auxLastTurns = lastTurns.filter(t => t.turn !== currentTurn.turn);
         auxLastTurns.sort(( a, b ) => {
-          if ( moment(a.creationDate) > moment(b.creationDate) ){
+          if ( moment(a.startDate) > moment(b.startDate) ){
             return -1;
           }
-          if ( moment(a.creationDate) < moment(b.creationDate) ){
+          if ( moment(a.startDate) < moment(b.startDate) ){
             return 1;
           }
           return 0;
@@ -779,7 +770,8 @@ function AttendTurn(props) {
         setLastTurns(auxLastTurns);
         
         if (socket) {
-          const data = {...res.data.body, ubication: module.name};
+          const data = {...res.data.body};
+          data.trace.ubication = module.name;
           socket.emit('turnFinish', { sucursal: currentSucursal, data: data });
         }
 
@@ -820,10 +812,10 @@ function AttendTurn(props) {
   
         const auxLastTurns = lastTurns.filter(t => t.turn !== currentTurn.turn);
         auxLastTurns.sort(( a, b ) => {
-          if ( moment(a.creationDate) > moment(b.creationDate) ){
+          if ( moment(a.startDate) > moment(b.startDate) ){
             return -1;
           }
-          if ( moment(a.creationDate) < moment(b.creationDate) ){
+          if ( moment(a.startDate) < moment(b.startDate) ){
             return 1;
           }
           return 0;
@@ -833,10 +825,11 @@ function AttendTurn(props) {
         setLastTurns(auxLastTurns);
 
         if (socket) {
-          const data = {...res.data.body, ubication: module.name};
+          const data = {...res.data.body};
+          data.trace.ubication = module.name;
           socket.emit('turnFinish', { sucursal: currentSucursal, data: data });
           if (currentTurn.area !== 'Resultados') {
-            socket.emit('newTurnTest', { sucursal: currentSucursal, type: 'toma', data: res.data.body }); 
+            socket.emit('newTurnTest', { sucursal: currentSucursal, type: 'toma', data: data }); 
           }
         }
 

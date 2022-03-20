@@ -106,26 +106,24 @@ function AttendTest(props) {
                 setModulo(mod);
                 if (await callGetSucursal(suc, mod)) {
                     await getConfigSucursal(suc);
-                    await getModule(suc, mod);
+                    const auxModule = await getModule(suc, mod);
                     // await getTurns(suc, mod);
                     await getTrace(suc);
                     // await getCurrentTurn(suc, mod);
                     const auxSocket = socketIOClient(ENDPOINT);
                     setSocket(auxSocket);
                     auxSocket.emit('join-sucursal', suc);
-                    auxSocket.emit('join-type', {sucursal:suc, type:'toma', name:mod, username: ''});
+                    auxSocket.emit('join-type', {sucursal:suc, module:auxModule, user:null});
                     auxSocket.emit('join-module', {sucursal:suc, module:mod});
     
                     auxSocket.on('newTurnTest', data => {
                         if (data) {
-                            console.log(data);
                             setSocketTurns({ status: true, action: 'addTurn', data: data });   
                         }
                     });
     
                     auxSocket.on('attendTurnTest', data => {
                         if (data) {
-                            console.log(data);
                             setSocketTurns({ status: true, action: 'attendTurn', data: data });   
                         }
                     });
@@ -141,7 +139,12 @@ function AttendTest(props) {
                     });
                 }
 
-                setInterval(() => setDateState(moment()), 1000);
+                setInterval(() => {
+                    if (moment().hour() === 22 && moment().minute() === 0 && moment().second() === 1) {
+                        setTrace([]);
+                    }
+                    setDateState(moment());
+                }, 1000);
             } catch (error) {
                 if (error.response && error.response.data) {
                     console.log(error.response.data);
@@ -187,12 +190,19 @@ function AttendTest(props) {
                     }
                 }
                 setTrace(auxTraces);
+
+                if (selectedTurn && selectedTurn.turn.turn === socketTurns.data.turn.turn) {
+                    handleCloseDialog();
+                }
             }
             else if (socketTurns.action === 'removeTurn') {
                 if (!socketTurns.data.type) {
                     const auxTraces = [...trace];
                     const auxTrace = auxTraces.filter(t => t.turn !== socketTurns.data.trace.turn);
                     setTrace(auxTrace);
+                    if (selectedTurn && selectedTurn.turn.turn === socketTurns.data.turn.turn) {
+                        handleCloseDialog();
+                    }
                 }
             }
         }
@@ -241,14 +251,14 @@ function AttendTest(props) {
 
     const getConfigSucursal = async (suc) => {
         try {
-            const urlApi = `http://${window.location.hostname}:4000/api/sucursal`;
+            const urlApi = `http://${window.location.hostname}:4000/api/sucursal/${suc}`;
             const res = await axios.get(urlApi, { 
                 headers: {
                     'me': ''
                 }
             });
     
-            setConfigSucursal(res.data.body.find(s => s.name === suc));
+            setConfigSucursal(res.data.body);
         } catch (error) {
             if (error.response && error.response.data) {
                 console.log(error.response.data);
@@ -291,11 +301,11 @@ function AttendTest(props) {
                     auxTraces[index].area = res.data.body.turn.area;
                 }
             }
-            console.log(auxTraces);
+            
             setTrace(auxTraces);
 
             if (socket) {
-                const data = {turn:{...res.data.body.turn, ubication: modulo}, trace: {...res.data.body.trace}, ubication: modulo};
+                const data = {...res.data.body};
                 socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: data });
                 socket.emit('turnAttend', { sucursal: sucursal, data: data });
             }
@@ -329,6 +339,7 @@ function AttendTest(props) {
                 source: 'toma'
             };
         
+            console.log(data);
             const res = await axios.post(`http://${window.location.hostname}:4000/api/action/recall`, data, { 
                 headers: { 'me': '' }
             });
@@ -336,7 +347,7 @@ function AttendTest(props) {
             showAlert("blue", `Ha re-llamado a: ${shift}`); 
     
             if (socket) {
-                const turn = {...res.data.body, ubication: modulo};
+                const turn = {...res.data.body};
                 socket.emit('turnReCall', { sucursal: sucursal, data: turn });
             }
         } catch (error) {
@@ -366,7 +377,7 @@ function AttendTest(props) {
             // setCurrentTurn({turn: ''});
     
             if (socket) {
-                const turn = {...res.data.body, ubication: modulo};
+                const turn = {...res.data.body};
                 socket.emit('turnFinish', { sucursal: sucursal, data: turn });
             }
 
@@ -405,7 +416,7 @@ function AttendTest(props) {
             // setCurrentTurn({turn: ''});
 
             if (socket) {
-                const turn = {...res.data.body, ubication: modulo};
+                const turn = {...res.data.body};
                 socket.emit('turnFinish', { sucursal: sucursal, data: turn });
             }
 
@@ -453,7 +464,7 @@ function AttendTest(props) {
             setTrace(auxTraces);
 
             if (socket) {
-                const data = {...res.data.body, ubication: modulo, type: 'freeTurn'};
+                const data = {...res.data.body, type: 'freeTurn'};
                 socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: data });
                 socket.emit('turnFinish', { sucursal: sucursal, data: data });
             }
@@ -526,15 +537,10 @@ function AttendTest(props) {
                 }
 
                 rows.push({
+                    ...row,
+                    status,
                     id: row._id,
-                    turn: row.turn,
-                    startDate: moment(row.startDate).format("YYYY-MM-DD HH:mm:ss"),
-                    ubication: row.ubication,
-                    state: row.state,
-                    sucursal: row.sucursal,
-                    status: status, 
-                    area: row.area,
-                    username: row.username,
+                    startDate: moment(row.startDate).format("YYYY-MM-DD HH:mm:ss")
                 });
             });
 
@@ -555,6 +561,7 @@ function AttendTest(props) {
         try {
             const auxModule = await axios.get(`http://${window.location.hostname}:4000/api/modules/${mod}/${suc}`);
             setModule(auxModule.data.body);
+            return auxModule.data.body;
         } catch (error) {
             console.log(error);
             if (error.response && error.response.status === 404) {

@@ -82,19 +82,14 @@ function LookOut(props) {
         async function init() {
             const auxSocket = socketIOClient(ENDPOINT);
             setSocket(auxSocket);
-            getSucursals();
-            const auxMyModule = await getMyModule();
-            if (auxMyModule) {
-                getSlaves(auxMyModule._id);
-                getConfigSucursal(auxMyModule.sucursal);
-                getTurns(auxMyModule.sucursal);
-                getTrace(auxMyModule.sucursal);
-            }
             
             const dataUser = getDataUser();
             if (dataUser) {
                 setUser(dataUser);
-                auxSocket.emit('join-sucursal', dataUser.sucursal);
+                const res = await getMyModule(dataUser, auxSocket);
+                if (!res) {
+                    getSucursals();
+                }
             }
             
             auxSocket.on('newTurn', data => {
@@ -130,12 +125,38 @@ function LookOut(props) {
             });
 
             auxSocket.on('turnReCall', resTurn => {
-                const ubication = resTurn.turn.ubication ? resTurn.turn.ubication : resTurn.ubication;
-                showAlert("blue", `${ubication} ha re-llamado a: ${resTurn.turn.turn}`); 
+                showAlert("blue", `${resTurn.trace.ubication} ha re-llamado a: ${resTurn.trace.turn}`); 
                 setStateDataTurns({ status: true, action: 'updateTurn', data: resTurn });   
             });
 
-            setTimer(setInterval(() => setDateState(moment()), 1000));
+            setTimer(setInterval(() => {
+                if (moment().hour() === 22 && moment().minute() === 0 && moment().second() === 1) {
+                    setTurns([]);
+                    setTrace([]);
+                    const auxSlaveModules = [...slaveModules];
+                    for (let index = 0; index < auxSlaveModules.length; index++) {
+                        const element = {...auxSlaveModules[index]};
+                        element.username = '';
+                        element.user = null;
+                        element.status = 'Libre';
+                        auxSlaveModules[index] = element;
+                    }
+    
+                    auxSlaveModules.sort(( a, b ) => {
+                        if ( a.number < b.number ){
+                            return -1;
+                        }
+                        if ( a.number > b.number ){
+                            return 1;
+                        }
+                            return 0;
+                    });
+    
+                    setSlaveModules(auxSlaveModules);
+                }
+                
+                setDateState(moment());
+            }, 1000));
         }
         
         init();
@@ -143,13 +164,13 @@ function LookOut(props) {
     }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
-        if (stateModule.status && stateModule.data !== null && stateModule.data.name) {
+        if (stateModule.status && stateModule.data !== null && stateModule.data.module) {
             setStateModule({ status: false, action: '', data: null });
             const auxSlaveModules = [...slaveModules];
 
             if (stateModule.action === 'greenLed') {
                 //Actualizar listado de modulos a seleccionar
-                const auxModules = modules.filter(m => m.name !== stateModule.data.name);
+                const auxModules = modules.filter(m => m.name !== stateModule.data.module.name);
                 if (auxModules.length) {
                     setModules(auxModules);
                     setModuleSelect(auxModules[0].name);
@@ -158,9 +179,9 @@ function LookOut(props) {
                 //Actualizar estado de las tarjetas de modulos
                 for (let index = 0; index < auxSlaveModules.length; index++) {
                     const element = {...auxSlaveModules[index]};
-                    const status = stateModule.data.status ? 'Activo' : 'Inactivo';
-                    if (element.name === stateModule.data.name) {
-                        element.username = stateModule.data.username;
+                    const status = stateModule.data.module.status ? 'Activo' : 'Inactivo';
+                    if (element.name === stateModule.data.module.name) {
+                        element.username = stateModule.data.module.username;
                         element.user = stateModule.data.user;
                         element.status = status;
                     }
@@ -182,9 +203,9 @@ function LookOut(props) {
             else if (stateModule.action === 'grayLed') {
                 //Actualizar listado de modulos a seleccionar
                 const auxModules = [...modules];
-                const res = auxModules.find(m => m.name === stateModule.data.name);
+                const res = auxModules.find(m => m.name === stateModule.data.module.name);
                 if (res === undefined && (stateModule.data !== undefined || stateModule.data !== null)) {
-                    auxModules.push(stateModule.data);
+                    auxModules.push(stateModule.data.module);
                     auxModules.sort(( a, b ) => {
                         if ( a.name < b.name ){
                         return -1;
@@ -200,7 +221,7 @@ function LookOut(props) {
                 //Actualizar estado de las tarjetas de modulos
                 for (let index = 0; index < auxSlaveModules.length; index++) {
                     const element = {...auxSlaveModules[index]};
-                    if (element.name === stateModule.data.name) {
+                    if (element.name === stateModule.data.module.name) {
                         element.username = '';
                         element.user = undefined;
                         element.status = 'Libre';
@@ -228,7 +249,7 @@ function LookOut(props) {
                 //Actualizar estado de las tarjetas de modulos
                 for (let index = 0; index < auxSlaveModules.length; index++) {
                     const element = {...auxSlaveModules[index]};
-                    if (element.name === stateModule.data.ubication) {
+                    if (element.name === stateModule.data.trace.ubication) {
                         element.status = 'Activo';
                     }
                     auxSlaveModules[index] = element;
@@ -250,7 +271,7 @@ function LookOut(props) {
                 //Actualizar estado de las tarjetas de modulos
                 for (let index = 0; index < auxSlaveModules.length; index++) {
                     const element = {...auxSlaveModules[index]};
-                    if (element.name === stateModule.data.ubication) {
+                    if (element.name === stateModule.data.trace.ubication) {
                         element.status = 'Inactivo';
                     }
                     auxSlaveModules[index] = element;
@@ -389,22 +410,14 @@ function LookOut(props) {
     
             const rows = [];
             res.data.body.forEach(async row => {
-                let mode = undefined;
                 let associate = undefined;
                 if (row.type === 'modulo') {
-                    mode = row.mode;
                     associate = row._id
                 }
 
                 rows.push({
+                    ...row,
                     id: row._id,
-                    name: row.name,
-                    type: row.type,
-                    status: row.status,
-                    sucursal: row.sucursal,
-                    username: row.username,
-                    // pattern: row.pattern,
-                    mode: mode,
                     associate: associate
                 });
             });
@@ -449,13 +462,9 @@ function LookOut(props) {
             const rows = [];
             res.data.body.forEach(row => {
                 rows.push({
-                    _id: row._id,
+                    ...row,
                     id: row._id,
-                    turn: row.turn,
-                    area: row.area,
                     creationDate: moment(row.creationDate).format("YYYY-MM-DD HH:mm:ss"),
-                    state: row.state,
-                    sucursal: row.sucursal
                 });
             });
 
@@ -489,12 +498,8 @@ function LookOut(props) {
                     finalDate = moment(row.finalDate).format("YYYY-MM-DD HH:mm:ss"); 
                 }
                 rows.push({
-                    _id: row._id,
+                    ...row,
                     id: row._id,
-                    turn: row.turn,
-                    sucursal: row.sucursal,
-                    state: row.state,
-                    username: row.username,
                     startDate: moment(row.startDate).format("YYYY-MM-DD HH:mm:ss"),
                     finalDate: finalDate
                 });
@@ -514,31 +519,39 @@ function LookOut(props) {
         }
     }
 
-    const getMyModule = async () => {
+    const getMyModule = async (dataUser, auxSocket) => {
         try {
-            const dataUser = getDataUser();
             if (dataUser) {
-                if (module === undefined || module === null) {
-                    const urlApi = `http://${window.location.hostname}:4000/api/modules?username=${dataUser.username}|eq`;
-                    const res = await axios.get(urlApi, { 
-                        headers: {
-                            'auth': localStorage.getItem('token')
-                        }
-                    });
-    
-                    if (res.data.body.length) {
-                        const auxModule = res.data.body[0];
-                        setModule(auxModule);
-                        setCurrentSucursal(auxModule.sucursal);
-                        return auxModule;
-                    } 
+                const urlApi = `http://${window.location.hostname}:4000/api/modules?username=${dataUser.username}|eq`;
+                const res = await axios.get(urlApi, { 
+                    headers: {
+                        'auth': localStorage.getItem('token')
+                    }
+                });
+
+                let auxModule = null;
+                if (res.data.body.length) {
+                    auxModule = res.data.body[0];
+                    getSlaves(auxModule._id);
+                    getConfigSucursal(auxModule.sucursal);
+                    getTurns(auxModule.sucursal);
+                    getTrace(auxModule.sucursal);
+
+                    if (auxSocket) {
+                        auxSocket.emit('join-sucursal', auxModule.sucursal);
+                        auxSocket.emit('join-type', {sucursal:auxModule.sucursal, module:auxModule, user:dataUser});
+                    }
                 }
                 else {
-                    return module;
+                    return false;
                 }
+
+                setModule(auxModule);
+                setCurrentSucursal(auxModule.sucursal);
+                return true;
             }  
             
-            return null;
+            return false;
         } catch (error) {
             if (error.response && error.response.data) {
                 console.log(error.response.data);
@@ -692,12 +705,7 @@ function LookOut(props) {
                 // setAnchorElMenu(null);
     
                 if (socket) {
-                    socket.emit('join-type', {
-                        sucursal:currentSucursal, 
-                        type:data.type, 
-                        name:data.name, 
-                        username: username
-                    });
+                    socket.emit('join-type', {sucursal:currentSucursal, module:data, user: user });
                 }
 
                 return data;
@@ -740,6 +748,7 @@ function LookOut(props) {
             setCurrentSucursal(null);
             setModules([]);
             setModuleSelect('');
+            getSucursals();
             socket.emit('leave-sucursal', currentSucursal);
             if (module) {
                 socket.emit('leave-type', { sucursal: currentSucursal, type: module.type }); 

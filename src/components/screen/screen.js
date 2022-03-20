@@ -66,7 +66,7 @@ function Screen(props) {
                     });
     
                     auxSocket.on('turnReCall', resTurn => {
-                        emphasis(resTurn);
+                        emphasis(resTurn.trace);
                     });
     
                     auxSocket.on('refresh', () => {
@@ -102,38 +102,26 @@ function Screen(props) {
                     auxShifts.push(stateDataTurns.data.turn);
                     setShifts(auxShifts);
 
-                    let data = {};
-                    if (typeof stateDataTurns.data.turn === 'object') {
-                        data = {...stateDataTurns.data};
-                    }
-                    else {
-                        data = {
-                            turn: {...stateDataTurns.data},
-                            ubication: stateDataTurns.data.ubication
-                        }
-                    }
-
-
                     if (recall.state) {
                         setTimeout(() => { 
-                            emphasis(data);
+                            emphasis(stateDataTurns.data.trace);
                         }, timer*(auxShifts.length - 1));
                     }
                     else {
-                        emphasis(data);
+                        emphasis(stateDataTurns.data.trace);
                     }
 
                     const auxLastTurns = [...lastTurns];
 
-                    if (!auxLastTurns.find(t => t.turn === data.turn.turn)) {
-                        auxLastTurns.push({...data.turn});
+                    if (!auxLastTurns.find(t => t.turn === stateDataTurns.data.trace.turn)) {
+                        auxLastTurns.push({...stateDataTurns.data.trace});
 
                          //Mayor a menor
                         auxLastTurns.sort(( a, b ) => {
-                            if ( moment(a.creationDate) > moment(b.creationDate) ){
+                            if ( moment(a.startDate) > moment(b.startDate) ){
                                 return -1;
                             }
-                            if ( moment(a.creationDate) < moment(b.creationDate) ){
+                            if ( moment(a.startDate) < moment(b.startDate) ){
                                 return 1;
                             }
                             return 0;
@@ -143,7 +131,7 @@ function Screen(props) {
                             auxLastTurns.pop();
                         }
 
-                        setCurrentTurn(data.turn);
+                        setCurrentTurn(stateDataTurns.data.trace);
 
                         setLastTurns(auxLastTurns);
                     }
@@ -152,10 +140,10 @@ function Screen(props) {
             else if (stateDataTurns.action === 'finishTurn') {
                 const auxTurns = lastTurns.filter(t => t.turn !== stateDataTurns.data.turn.turn);
                 auxTurns.sort(( a, b ) => {
-                    if ( moment(a.creationDate) > moment(b.creationDate) ){
+                    if ( moment(a.startDate) > moment(b.startDate) ){
                         return -1;
                     }
-                    if ( moment(a.creationDate) < moment(b.creationDate) ){
+                    if ( moment(a.startDate) < moment(b.startDate) ){
                         return 1;
                     }
                     return 0;
@@ -225,7 +213,7 @@ function Screen(props) {
             setRecall({
                 state: true,
                 data: {
-                    turn: resTurn.turn.turn,
+                    turn: resTurn.turn,
                     ubication: resTurn.ubication
                 }
             });
@@ -254,10 +242,10 @@ function Screen(props) {
             const res = await axios.get(`http://${window.location.hostname}:4000/api/action/pendding/${sucursal}`);
             const auxTurns = [...res.data.body];
             auxTurns.sort(( a, b ) => {
-                if ( moment(a.creationDate) > moment(b.creationDate) ){
+                if ( moment(a.startDate) > moment(b.startDate) ){
                   return -1;
                 }
-                if ( moment(a.creationDate) < moment(b.creationDate) ){
+                if ( moment(a.startDate) < moment(b.startDate) ){
                   return 1;
                 }
                 return 0;
