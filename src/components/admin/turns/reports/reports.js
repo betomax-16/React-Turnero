@@ -11,6 +11,7 @@ import TextField from '@mui/material/TextField';
 import DateAdapter from '@mui/lab/AdapterMoment'
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import DatePicker from '@mui/lab/DatePicker';
+import CircularProgress from '@mui/material/CircularProgress';
 import AppContext from "../../../../context/app/app-context";
 import moment from "moment";
 import axios from "axios";
@@ -81,6 +82,8 @@ function Reports(props) {
         generalIntervalTime: [],
         detail: []
     });
+
+    const [showLoading, setShowLoading] = useState(false);
     const [columns, setColumns] = useState(columnsGeneral);
     const [selectOptionReport, setSelectOptionReport] = useState('General');
 
@@ -105,6 +108,7 @@ function Reports(props) {
     const getData = async (data) => {
         try {
             if (moment(data.starDate).isValid() && moment(data.finalDate).isValid()) {
+                setShowLoading(true);
                 const startDate = moment(data.startDate);
                 const finalDate = moment(data.finalDate);
                 const req = {
@@ -117,15 +121,15 @@ function Reports(props) {
                 let url = '';
                 let op = '';
                 if (selectOptionReport === 'General') {
-                    url = `http://${window.location.hostname}:4000/api/reports/general?startDate=${req.startDate}&finalDate=${req.finalDate}`;
+                    url = `http://${window.location.hostname}:4001/api/reports/general?startDate=${req.startDate}&finalDate=${req.finalDate}`;
                     op = 'general';
                 }
                 else if (selectOptionReport === 'GeneralByHour') {
-                    url = `http://${window.location.hostname}:4000/api/reports/generalByHour?startDate=${req.startDate}&finalDate=${req.finalDate}`;
+                    url = `http://${window.location.hostname}:4001/api/reports/generalByHour?startDate=${req.startDate}&finalDate=${req.finalDate}`;
                     op = 'generalIntervalTime';
                 }
                 else if (selectOptionReport === 'Detail') {
-                    url = `http://${window.location.hostname}:4000/api/reports/detail?startDate=${req.startDate}&finalDate=${req.finalDate}`;
+                    url = `http://${window.location.hostname}:4001/api/reports/detail?startDate=${req.startDate}&finalDate=${req.finalDate}`;
                     op = 'detail';
                 }
 
@@ -160,10 +164,12 @@ function Reports(props) {
 
                     setDataAux(copyDataAux);
                     setData(rows);
+                    setShowLoading(false);
                 }
             }
         } catch (error) {
             console.log(error);
+            setShowLoading(false);
             showAlert("red", 'algo salio mal');
         }
     }
@@ -240,17 +246,20 @@ function Reports(props) {
                 <Button type="submit" variant="contained" className="button">Consultar</Button>
             </form>
             <div className="table">
-                <DataGrid
-                    localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-                    rows={data}
-                    columns={columns}
-                    pageSize={30}
-                    rowsPerPageOptions={[30]}
-                    disableSelectionOnClick
-                    components={{
-                        Toolbar: CustomToolbar,
-                    }}
-                />
+                {!showLoading ? 
+                    <DataGrid
+                        localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+                        rows={data}
+                        columns={columns}
+                        pageSize={30}
+                        rowsPerPageOptions={[30]}
+                        disableSelectionOnClick
+                        components={{
+                            Toolbar: CustomToolbar,
+                        }}
+                    /> :
+                    <CircularProgress size={100}/>
+                }
             </div>
         </div>
     </>);

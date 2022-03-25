@@ -6,7 +6,7 @@ function MessageDown(props) {
   const { alert, hideAlert } = useContext(AppContext);
   useEffect(() => {
     if (alert.show) {
-      setTimeout(hideAlert, 4000);
+      setTimeout(hideAlert, 8000);
     }
   }, [alert.show]);// eslint-disable-line react-hooks/exhaustive-deps
 

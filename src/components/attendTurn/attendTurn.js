@@ -243,8 +243,17 @@ function AttendTurn(props) {
       const res = await axios.get(urlApi);
 
       if (res.data.body.length) {
-        setSucursals(res.data.body);
-        setSucursalSelect(res.data.body[0].name);
+        const auxSucursals = res.data.body.sort(( a, b ) => {
+          if ( a.name < b.name ){
+            return -1;
+          }
+          if ( a.name > b.name ){
+            return 1;
+          }
+          return 0;
+        });
+        setSucursals(auxSucursals);
+        setSucursalSelect(auxSucursals[0].name);
       }  
     } catch (error) {
         if (error.response && error.response.data) {

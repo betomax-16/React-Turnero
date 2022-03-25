@@ -12,6 +12,13 @@ import { MdSchema, MdLocalConvenienceStore } from "react-icons/md";
 import { HiDocumentReport } from "react-icons/hi";
 import { GiGears } from "react-icons/gi";
 import Tooltip from '@mui/material/Tooltip';
+import Select from '@mui/material/Select';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
 import logo from "../../../public/img/logo.png";
 
 function Menu(props) {
@@ -19,9 +26,13 @@ function Menu(props) {
     const [toggleTurn, setToggleTurn] = useState(false);
 
     const [openConfirm, setOpenConfirm] = useState(false);
+    const [openModalSuc, setOpenModalSuc] = useState(false);
+    const [sucursals, setSucursals] = useState([]);
+    const [selectSucursal, setSelectSucursal] = useState('');
     const handleAcceptConfirm = async () => {
         try {
-            const urlApi = `http://${window.location.hostname}:4000/api/action/reset`;
+            const query = selectSucursal !== '' ? `?suc=${selectSucursal}` : '';
+            const urlApi = `http://${window.location.hostname}:4000/api/action/reset${query}`;
             await axios.delete(urlApi, { 
                 headers: {
                     'auth': localStorage.getItem('token')
@@ -35,11 +46,50 @@ function Menu(props) {
             showAlert("red", 'algo salio mal');
         }
         setOpenConfirm(false);
+        setOpenModalSuc(false);
     };
 
     const handleCloseConfirm = () => {
         setOpenConfirm(false);
     };
+
+    const onChangeSucursal = (suc) => {
+        setSelectSucursal(suc);
+    }
+
+    const handlerCloseModalSucursal = () => {
+        setOpenModalSuc(false);
+    }
+
+    const handlerOpenModalSucursal = async () => {
+        try {
+            setOpenModalSuc(true);
+            const urlApi = `http://${window.location.hostname}:4000/api/sucursal`;
+            const res = await axios.get(urlApi, { 
+                headers: {
+                    'auth': localStorage.getItem('token')
+                }
+            });
+
+            if (res.data.body.length) {
+                const auxSucursals = res.data.body.sort(( a, b ) => {
+                    if ( a.name < b.name ){
+                      return -1;
+                    }
+                    if ( a.name > b.name ){
+                      return 1;
+                    }
+                    return 0;
+                });
+
+                setSucursals(auxSucursals);
+                setSelectSucursal(auxSucursals[0].name);
+            }
+        } catch (error) {
+            console.log(error);
+            showAlert("red", 'algo salio mal');
+        }
+    }
 
     useEffect(() => {
         const aux_user = getDataUser();
@@ -134,7 +184,7 @@ function Menu(props) {
                                 <span  className="title">Reportes</span>
                             </div>
                         </Link>}
-                        <div className="sub-option" onClick={() => {setOpenConfirm(true)}}>
+                        <div className="sub-option" onClick={handlerOpenModalSucursal}>
                             <Tooltip title="Re-iniciar turnos">
                                 <div className="icon">
                                     <BiReset size={30}/>
@@ -164,10 +214,31 @@ function Menu(props) {
                 </div>
             </div>
         </nav>
+
+        <Dialog open={openModalSuc} onClose={handlerCloseModalSucursal}>
+            <DialogTitle>Sucursal donde se reiniciarán los turnos</DialogTitle>
+            <DialogContent>
+                <Select fullWidth
+                        value={selectSucursal}
+                        onChange={(e) => {
+                            onChangeSucursal(e.target.value);
+                        }}
+                        label="Sucursal" >
+                    {sucursals.map((sucursal, index) =>
+                        <MenuItem className="item-combobox" key={index} value={sucursal.name}>{sucursal.name}</MenuItem>
+                    )}
+                </Select>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handlerCloseModalSucursal}>Cancelar</Button>
+                <Button onClick={() => {setOpenConfirm(true)}}>Aceptar</Button>
+            </DialogActions>
+        </Dialog>
+
         <Confirm 
             open={openConfirm}
             title={'Re-iniciar turnos'} 
-            message={'¿Desea realmente realizar el re-inicio de los turnos?'} 
+            message={`¿Desea realmente realizar el re-inicio de los turnos de ${selectSucursal}?`} 
             handleClose={handleCloseConfirm}
             handleAccept={handleAcceptConfirm}
                 />
