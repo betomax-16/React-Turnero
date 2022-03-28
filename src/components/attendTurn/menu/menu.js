@@ -107,7 +107,7 @@ function AttendMenu(props) {
                 <img src={logo} alt="logo"></img>
             </div>
             <div className={props.isModuleFree ? "attendMenu-module center" : "attendMenu-module"}>
-                {module && <span className="attendMenu-title">{currentSucursal||props.sucursal} - {module.name||props.module}</span>}
+                {module && <span className="attendMenu-title" style={{color: invertColor(props.configSuc.color)}}>{currentSucursal||props.sucursal} - {module.name||props.module}</span>}
             </div>
             {!props.isModuleFree && 
                 <div className="attendMenu-options">
