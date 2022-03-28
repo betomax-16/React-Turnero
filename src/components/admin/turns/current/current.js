@@ -87,13 +87,12 @@ function Current(props) {
 
             setTurns(rows);
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
@@ -126,13 +125,12 @@ function Current(props) {
 
             setTrace(rows);
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }

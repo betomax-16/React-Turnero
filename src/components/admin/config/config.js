@@ -35,13 +35,12 @@ function Config(props) {
             });
             showAlert("green", 'Datos actualizados exitosamente.');
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
                 showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
@@ -60,13 +59,12 @@ function Config(props) {
                 })
             }
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
                 showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }

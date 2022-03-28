@@ -43,7 +43,12 @@ function Menu(props) {
             showAlert("green", 'Re-inicio exitoso.');
         } catch (error) {
             console.log(error);
-            showAlert("red", 'algo salio mal');
+            if (error.response && error.response.data) {
+                showAlert("red", error.response.data.body.message);
+            }
+            else {
+                showAlert("red", 'Ocurrió algún error interno.');
+            }
         }
         setOpenConfirm(false);
         setOpenModalSuc(false);
@@ -87,7 +92,12 @@ function Menu(props) {
             }
         } catch (error) {
             console.log(error);
-            showAlert("red", 'algo salio mal');
+            if (error.response && error.response.data) {
+                showAlert("red", error.response.data.body.message);
+            }
+            else {
+                showAlert("red", 'Ocurrió algún error interno.');
+            }
         }
     }
 

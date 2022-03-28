@@ -18,13 +18,12 @@ function TakeTurn(props) {
     try {
       callGetSucursal(); 
     } catch (error) {
+      console.log(error);
       if (error.response && error.response.data) {
-        console.log(error.response.data);
-        showAlert("red", error.response.data.body.message); 
+          showAlert("red", error.response.data.body.message);
       }
       else {
-          console.log(error);
-          showAlert("red", error.message);
+          showAlert("red", 'Ocurrió algún error interno.');
       }
     }
   }, []);// eslint-disable-line react-hooks/exhaustive-deps
@@ -46,13 +45,12 @@ function TakeTurn(props) {
         // setSucursalExist(true);
       }
     } catch (error) {
+      console.log(error);
       if (error.response && error.response.data) {
-        console.log(error.response.data);
-        showAlert("red", error.response.data.body.message); 
+          showAlert("red", error.response.data.body.message);
       }
       else {
-        console.log(error);
-        showAlert("red", error.message);
+          showAlert("red", 'Ocurrió algún error interno.');
       }
     }
     
@@ -79,14 +77,13 @@ function TakeTurn(props) {
       sendPrint(res.data.body);
       showAlert("green", "Turno creado."); 
     } catch (error) {
-        if (error.response && error.response.data) {
-            console.log(error.response.data);
-            showAlert("red", error.response.data.body.message); 
-        }
-        else {
-            console.log(error);
-            showAlert("red", error.message);
-        }
+      console.log(error);
+      if (error.response && error.response.data) {
+          showAlert("red", error.response.data.body.message);
+      }
+      else {
+          showAlert("red", 'Ocurrió algún error interno.');
+      }
     }
   }
 
@@ -101,13 +98,12 @@ function TakeTurn(props) {
         socketPrint.send(data);
       }
     } catch (error) {
+      console.log(error);
       if (error.response && error.response.data) {
-        console.log(error.response.data);
-        showAlert("red", error.response.data.body.message); 
+          showAlert("red", error.response.data.body.message);
       }
       else {
-          console.log(error);
-          showAlert("red", error.message);
+          showAlert("red", 'Ocurrió algún error interno.');
       }
     }
   };

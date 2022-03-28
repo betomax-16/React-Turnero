@@ -96,13 +96,12 @@ function Sucursales(props) {
                         
                         setOpenConfig(true);
                     } catch (error) {
+                        console.log(error);
                         if (error.response && error.response.data) {
-                            console.log(error.response.data);
-                            showAlert("red", error.response.data.body.message); 
+                            showAlert("red", error.response.data.body.message);
                         }
                         else {
-                            console.log(error);
-                            showAlert("red", 'Ocurrio algun error interno.');
+                            showAlert("red", 'Ocurrió algún error interno.');
                         }
                     }
                }}>
@@ -172,13 +171,12 @@ function Sucursales(props) {
 
             setSucursals(auxSucursals);
         } catch (error) {
-            if (error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+            console.log(error);
+            if (error.response && error.response.data) {
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
@@ -204,13 +202,12 @@ function Sucursales(props) {
             setAreas(auxData);
             setAreasSucursal(auxSelectAreas);
         } catch (error) {
-            if (error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+            console.log(error);
+            if (error.response && error.response.data) {
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
@@ -240,13 +237,12 @@ function Sucursales(props) {
             setAreasSucursal(areasReturn);
             setCopyAreasSucursal(areasReturn);
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
@@ -311,13 +307,12 @@ function Sucursales(props) {
             setOpen(false);
             showAlert("green", "Cambios exitosos.");
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
@@ -355,13 +350,12 @@ function Sucursales(props) {
             setOpenConfig(false);
             showAlert("green", "Cambios exitosos.");
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }

@@ -27,27 +27,27 @@
 }
 
 .red {
-    border-color: red;
-    color: red;
-    background-color: salmon;
+    border-color: #f8baba;
+    color: #5f2120;
+    background-color: #f8baba;
 }
 
 .green {
-    border-color: rgb(42, 194, 63);
-    color: rgb(42, 194, 63);
-    background-color: rgb(169, 248, 181);
+    border-color: #cbf1cb;
+    color: #1e4620;
+    background-color: #cbf1cb
 }
 
 .blue {
-    border-color: rgb(22, 143, 223);
-    color: rgb(22, 143, 223);
-    background-color: rgb(148, 198, 231);
+    border-color: #c1e9fa;
+    color: #014361;
+    background-color: #c1e9fa
 }
 
 .yellow {
-    border-color: rgb(188, 190, 25);
-    color: rgb(188, 190, 25);
-    background-color: rgb(240, 241, 158);
+    border-color: #fff7af;
+    color: #663c00;
+    background-color: #fff7af;
 }
 
 .message {

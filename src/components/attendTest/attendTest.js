@@ -146,13 +146,12 @@ function AttendTest(props) {
                     setDateState(moment());
                 }, 1000);
             } catch (error) {
+                console.log(error);
                 if (error.response && error.response.data) {
-                    console.log(error.response.data);
-                    showAlert("red", error.response.data.body.message); 
+                    showAlert("red", error.response.data.body.message);
                 }
                 else {
-                    console.log(error);
-                    showAlert("red", error.message);
+                    showAlert("red", 'Ocurrió algún error interno.');
                 }
             }
         }
@@ -237,14 +236,13 @@ function AttendTest(props) {
           setSucursalExist(exist);
           return exist;
         } catch (error) {
-          if (error.response && error.response.data) {
-            console.log(error.response.data);
-            showAlert("red", error.response.data.body.message); 
-          }
-          else {
             console.log(error);
-            showAlert("red", error.message);
-          }
+            if (error.response && error.response.data) {
+                showAlert("red", error.response.data.body.message);
+            }
+            else {
+                showAlert("red", 'Ocurrió algún error interno.');
+            }
         }
         
     };
@@ -260,13 +258,12 @@ function AttendTest(props) {
     
             setConfigSucursal(res.data.body);
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
@@ -317,13 +314,12 @@ function AttendTest(props) {
             setOpenDialog(false);
             setSelectedTurn(null);
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", error.message);
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
@@ -351,13 +347,12 @@ function AttendTest(props) {
                 socket.emit('turnReCall', { sucursal: sucursal, data: turn });
             }
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", error.message);
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         } 
     }
@@ -389,13 +384,12 @@ function AttendTest(props) {
             auxModule.status = false;
             setModule(auxModule);
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", error.message);
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         } 
     }
@@ -428,13 +422,12 @@ function AttendTest(props) {
             auxModule.status = false;
             setModule(auxModule);
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", error.message);
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         } 
     }
@@ -473,13 +466,12 @@ function AttendTest(props) {
             auxModule.status = false;
             setModule(auxModule);
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", error.message);
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         } 
     }
@@ -546,13 +538,12 @@ function AttendTest(props) {
 
             setTrace(rows);
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", error.message);
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
@@ -655,11 +646,11 @@ function AttendTest(props) {
             return exist;
         } catch (error) {
             console.log(error);
-            if (error.response && error.response.status === 404) {
-                showAlert("red", error.response.message);
+            if (error.response && error.response.data) {
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                showAlert("red", error.message);
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
@@ -782,13 +773,12 @@ function AttendTest(props) {
 
             setTrace(rows);
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", error.message);
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
@@ -832,13 +822,12 @@ function AttendTest(props) {
 
             setTrace(rows);
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", error.message);
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }

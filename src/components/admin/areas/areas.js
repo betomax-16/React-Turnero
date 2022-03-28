@@ -44,7 +44,12 @@ function Areas(props) {
             }
         } catch (error) {
             console.log(error);
-            showAlert("red", 'algo salio mal');
+            if (error.response && error.response.data) {
+                showAlert("red", error.response.data.body.message);
+            }
+            else {
+                showAlert("red", 'Ocurrió algún error interno.');
+            }
         }
         setOpenConfirm(false);
     };
@@ -139,7 +144,12 @@ function Areas(props) {
             }
         } catch (error) {
             console.log(error);
-            showAlert("red", 'algo salio mal');
+            if (error.response && error.response.data) {
+                showAlert("red", error.response.data.body.message);
+            }
+            else {
+                showAlert("red", 'Ocurrió algún error interno.');
+            }
         }
     }
 
@@ -162,13 +172,12 @@ function Areas(props) {
 
             setAreas(rows);
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }

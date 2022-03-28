@@ -170,7 +170,12 @@ function Reports(props) {
         } catch (error) {
             console.log(error);
             setShowLoading(false);
-            showAlert("red", 'algo salio mal');
+            if (error.response && error.response.data) {
+                showAlert("red", error.response.data.body.message);
+            }
+            else {
+                showAlert("red", 'Ocurrió algún error interno.');
+            }
         }
     }
 

@@ -78,13 +78,12 @@ function Screen(props) {
                     }
                 }
             } catch (error) {
+                console.log(error);
                 if (error.response && error.response.data) {
-                    console.log(error.response.data);
-                    showAlert("red", error.response.data.body.message); 
+                    showAlert("red", error.response.data.body.message);
                 }
                 else {
-                    console.log(error);
-                    showAlert("red", error.message);
+                    showAlert("red", 'Ocurrió algún error interno.');
                 }
             }
         }
@@ -172,14 +171,13 @@ function Screen(props) {
           setSucursalExist(exist);
           return exist;
         } catch (error) {
-          if (error.response && error.response.data) {
-            console.log(error.response.data);
-            showAlert("red", error.response.data.body.message); 
-          }
-          else {
             console.log(error);
-            showAlert("red", error.message);
-          }
+            if (error.response && error.response.data) {
+                showAlert("red", error.response.data.body.message);
+            }
+            else {
+                showAlert("red", 'Ocurrió algún error interno.');
+            }
         }
         
     };
@@ -196,13 +194,12 @@ function Screen(props) {
                 setTimer(res.data.body[0].timer);
             }
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
                 showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
@@ -256,13 +253,12 @@ function Screen(props) {
             }
             return res.data.body;
         } catch (error) {
+            console.log(error);
             if (error.response && error.response.data) {
-                console.log(error.response.data);
-                showAlert("red", error.response.data.body.message); 
+                showAlert("red", error.response.data.body.message);
             }
             else {
-                console.log(error);
-                showAlert("red", 'Ocurrio algun error interno.');
+                showAlert("red", 'Ocurrió algún error interno.');
             }
         }
     }
