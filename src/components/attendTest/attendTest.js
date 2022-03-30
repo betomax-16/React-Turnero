@@ -20,6 +20,7 @@ import TurnCard from "./cardTurn/turnCard";
 import logo from '../../public/img/logo.png';
 import { blue, green, red, orange, purple } from '@mui/material/colors';
 import { AiOutlineClose } from "react-icons/ai";
+import Log from "../utils/logError/log";
 import "./styles.css";
 
 const ButtonGreen = styled(Button)(({ theme }) => ({
@@ -269,16 +270,15 @@ function AttendTest(props) {
     }
 
     const handlerAttendTurn = async (idExakta) => {
+        let data = {};
         try {
             const shift = selectedTurn.turn.turn;
-            const data = {
+            data = {
                 turn: shift,
                 sucursal: sucursal,
                 ubication: modulo,
                 username: idExakta
             };
-
-            console.log(data);
     
             const res = await axios.post(`http://${window.location.hostname}:4000/api/action/assistance`, data);
 
@@ -302,9 +302,9 @@ function AttendTest(props) {
             setTrace(auxTraces);
 
             if (socket) {
-                const data = {...res.data.body};
-                socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: data });
-                socket.emit('turnAttend', { sucursal: sucursal, data: data });
+                const dataSocket = {...res.data.body};
+                socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: dataSocket });
+                socket.emit('turnAttend', { sucursal: sucursal, data: dataSocket });
             }
     
             // const auxModule = {...module};
@@ -317,6 +317,17 @@ function AttendTest(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    sucursal: sucursal,
+                    ubication: modulo,
+                    username: idExakta,
+                    source: 'toma',
+                    action: 'attendTest.js (Atención de turno)',
+                    apiUrl: `http://${window.location.hostname}:4000/api/action/assistance`,
+                    bodyRequest: data,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -325,9 +336,10 @@ function AttendTest(props) {
     }
     
     const handlerReCallTurn = async (idExakta) => {
+        let data = {};
         try {
             const shift = selectedTurn.turn.turn;
-            const data = {
+            data = {
                 turn: shift,
                 sucursal: sucursal,
                 ubication: modulo,
@@ -335,7 +347,6 @@ function AttendTest(props) {
                 source: 'toma'
             };
         
-            console.log(data);
             const res = await axios.post(`http://${window.location.hostname}:4000/api/action/recall`, data, { 
                 headers: { 'me': '' }
             });
@@ -350,6 +361,17 @@ function AttendTest(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    sucursal: sucursal,
+                    ubication: modulo,
+                    username: idExakta,
+                    source: 'toma',
+                    action: 'attendTest.js (Rellamar turno)',
+                    apiUrl: `http://${window.location.hostname}:4000/api/action/recall`,
+                    bodyRequest: data,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -358,9 +380,10 @@ function AttendTest(props) {
     }
     
     const handlerCancelationTurn = async (idExakta) => {
+        let data = {};
         try {
             const shift = selectedTurn.turn.turn;
-            const data = {
+            data = {
                 turn: shift,
                 sucursal: sucursal,
                 ubication: modulo,
@@ -387,6 +410,17 @@ function AttendTest(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    sucursal: sucursal,
+                    ubication: modulo,
+                    username: idExakta,
+                    source: 'toma',
+                    action: 'attendTest.js (Cancelación de turno)',
+                    apiUrl: `http://${window.location.hostname}:4000/api/action/cancelation`,
+                    bodyRequest: data,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -395,9 +429,10 @@ function AttendTest(props) {
     }
     
     const handlerAttendedTurn = async (idExakta) => {
+        let data = {};
         try {
             const shift = selectedTurn.turn.turn;
-            const data = {
+            data = {
                 turn: shift,
                 sucursal: sucursal,
                 ubication: modulo,
@@ -425,6 +460,17 @@ function AttendTest(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    sucursal: sucursal,
+                    ubication: modulo,
+                    username: idExakta,
+                    source: 'toma',
+                    action: 'attendTest.js (Fin de turno)',
+                    apiUrl: `http://${window.location.hostname}:4000/api/action/finished`,
+                    bodyRequest: data,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -433,9 +479,10 @@ function AttendTest(props) {
     }
 
     const handlerFreeTurn = async () => {
+        let data = {};
         try {
             const shift = selectedTurn.turn.turn;
-            const data = {
+            data = {
                 turn: shift,
                 sucursal: sucursal
             };
@@ -457,9 +504,9 @@ function AttendTest(props) {
             setTrace(auxTraces);
 
             if (socket) {
-                const data = {...res.data.body, type: 'freeTurn'};
-                socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: data });
-                socket.emit('turnFinish', { sucursal: sucursal, data: data });
+                const dataSocket = {...res.data.body, type: 'freeTurn'};
+                socket.emit('attendTurnTest', { sucursal: sucursal, type:'toma', data: dataSocket });
+                socket.emit('turnFinish', { sucursal: sucursal, data: dataSocket });
             }
 
             const auxModule = {...module};
@@ -469,6 +516,17 @@ function AttendTest(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    sucursal: sucursal,
+                    ubication: modulo,
+                    username: idExakta.value,
+                    source: 'toma',
+                    action: 'attendTest.js (Liberación de turno)',
+                    apiUrl: `http://${window.location.hostname}:4000/api/action/free`,
+                    bodyRequest: data,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');

@@ -26,6 +26,7 @@ import { AiFillDelete } from "react-icons/ai";
 import { BsPlusLg } from "react-icons/bs";
 import { FaFilter, FaUserCheck, FaUserTimes } from "react-icons/fa";
 import { getOperatorMongo } from "../../../utils/operatorsMongoQuery";
+import Log from "../../utils/logError/log";
 import './styles.css';
 
 // const protocol = window.location.protocol;
@@ -40,16 +41,31 @@ function Modules(props) {
     });
 
     const handleAcceptConfirm = async () => {
+        let url = '';
+        const me = getDataUser();
+        let bodyRequest = {};
         try {
             if (openConfirm.title === 'Eliminar modulos') {
                 if (modulesSelected.length > 0) {
                     for (let index = 0; index < modulesSelected.length; index++) {
                         const item = modulesSelected[index];
-                        await axios.delete(`http://${window.location.hostname}:4000/api/modules/${item.name}/${item.sucursal}`, { 
+                        url = `http://${window.location.hostname}:4000/api/modules/${item.name}/${item.sucursal}`;
+                        const res = await axios.delete(url, { 
                             headers: {
                                 'auth': localStorage.getItem('token')
                             }
                         });
+
+                        const dataSave = {
+                            username: me ? me.username : null,
+                            source: 'admin',
+                            action: 'modules.js (handleAcceptConfirm {delete}[Eliminar modulos])',
+                            apiUrl: url,
+                            bodyBeforeRequest: item,
+                            bodyRequest: {},
+                            bodyResponse: res.data
+                        };
+                        Log.SendLogAction(dataSave);
                     };
     
                     showAlert("green", 'Eliminación exitosa.'); 
@@ -66,11 +82,24 @@ function Modules(props) {
                 setOpenSupervisor(false)
             }
             else if (openConfirm.title === 'Liberación de módulo') {
-                await axios.put(`http://${window.location.hostname}:4000/api/modules/${openConfirm.module}/${openConfirm.sucursal}`, {status: false}, { 
+                url = `http://${window.location.hostname}:4000/api/modules/${openConfirm.module}/${openConfirm.sucursal}`;
+                bodyRequest = {status: false};
+                const res = await axios.put(url, bodyRequest, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
                 });
+
+                const dataSave = {
+                    username: me ? me.username : null,
+                    source: 'admin',
+                    action: 'modules.js (handleAcceptConfirm {put}[Liberación de módulo])',
+                    apiUrl: url,
+                    bodyBeforeRequest: openConfirm.objectModule,
+                    bodyRequest: bodyRequest,
+                    bodyResponse: res.data
+                };
+                Log.SendLogAction(dataSave);
 
                 showAlert("green", `${openConfirm.module} liberado exitosamente.`); 
             }
@@ -78,6 +107,15 @@ function Modules(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    username: me ? me.username : null,
+                    source: 'admin',
+                    action: 'modules.js (handleAcceptConfirm)',
+                    apiUrl: url,
+                    bodyRequest: bodyRequest,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -162,13 +200,14 @@ function Modules(props) {
     
 
 
-    const { showAlert } = useContext(AppContext);
+    const { showAlert, getDataUser } = useContext(AppContext);
     const [open, setOpen] = useState(false);
     const [openAssociate, setOpenAssociate] = useState(false);
     const [openSupervisor, setOpenSupervisor] = useState(false);
     const [isNew, setisNew] = useState(true);
     const [areas, setAreas] = useState([]);
     const [titleAssociate, setTitleAssociate] = useState('');
+    const [preSaveData, setPreSaveData] = useState({});
     
     const onSubmit = data => callSaveData(data);
 
@@ -182,6 +221,7 @@ function Modules(props) {
                 })
             }
 
+            setPreSaveData(item);
             setTypeSelected(item.type);
             if (item.type === 'modulo') {
                 await getVigias(item.sucursal, 'vigia');  
@@ -200,6 +240,7 @@ function Modules(props) {
                     })
                 }
             }
+            setPreSaveData({});
         }
         setOpen(true);
     };
@@ -236,40 +277,95 @@ function Modules(props) {
         setAreas(auxData);
     }
 
-    const handleSaveAssociate = () => {
+    const handleSaveAssociate = async () => {
+        let url = '';
+        const me = getDataUser();
+        let bodyRequest = {};
         try {
             const req = {
                 isPrivilegeByArrivalTime: moduleSelected.isPrivilegeByArrivalTime
             };
-            axios.put(`http://${window.location.hostname}:4000/api/modules/${moduleSelected.name}/${moduleSelected.sucursal}`, req, { 
+            bodyRequest = {...req};
+            url = `http://${window.location.hostname}:4000/api/modules/${moduleSelected.name}/${moduleSelected.sucursal}`;
+            const auxUrl1 = url.slice(0, url.length);
+            const res = await axios.put(auxUrl1, req, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
             });
 
-            areas.forEach(element => {
+            const dataSave = {
+                username: me ? me.username : null,
+                source: 'admin',
+                action: 'modules.js (handleSaveAssociate {put})',
+                apiUrl: auxUrl1,
+                bodyBeforeRequest: moduleSelected,
+                bodyRequest: bodyRequest,
+                bodyResponse: res.data
+            };
+            Log.SendLogAction(dataSave);
+
+            for (let index = 0; index < areas.length; index++) {
+                const element = {...areas[index]};
+                bodyRequest = {...element};
                 if (!element.idAssociate) {
-                    axios.post(`http://${window.location.hostname}:4000/api/privilege`, element, { 
+                    url = `http://${window.location.hostname}:4000/api/privilege`;
+                    const auxUrl2 = url.slice(0, url.length);
+                    const res = await axios.post(auxUrl2, element, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
                     });
+
+                    const dataSave = {
+                        username: me ? me.username : null,
+                        source: 'admin',
+                        action: 'modules.js (handleSaveAssociate {post})',
+                        apiUrl: auxUrl2,
+                        bodyBeforeRequest: preSaveData,
+                        bodyRequest: bodyRequest,
+                        bodyResponse: res.data
+                    };
+                    Log.SendLogAction(dataSave);
                 }
                 else {
-                    axios.put(`http://${window.location.hostname}:4000/api/privilege/${element.idAssociate}`, element, { 
+                    url = `http://${window.location.hostname}:4000/api/privilege/${element.idAssociate}`;
+                    const auxUrl3 = url.slice(0, url.length);
+                    const res = await axios.put(auxUrl3, element, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
                     });
-                } 
-            });
 
+                    const dataSave = {
+                        username: me ? me.username : null,
+                        source: 'admin',
+                        action: 'modules.js (handleSaveAssociate {put})',
+                        apiUrl: auxUrl3,
+                        bodyBeforeRequest: preSaveData,
+                        bodyRequest: bodyRequest,
+                        bodyResponse: res.data
+                    };
+                    Log.SendLogAction(dataSave);
+                } 
+            }
+
+            setPreSaveData({});
             handleCloseAssociate();
             showAlert("green", 'Registro existoso.');
         } catch (error) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    username: me ? me.username : null,
+                    source: 'admin',
+                    action: 'modules.js (handleSaveAssociate[Asociar privilegios])',
+                    apiUrl: url,
+                    bodyRequest: bodyRequest,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -287,7 +383,7 @@ function Modules(props) {
                     }}>Asignar Privilegios</div> 
                     <div className="button-associate-privilege" onClick={() => {
                         const auxModule = modules.find(m => m.id === val.val);
-                        freeModule(auxModule.name, auxModule.sucursal);
+                        freeModule(auxModule);
                     }}>Liberar</div>
                     <div className="button-associate-privilege" onClick={() => {
                         if (props.socket) {
@@ -379,14 +475,15 @@ function Modules(props) {
         }
     };
 
-    const freeModule = async (moduleName, sucursal) => {
+    const freeModule = async (module) => {
         try {
             setOpenConfirm({
                 state: true,
                 title: `Liberación de módulo`,
-                ask: `¿Esta seguro de liberar el Módulo: ${moduleName}?`,
-                module: moduleName,
-                sucursal: sucursal
+                ask: `¿Esta seguro de liberar el Módulo: ${module.name}?`,
+                module: module.name,
+                objectModule: module,
+                sucursal: module.sucursal
             });
         } catch (error) {
             console.log(error);
@@ -400,6 +497,9 @@ function Modules(props) {
     }
 
     const callSaveData = async (data) => {
+        let url = '';
+        const me = getDataUser();
+        let bodyRequest = {};
         try {
             const auxData = {...data};
             delete auxData.username;
@@ -409,14 +509,26 @@ function Modules(props) {
             }
 
             auxData.isPrivilegeByArrivalTime = false;
-            
+            bodyRequest = {...auxData};
             if (isNew) {
-                const res = await axios.post(`http://${window.location.hostname}:4000/api/modules`, auxData, { 
+                url = `http://${window.location.hostname}:4000/api/modules`;
+                const res = await axios.post(url, auxData, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
                 });
                 if (res.data.statusCode === 201) {
+                    const dataSave = {
+                        username: me ? me.username : null,
+                        source: 'admin',
+                        action: 'modules.js (callSaveData {post})',
+                        apiUrl: url,
+                        bodyBeforeRequest: preSaveData,
+                        bodyRequest: bodyRequest,
+                        bodyResponse: res.data
+                    };
+                    Log.SendLogAction(dataSave);
+
                     showAlert("green", 'Registro exitoso.'); 
                     getModules();  
                     handleClose();
@@ -427,12 +539,25 @@ function Modules(props) {
             }
             else {
                 const item = modulesSelected[0];
-                const res = await axios.put(`http://${window.location.hostname}:4000/api/modules/${item.name}/${item.sucursal}`, auxData, { 
+                url = `http://${window.location.hostname}:4000/api/modules/${item.name}/${item.sucursal}`;
+                const res = await axios.put(url, auxData, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
                 });
                 if (res.data.statusCode === 200) {
+                    const dataSave = {
+                        username: me ? me.username : null,
+                        source: 'admin',
+                        action: 'modules.js (callSaveData {put})',
+                        apiUrl: url,
+                        bodyBeforeRequest: preSaveData,
+                        bodyRequest: bodyRequest,
+                        bodyResponse: res.data
+                    };
+                    Log.SendLogAction(dataSave);
+                    setPreSaveData({});
+
                     showAlert("green", 'Edición exitosa.'); 
                     setModulesSelected([]);
                     setModulesSelectedID([]);
@@ -447,6 +572,15 @@ function Modules(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    username: me ? me.username : null,
+                    source: 'admin',
+                    action: 'modules.js (callSaveData[Nuevo o edición de módulo])',
+                    apiUrl: url,
+                    bodyRequest: bodyRequest,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -597,6 +731,7 @@ function Modules(props) {
             }
 
             setAreas(auxData);
+            setPreSaveData(auxData);
         } catch (error) {
             console.log(error);
             if (error.response && error.response.data) {
@@ -760,18 +895,43 @@ function Modules(props) {
         }
     }
 
-    const addSupervisor = (idModule, idVigia) => {
+    const addSupervisor = async (idModule, idVigia, oldData) => {
+        let url = '';
+        const me = getDataUser();
+        let bodyRequest = {};
         try {
             const data = { idVigia, idModule };
-            axios.post(`http://${window.location.hostname}:4000/api/supervisors`, data, { 
+            bodyRequest = {...data};
+            url =  `http://${window.location.hostname}:4000/api/supervisors`;
+            const res = await axios.post(url, data, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
             });
+
+            const dataSave = {
+                username: me ? me.username : null,
+                source: 'admin',
+                action: 'modules.js (addSupervisor {post})',
+                apiUrl: url,
+                bodyBeforeRequest: oldData,
+                bodyRequest: bodyRequest,
+                bodyResponse: res.data
+            };
+            Log.SendLogAction(dataSave);
         } catch (error) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    username: me ? me.username : null,
+                    source: 'admin',
+                    action: 'modules.js (addSupervisor[Agregar supervisor de módulo])',
+                    apiUrl: url,
+                    bodyRequest: bodyRequest,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -779,17 +939,40 @@ function Modules(props) {
         }
     }
 
-    const deleteSupervisor = (id) => {
+    const deleteSupervisor = async (id, oldData) => {
+        let url = '';
+        const me = getDataUser();
         try {
-            axios.delete(`http://${window.location.hostname}:4000/api/supervisors/${id}`, { 
+            url = `http://${window.location.hostname}:4000/api/supervisors/${id}`;
+            const res = await axios.delete(url, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
             });
+
+            const dataSave = {
+                username: me ? me.username : null,
+                source: 'admin',
+                action: 'modules.js (deleteSupervisor {delete})',
+                apiUrl: url,
+                bodyBeforeRequest: oldData,
+                bodyRequest: {},
+                bodyResponse: res.data
+            };
+            Log.SendLogAction(dataSave);
         } catch (error) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    username: me ? me.username : null,
+                    source: 'admin',
+                    action: 'modules.js (deleteSupervisor[Eliminar supervisor de módulo])',
+                    apiUrl: url,
+                    bodyRequest: {},
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -815,7 +998,7 @@ function Modules(props) {
                 const result = resSupervisors.find(i => i.idModule === moduleToMonitor.id && i.idVigia === element.selectOption);
                 // add relation
                 if (!result) {
-                    addSupervisor(moduleToMonitor.id, element.selectOption);
+                    addSupervisor(moduleToMonitor.id, element.selectOption, resSupervisors);
                 }
             });
 
@@ -823,14 +1006,14 @@ function Modules(props) {
                 const result = itemsSupervisors.find(i => i.selectOption === element.idVigia);
                 //delete
                 if (!result) {
-                    deleteSupervisor(element._id);
+                    deleteSupervisor(element._id, resSupervisors);
                 }
             });
         }
         else {
             // add relation
             itemsSupervisors.forEach(element => {
-                addSupervisor(moduleToMonitor.id, element.selectOption);
+                addSupervisor(moduleToMonitor.id, element.selectOption, resSupervisors);
             });
         }
         setModuleToMonitor(null);

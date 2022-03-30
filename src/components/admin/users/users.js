@@ -22,6 +22,7 @@ import { AiFillDelete } from "react-icons/ai";
 import { BsPlusLg } from "react-icons/bs";
 import { FaFilter } from "react-icons/fa";
 import { getOperatorMongo } from "../../../utils/operatorsMongoQuery";
+import Log from "../../utils/logError/log";
 import './styles.css';
 
 const columns = [
@@ -40,15 +41,29 @@ function Users(props) {
     const [openConfirm, setOpenConfirm] = useState(false);
 
     const handleAcceptConfirm = async () => {
+        let url = '';
+        const me = getDataUser();
         try {
             if (usersSelected.length > 0) {
                 for (let index = 0; index < usersSelected.length; index++) {
                     const user = usersSelected[index];
-                    await axios.delete(`http://${window.location.hostname}:4000/api/users/${user.username}`, { 
+                    url = `http://${window.location.hostname}:4000/api/users/${user.username}`;
+                    const res = await axios.delete(url, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
                     });
+
+                    const dataSave = {
+                        username: me ? me.username : null,
+                        source: 'admin',
+                        action: 'users.js (handleAcceptConfirm {delete})',
+                        apiUrl: url,
+                        bodyBeforeRequest: user,
+                        bodyRequest: {},
+                        bodyResponse: res.data
+                    };
+                    Log.SendLogAction(dataSave);
                 }
 
                 showAlert("green", 'Eliminación exitosa.'); 
@@ -59,6 +74,15 @@ function Users(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    username: me ? me.username : null,
+                    source: 'admin',
+                    action: 'users.js (handleAcceptConfirm [Eliminacion de usuario])',
+                    apiUrl: url,
+                    bodyRequest: {},
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -92,6 +116,8 @@ function Users(props) {
     const { showAlert, getDataUser } = useContext(AppContext);
     const [open, setOpen] = useState(false);
     const [isNew, setisNew] = useState(true);
+
+    const [preSaveData, setPreSaveData] = useState({});
     
     const onSubmit = data => callSaveData(data);
 
@@ -112,6 +138,7 @@ function Users(props) {
                     // shouldDirty: errors.username != null
                 })
             }
+            setPreSaveData(user);
         }
         else {
             if (users.length > 0) {
@@ -126,6 +153,7 @@ function Users(props) {
                     })
                 }
             }
+            setPreSaveData({});
         }
         setOpen(true);
     };
@@ -135,14 +163,28 @@ function Users(props) {
     };
 
     const callSaveData = async (data) => {
+        let url = '';
+        const user = getDataUser();
         try {
             if (isNew) {
-                const res = await axios.post(`http://${window.location.hostname}:4000/api/users`, data, { 
+                url = `http://${window.location.hostname}:4000/api/users`;
+                const res = await axios.post(url, data, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
                 });
                 if (res.data.statusCode === 201) {
+                    const dataSave = {
+                        username: user ? user.username : null,
+                        source: 'admin',
+                        action: 'users.js (callSaveData {post})',
+                        apiUrl: url,
+                        bodyBeforeRequest: preSaveData,
+                        bodyRequest: data,
+                        bodyResponse: res.data
+                    };
+                    Log.SendLogAction(dataSave);
+
                     showAlert("green", 'Registro exitoso.'); 
                     getUsers();  
                     handleClose();
@@ -152,12 +194,25 @@ function Users(props) {
                 }
             }
             else {
-                const res = await axios.put(`http://${window.location.hostname}:4000/api/users/${data.username}`, data, { 
+                url = `http://${window.location.hostname}:4000/api/users/${data.username}`;
+                const res = await axios.put(url, data, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
                 });
                 if (res.data.statusCode === 200) {
+                    const dataSave = {
+                        username: user ? user.username : null,
+                        source: 'admin',
+                        action: 'users.js (callSaveData {put})',
+                        apiUrl: url,
+                        bodyBeforeRequest: preSaveData,
+                        bodyRequest: data,
+                        bodyResponse: res.data
+                    };
+                    Log.SendLogAction(dataSave);
+                    setPreSaveData({});
+
                     showAlert("green", 'Edición exitosa.');  
                     setUsersSelected([]);
                     setUsersSelectedID([]);
@@ -172,6 +227,15 @@ function Users(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    username: user ? user.username : null,
+                    source: 'admin',
+                    action: 'users.js (callSaveData)',
+                    apiUrl: url,
+                    bodyRequest: data,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -283,10 +347,26 @@ function Users(props) {
     };
 
     const callSaveDataChangePass = async () => {
+        let url = '';
+        const me = getDataUser();
+        let data = {};
         try {
             if (pass !== '') {
                 const user = usersSelected[0];
-                await axios.put(`http://${window.location.hostname}:5000/api/credentials/${user.username}`, {password: pass});
+                url = `http://${window.location.hostname}:5000/api/credentials/${user.username}`;
+                data = {password: pass};
+                const res = await axios.put(url, data);
+
+                const dataSave = {
+                    username: user ? user.username : null,
+                    source: 'admin',
+                    action: 'users.js (callSaveDataChangePass [Cambio de contraseña]{put})',
+                    apiUrl: url,
+                    bodyBeforeRequest: {},
+                    bodyRequest: data,
+                    bodyResponse: res.data
+                };
+                Log.SendLogAction(dataSave);
 
                 setPass({
                     value: '',
@@ -305,6 +385,15 @@ function Users(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    username: me ? me.username : null,
+                    source: 'admin',
+                    action: 'users.js (callSaveDataChangePass [Cambio de contraseña])',
+                    apiUrl: url,
+                    bodyRequest: data,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrio algún error interno.');

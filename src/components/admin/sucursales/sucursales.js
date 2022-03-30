@@ -14,6 +14,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import { DataGrid, esES } from '@mui/x-data-grid';
 import { ChromePicker  } from 'react-color';
+import Log from "../../utils/logError/log";
 import './styles.css';
 
 // const protocol = window.location.protocol;
@@ -68,6 +69,7 @@ function Sucursales(props) {
             
                         let existPrint = false;
                         let existMessageTicket = false;
+                        setPreSaveData(res.data.body);
                         for (const property in res.data.body) {
                             setValue(property, res.data.body[property], {
                                 shouldValidate: true
@@ -119,7 +121,7 @@ function Sucursales(props) {
     const onSubmit = data => handleSaveConfig(data);
 
     const [sucursalSelected, setSucursalSelected] = useState(null);
-    const { showAlert } = useContext(AppContext);
+    const { showAlert, getDataUser } = useContext(AppContext);
     const [open, setOpen] = useState(false);
     const [openConfig, setOpenConfig] = useState(false);
     const [sucursals, setSucursals] = useState([]);
@@ -128,6 +130,8 @@ function Sucursales(props) {
 
     const [copyAreasSucursal, setCopyAreasSucursal] = useState({});
     const [areasSucursal, setAreasSucursal] = useState({});
+
+    const [preSaveData, setPreSaveData] = useState({});
 
     useEffect(() => {
         getSucursals();
@@ -236,6 +240,8 @@ function Sucursales(props) {
 
             setAreasSucursal(areasReturn);
             setCopyAreasSucursal(areasReturn);
+
+            setPreSaveData(areasReturn);
         } catch (error) {
             console.log(error);
             if (error.response && error.response.data) {
@@ -283,33 +289,73 @@ function Sucursales(props) {
         }
 
 
+        let url = '';
+        let data = {};
+        const user = getDataUser();
         try {
             if (deleteRow.length > 0) {
                 deleteRow.forEach(async element => {
-                    await axios.delete(`http://${window.location.hostname}:4000/api/area-sucursal/${element.sucursal}/${element.area}`, { 
+                    url = `http://${window.location.hostname}:4000/api/area-sucursal/${element.sucursal}/${element.area}`;
+                    const myUrl = url.slice(0, url.length);
+                    const res = await axios.delete(url, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
                     }); 
+
+                    const dataSave = {
+                        username: user ? user.username : null,
+                        source: 'admin',
+                        action: 'sucursales.js (handleSave [Asociar areas {delete}])',
+                        apiUrl: myUrl,
+                        bodyBeforeRequest: preSaveData,
+                        bodyRequest: {},
+                        bodyResponse: res.data
+                    };
+                    Log.SendLogAction(dataSave);
                 });
             }
     
             if (insertRow.length > 0) {
                 insertRow.forEach(async element => {
-                    await axios.post(`http://${window.location.hostname}:4000/api/area-sucursal`, element, { 
+                    data = element;
+                    url = `http://${window.location.hostname}:4000/api/area-sucursal`;
+                    const myUrl = url.slice(0, url.length);
+                    const res = await axios.post(url, element, { 
                         headers: {
                             'auth': localStorage.getItem('token')
                         }
-                    }); 
+                    });
+                    
+                    const dataSave = {
+                        username: user ? user.username : null,
+                        source: 'admin',
+                        action: 'sucursales.js (handleSave [Asociar areas {post}])',
+                        apiUrl: myUrl,
+                        bodyBeforeRequest: preSaveData,
+                        bodyRequest: data,
+                        bodyResponse: res.data
+                    };
+                    Log.SendLogAction(dataSave);
                 });  
             }
 
             setOpen(false);
+            setPreSaveData({});
             showAlert("green", "Cambios exitosos.");
         } catch (error) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    username: user ? user.username : null,
+                    source: 'admin',
+                    action: 'sucursales.js (handleSave [Asociar areas])',
+                    apiUrl: url,
+                    bodyRequest: data,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -334,6 +380,9 @@ function Sucursales(props) {
     };
 
     const handleSaveConfig = async (data) => {
+        let url = `http://${window.location.hostname}:4000/api/sucursal/${data.name}`;
+        let bodyRequest = {};
+        const user = getDataUser();
         try {
             const req = {
                 color: data.color,
@@ -341,18 +390,40 @@ function Sucursales(props) {
                 print: data.print,
                 messageTicket: data.messageTicket
             };
-            await axios.put(`http://${window.location.hostname}:4000/api/sucursal/${data.name}`, req, { 
+            bodyRequest = req;
+            const res = await axios.put(url, req, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
             }); 
 
+            const dataSave = {
+                username: user ? user.username : null,
+                source: 'admin',
+                action: 'sucursales.js (handleSaveConfig [Configuracion de sucursal])',
+                apiUrl: url,
+                bodyBeforeRequest: preSaveData,
+                bodyRequest: bodyRequest,
+                bodyResponse: res.data
+            };
+            Log.SendLogAction(dataSave);
+
             setOpenConfig(false);
+            setPreSaveData({});
             showAlert("green", "Cambios exitosos.");
         } catch (error) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    username: user ? user.username : null,
+                    source: 'admin',
+                    action: 'sucursales.js (handleSaveConfig [Configuracion de sucursal])',
+                    apiUrl: url,
+                    bodyRequest: bodyRequest,
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');

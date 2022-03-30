@@ -20,6 +20,7 @@ import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import logo from "../../../public/img/logo.png";
+import Log from "../../utils/logError/log";
 
 function Menu(props) {
     const { userLogout, showAlert, setReset, reset, getDataUser, setUser, user } = useContext(AppContext);
@@ -30,14 +31,27 @@ function Menu(props) {
     const [sucursals, setSucursals] = useState([]);
     const [selectSucursal, setSelectSucursal] = useState('');
     const handleAcceptConfirm = async () => {
+        let url = '';
+        const me = getDataUser();
         try {
             const query = selectSucursal !== '' ? `?suc=${selectSucursal}` : '';
-            const urlApi = `http://${window.location.hostname}:4000/api/action/reset${query}`;
-            await axios.delete(urlApi, { 
+            url = `http://${window.location.hostname}:4000/api/action/reset${query}`;
+            const res = await axios.delete(url, { 
                 headers: {
                     'auth': localStorage.getItem('token')
                 }
             });
+
+            const dataSave = {
+                username: me ? me.username : null,
+                source: 'admin',
+                action: 'menu.js (handleAcceptConfirm {delete})',
+                apiUrl: url,
+                bodyBeforeRequest: {},
+                bodyRequest: {},
+                bodyResponse: res.data
+            };
+            Log.SendLogAction(dataSave);
 
             setReset(reset+1);
             showAlert("green", 'Re-inicio exitoso.');
@@ -45,6 +59,15 @@ function Menu(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    username: me ? me.username : null,
+                    source: 'admin',
+                    action: 'menu.js (handleAcceptConfirm)',
+                    apiUrl: url,
+                    bodyRequest: {},
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');

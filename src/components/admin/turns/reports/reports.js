@@ -15,6 +15,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import AppContext from "../../../../context/app/app-context";
 import moment from "moment";
 import axios from "axios";
+import Log from "../../../utils/logError/log";
 import './styles.css';
 
 const columnsGeneral = [
@@ -67,7 +68,7 @@ function CustomToolbar() {
 }
 
 function Reports(props) {
-    const { showAlert } = useContext(AppContext);
+    const { showAlert, getDataUser } = useContext(AppContext);
     const { control, handleSubmit, formState: { errors } } = useForm({defaultValues: {
         startDate: moment().set("date",1),
         finalDate: moment().set("date",1).add(1, 'month'),
@@ -106,6 +107,8 @@ function Reports(props) {
     };
 
     const getData = async (data) => {
+        let url = '';
+        const me = getDataUser();
         try {
             if (moment(data.starDate).isValid() && moment(data.finalDate).isValid()) {
                 setShowLoading(true);
@@ -118,7 +121,6 @@ function Reports(props) {
                     area: data.area
                 };
 
-                let url = '';
                 let op = '';
                 if (selectOptionReport === 'General') {
                     url = `http://${window.location.hostname}:4001/api/reports/general?startDate=${req.startDate}&finalDate=${req.finalDate}`;
@@ -172,6 +174,15 @@ function Reports(props) {
             setShowLoading(false);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+                const dataSave = {
+                    username: me ? me.username : null,
+                    source: 'admin',
+                    action: 'reports.js (getData)',
+                    apiUrl: url,
+                    bodyRequest: {},
+                    bodyResponse: error.response.data
+                };
+                Log.SendLogError(dataSave);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');

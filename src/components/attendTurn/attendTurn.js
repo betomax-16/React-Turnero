@@ -7,6 +7,7 @@ import AttendMenu from "./menu/menu";
 import Attend from "./attend/attend";
 import TurnList from "../screen/turnList/turnList";
 import RequireAuth from "../utils/auth/RequireAuth";
+import Log from "../utils/logError/log";
 import './styles.css';
 
 moment.locale('es', {
@@ -486,6 +487,16 @@ function AttendTurn(props) {
       console.log(error);
       if (error.response && error.response.data) {
           showAlert("red", error.response.data.body.message);
+          const dataSave = {
+            sucursal: currentSucursal,
+            ubication: module ? module.name : null,
+            username: dataUser.username,
+            source: 'recepcion',
+            action: 'attendTurn.js (getMyModule)',
+            apiUrl: `http://${window.location.hostname}:4000/api/modules?username=${dataUser.username}|eq`,
+            bodyResponse: error.response.data
+          };
+          Log.SendLogError(dataSave);
       }
       else {
           showAlert("red", 'Ocurrió algún error interno.');
@@ -590,6 +601,15 @@ function AttendTurn(props) {
       console.log(error);
       if (error.response && error.response.data) {
           showAlert("red", error.response.data.body.message);
+          const dataSave = {
+            sucursal: dataModule.sucursal,
+            ubication: dataModule.name,
+            source: 'recepcion',
+            action: 'attendTurn.js (getPendingTurn)',
+            apiUrl: `http://${window.location.hostname}:4000/api/trace?sucursal=${dataModule.sucursal}|eq&ubication=${dataModule.name}|eq|and&finalDate=null|eq|and`,
+            bodyResponse: error.response.data
+          };
+          Log.SendLogError(dataSave);
       }
       else {
           showAlert("red", 'Ocurrió algún error interno.');
@@ -626,8 +646,9 @@ function AttendTurn(props) {
     if (module && !module.status) {
       const findArea = areas.find(a => a.name === area);
       if ((findArea && findArea.number > 0) || area === '') {
+        let data = {};
         try {
-          const data = {
+          data = {
             area: area,
             sucursal: currentSucursal
           };
@@ -684,6 +705,17 @@ function AttendTurn(props) {
           console.log(error);
           if (error.response && error.response.data) {
               showAlert("red", error.response.data.body.message);
+              const dataSave = {
+                sucursal: module.sucursal,
+                ubication: module.name,
+                username: user.username, 
+                source: 'recepcion',
+                action: 'attendTurn.js (Atención de turno)',
+                apiUrl: `http://${window.location.hostname}:4000/api/action/next`,
+                bodyRequest: data,
+                bodyResponse: error.response.data
+              };
+              Log.SendLogError(dataSave);
           }
           else {
               showAlert("red", 'Ocurrió algún error interno.');
@@ -701,8 +733,9 @@ function AttendTurn(props) {
 
   const handlerReCallTurn = async (area) => {
     if (module && module.status) {
+      let data = {};
       try {
-        const data = {
+        data = {
           turn: currentTurn.turn,
           sucursal: currentSucursal,
           source: 'recepcion'
@@ -717,8 +750,8 @@ function AttendTurn(props) {
         showAlert("blue", `Ha re-llamado a: ${currentTurn.turn}`); 
 
         if (socket) {
-          const data = {...res.data.body};
-          socket.emit('turnReCall', { sucursal: currentSucursal, data: data });
+          const dataSocket = {...res.data.body};
+          socket.emit('turnReCall', { sucursal: currentSucursal, data: dataSocket });
         }
 
         const auxCurrentTurn = {...currentTurn , lastHourActivity: moment().add(timeLogout, 'm')};
@@ -727,6 +760,17 @@ function AttendTurn(props) {
         console.log(error);
         if (error.response && error.response.data) {
             showAlert("red", error.response.data.body.message);
+            const dataSave = {
+              sucursal: module.sucursal,
+              ubication: module.name,
+              username: user.username, 
+              source: 'recepcion',
+              action: 'attendTurn.js (Rellamar turno)',
+              apiUrl: `http://${window.location.hostname}:4000/api/action/recall`,
+              bodyRequest: data,
+              bodyResponse: error.response.data
+            };
+            Log.SendLogError(dataSave);
         }
         else {
             showAlert("red", 'Ocurrió algún error interno.');
@@ -740,8 +784,9 @@ function AttendTurn(props) {
 
   const handlerCancelationTurn = async (area) => {
     if (module && module.status) {
+      let data = {};
       try {
-        const data = {
+        data = {
           turn: currentTurn.turn,
           sucursal: currentSucursal,
           ubication: module.name,
@@ -769,9 +814,9 @@ function AttendTurn(props) {
         setLastTurns(auxLastTurns);
         
         if (socket) {
-          const data = {...res.data.body};
-          data.trace.ubication = module.name;
-          socket.emit('turnFinish', { sucursal: currentSucursal, data: data });
+          const dataSocket = {...res.data.body};
+          dataSocket.trace.ubication = module.name;
+          socket.emit('turnFinish', { sucursal: currentSucursal, data: dataSocket });
         }
 
         const auxModule = {...module};
@@ -782,6 +827,17 @@ function AttendTurn(props) {
         console.log(error);
         if (error.response && error.response.data) {
             showAlert("red", error.response.data.body.message);
+            const dataSave = {
+              sucursal: module.sucursal,
+              ubication: module.name,
+              username: user.username, 
+              source: 'recepcion',
+              action: 'attendTurn.js (Cancelación de turno)',
+              apiUrl: `http://${window.location.hostname}:4000/api/action/cancelation`,
+              bodyRequest: data,
+              bodyResponse: error.response.data
+            };
+            Log.SendLogError(dataSave);
         }
         else {
             showAlert("red", 'Ocurrió algún error interno.');
@@ -795,8 +851,9 @@ function AttendTurn(props) {
 
   const handlerAttendedTurn = async (area) => {
     if (module && module.status) {
+      let data = {};
       try {
-        const data = {
+        data = {
           turn: currentTurn.turn,
           sucursal: currentSucursal,
           module: module.name
@@ -823,11 +880,11 @@ function AttendTurn(props) {
         setLastTurns(auxLastTurns);
 
         if (socket) {
-          const data = {...res.data.body};
-          data.trace.ubication = module.name;
-          socket.emit('turnFinish', { sucursal: currentSucursal, data: data });
+          const dataSocket = {...res.data.body};
+          dataSocket.trace.ubication = module.name;
+          socket.emit('turnFinish', { sucursal: currentSucursal, data: dataSocket });
           if (currentTurn.area !== 'Resultados') {
-            socket.emit('newTurnTest', { sucursal: currentSucursal, type: 'toma', data: data }); 
+            socket.emit('newTurnTest', { sucursal: currentSucursal, type: 'toma', data: dataSocket }); 
           }
         }
 
@@ -838,6 +895,17 @@ function AttendTurn(props) {
         console.log(error);
         if (error.response && error.response.data) {
             showAlert("red", error.response.data.body.message);
+            const dataSave = {
+              sucursal: module.sucursal,
+              ubication: module.name,
+              username: user.username, 
+              source: 'recepcion',
+              action: 'attendTurn.js (Fin de atención de turno)',
+              apiUrl: `http://${window.location.hostname}:4000/api/action/attended`,
+              bodyRequest: data,
+              bodyResponse: error.response.data
+            };
+            Log.SendLogError(dataSave);
         }
         else {
             showAlert("red", 'Ocurrió algún error interno.');
