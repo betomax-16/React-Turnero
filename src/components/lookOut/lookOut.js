@@ -762,29 +762,37 @@ function LookOut(props) {
 
     const freeModule = async (moduleName, sucursal) => {
         try {
-            let flagAction = false;
-            const auxSlaveModules = [...slaveModules];
-            for (let index = 0; index < auxSlaveModules.length; index++) {
-                const element = {...auxSlaveModules[index]};
+            // let flagAction = false;
+            // const auxSlaveModules = [...slaveModules];
+            // for (let index = 0; index < auxSlaveModules.length; index++) {
+            //     const element = {...auxSlaveModules[index]};
 
-                if (element.name === moduleName && element.status === 'Activo') {
-                    flagAction = true;
-                    break;
-                }
-            }
+            //     if (element.name === moduleName && element.status === 'Activo') {
+            //         flagAction = true;
+            //         break;
+            //     }
+            // }
 
-            if (flagAction) {
-                setOpenConfirm({
-                    state: true,
-                    title: `Liberación de módulo`,
-                    ask: `¿Estás seguro de terminar la atención en el Módulo: ${moduleName}?`,
-                    module: moduleName,
-                    sucursal: sucursal
-                });
-            }
-            else {
-                showAlert("yellow", `EL módulo ${moduleName} no se encuentra activo.`);
-            }
+            // if (flagAction) {
+            //     setOpenConfirm({
+            //         state: true,
+            //         title: `Liberación de módulo`,
+            //         ask: `¿Estás seguro de terminar la atención en el Módulo: ${moduleName}?`,
+            //         module: moduleName,
+            //         sucursal: sucursal
+            //     });
+            // }
+            // else {
+            //     showAlert("yellow", `EL módulo ${moduleName} no se encuentra activo.`);
+            // }
+
+            setOpenConfirm({
+                state: true,
+                title: `Liberación de módulo`,
+                ask: `¿Estás seguro de terminar la atención en el Módulo: ${moduleName}?`,
+                module: moduleName,
+                sucursal: sucursal
+            });
         } catch (error) {
             console.log(error);
             if (error.response && error.response.data) {
@@ -799,7 +807,7 @@ function LookOut(props) {
     const handleAcceptConfirm = async () => {
         try {
             if (openConfirm.title === 'Liberación de módulo') {
-                await axios.put(`http://${window.location.hostname}:4000/api/modules/${openConfirm.module}/${openConfirm.sucursal}`, {status: false}, { 
+                const res = await axios.put(`http://${window.location.hostname}:4000/api/modules/${openConfirm.module}/${openConfirm.sucursal}`, {username: ''}, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
@@ -810,7 +818,7 @@ function LookOut(props) {
                 for (let index = 0; index < auxSlaveModules.length; index++) {
                     const element = {...auxSlaveModules[index]};
                     if (element.name === openConfirm.module) {
-                        element.status = 'Inactivo';
+                        element.status = 'Libre';
                     }
                     auxSlaveModules[index] = element;
                 }
@@ -826,6 +834,14 @@ function LookOut(props) {
                 });
 
                 setSlaveModules(auxSlaveModules);
+                if (socket) {
+                    socket.emit('refresh', {sucursal: openConfirm.sucursal, module: openConfirm.module}); 
+                    socket.emit('leave-sucursal', openConfirm.sucursal);
+                    socket.emit('leave-type', { sucursal: openConfirm.sucursal, type: 'modulo' }); 
+                    socket.emit('addModule', {sucursal:openConfirm.sucursal, module: res.data.body}); 
+
+                }
+                
                 showAlert("green", `${openConfirm.module} liberado exitosamente.`); 
             }
         } catch (error) {

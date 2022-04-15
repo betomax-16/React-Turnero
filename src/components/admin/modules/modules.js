@@ -83,7 +83,7 @@ function Modules(props) {
             }
             else if (openConfirm.title === 'Liberación de módulo') {
                 url = `http://${window.location.hostname}:4000/api/modules/${openConfirm.module}/${openConfirm.sucursal}`;
-                bodyRequest = {status: false};
+                bodyRequest = {username: ''};
                 const res = await axios.put(url, bodyRequest, { 
                     headers: {
                         'auth': localStorage.getItem('token')
@@ -99,8 +99,27 @@ function Modules(props) {
                     bodyRequest: bodyRequest,
                     bodyResponse: res.data
                 };
+
+                const auxModules = [...modules];
+                for (let index = 0; index < auxModules.length; index++) {
+                    const element = {...auxModules[index]};
+                    if (element.sucursal === openConfirm.sucursal && element.name === openConfirm.module) {
+                        element.username = '';
+                        auxModules[index] = element;
+                        break;
+                    }
+                }
+
+                setModules(auxModules);
                 Log.SendLogAction(dataSave);
 
+                if (props.socket) {
+                    props.socket.emit('refresh', {sucursal: openConfirm.sucursal, module: openConfirm.module});  
+                    props.socket.emit('leave-sucursal', openConfirm.sucursal);
+                    props.socket.emit('leave-type', { sucursal: openConfirm.sucursal, type: 'modulo' });   
+                    props.socket.emit('addModule', {sucursal:openConfirm.sucursal, module: res.data.body});   
+                }
+                
                 showAlert("green", `${openConfirm.module} liberado exitosamente.`); 
             }
         } catch (error) {
