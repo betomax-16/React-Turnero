@@ -860,7 +860,7 @@ function AttendTest(props) {
                 });
             });
 
-            const auxImageTraces = trace.filter(t => t.area === 'Imagen');
+            const auxImageTraces = trace.filter(t => t.area === 'Imagen' || t.area === 'Citas');
             auxImageTraces.forEach(element => {
                 rows.push(element);
             });
