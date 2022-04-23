@@ -151,6 +151,9 @@ function AttendTest(props) {
                 if (error.response && error.response.data) {
                     showAlert("red", error.response.data.body.message);
                 }
+                else if (error.message) {
+                    showAlert("red", error.message);
+                }
                 else {
                     showAlert("red", 'Ocurrió algún error interno.');
                 }
@@ -241,6 +244,9 @@ function AttendTest(props) {
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
             }
+            else if (error.message) {
+                showAlert("red", error.message);
+            }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
             }
@@ -262,6 +268,9 @@ function AttendTest(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+            }
+            else if (error.message) {
+                showAlert("red", error.message);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -329,6 +338,9 @@ function AttendTest(props) {
                 };
                 Log.SendLogError(dataSave);
             }
+            else if (error.message) {
+                showAlert("red", error.message);
+            }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
             }
@@ -372,6 +384,9 @@ function AttendTest(props) {
                     bodyResponse: error.response.data
                 };
                 Log.SendLogError(dataSave);
+            }
+            else if (error.message) {
+                showAlert("red", error.message);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -422,6 +437,9 @@ function AttendTest(props) {
                 };
                 Log.SendLogError(dataSave);
             }
+            else if (error.message) {
+                showAlert("red", error.message);
+            }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
             }
@@ -471,6 +489,9 @@ function AttendTest(props) {
                     bodyResponse: error.response.data
                 };
                 Log.SendLogError(dataSave);
+            }
+            else if (error.message) {
+                showAlert("red", error.message);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -527,6 +548,9 @@ function AttendTest(props) {
                     bodyResponse: error.response.data
                 };
                 Log.SendLogError(dataSave);
+            }
+            else if (error.message) {
+                showAlert("red", error.message);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
@@ -600,6 +624,9 @@ function AttendTest(props) {
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
             }
+            else if (error.message) {
+                showAlert("red", error.message);
+            }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
             }
@@ -615,6 +642,9 @@ function AttendTest(props) {
             console.log(error);
             if (error.response && error.response.status === 404) {
                 showAlert("red", "Módulo no encontrado.");
+            }
+            else if (error.message) {
+                showAlert("red", error.message);
             }
             else {
                 showAlert("red", error.message);
@@ -657,7 +687,7 @@ function AttendTest(props) {
                     'me': ''
                 }
             });
-
+            
             let exist = false;
             if (res.data.body.length) { 
                 if (res.data.body[0].rol.toLowerCase() === 'recepcionista') {
@@ -667,11 +697,13 @@ function AttendTest(props) {
                                 'me': ''
                             }
                         });
+
                         if (resTrace.data.body.length === 0) {
                             exist = true;
                         }
                         else {
-                            throw new Error('Aun tiene pacientes pendientes.');
+                            const turn = resTrace.data.body[0].turn;
+                            throw new Error(`Aún tiene pacientes pendientes. [${turn.toUpperCase()}]`);
                         }
                     }
                     else {
@@ -707,6 +739,9 @@ function AttendTest(props) {
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
             }
+            else if (error.message) {
+                showAlert("red", error.message);
+            }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
             }
@@ -740,6 +775,7 @@ function AttendTest(props) {
         if (!idExakta.error) {
             if (action === 'Atender') {
                 const res = await validIdExakta(idExakta.value, true);
+                console.log(res);
                 if (res) {
                     handleCloseDialog();
                     handlerAttendTurn(idExakta.value);
@@ -835,6 +871,9 @@ function AttendTest(props) {
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
             }
+            else if (error.message) {
+                showAlert("red", error.message);
+            }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
             }
@@ -883,6 +922,9 @@ function AttendTest(props) {
             console.log(error);
             if (error.response && error.response.data) {
                 showAlert("red", error.response.data.body.message);
+            }
+            else if (error.message) {
+                showAlert("red", error.message);
             }
             else {
                 showAlert("red", 'Ocurrió algún error interno.');
