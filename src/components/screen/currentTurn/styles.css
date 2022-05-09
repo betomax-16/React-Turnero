@@ -3,7 +3,7 @@
     flex-direction: column;
     position: relative;
     height: 100%;
-    background: linear-gradient(318deg, #f7f7f7, #f5edbc);
+    background: linear-gradient(318deg, #f7f7f7, #e7e4d4);
     background-size: 400% 400%;
     -webkit-animation: AnimationName 30s ease infinite;
     -moz-animation: AnimationName 30s ease infinite;
@@ -42,8 +42,8 @@
     width: 100%;
     border-radius: 7px 7px 0 0;
     text-align: center;
-    background-color: #f0f19e;
-    color: #746300;
+    background-color: #4d6fbf;
+    color: #ffffff;
 }
 
 .turn-info .turn {

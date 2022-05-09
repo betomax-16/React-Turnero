@@ -36,13 +36,13 @@
     align-items: center;
     cursor: pointer;
     border-radius: 50%;
-    background-color: #c1dbd4;
+    background-color: #c0d1fd;
     box-shadow: 2px 3px 5px grey;
     color: white;
 }
 
 .config-container .form-box .button-add:hover {
-    background-color: #a5d3c7;
+    background-color: #95b2fb;
 }
 
 .config-container .form-box .button-add:hover .icon {

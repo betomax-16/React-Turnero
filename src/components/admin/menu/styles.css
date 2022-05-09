@@ -2,8 +2,8 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    background-color: #05805e;
-    box-shadow: inset -7px 0px 20px #13664f;
+    background-color: #103595;
+    box-shadow: inset -7px 0px 20px #1f4192;
     color: white;
 }
 
@@ -61,8 +61,8 @@
 
 .options .option:hover,
 .options .sub-option:hover {
-    background-color: #0774553d;
-    box-shadow: inset -2px 0px 20px #13664f;
+    background-color: #17347870;
+    box-shadow: inset -2px 0px 20px #1d3e8f
 }
 
 .options .option:hover .icon,
@@ -83,7 +83,7 @@
 }
 
 .options .sub-option::before {
-    background-color: #7cff8a70;
+    background-color: #142e6e;
 }
 
 .options .option .icon,

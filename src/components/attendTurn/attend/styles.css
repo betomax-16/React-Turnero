@@ -1,7 +1,7 @@
 .attend-container {
     display: flex;
     flex-direction: column;
-    background: #05805e;
+    background: #4d6fbf;
     color: white;
     width: 100%;
 }
@@ -17,7 +17,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #0b684e;
+    background-color: #314778;
 }
 
 .attend-buttons {
@@ -33,7 +33,7 @@
     align-items: center;
     position: relative;
     padding: 10px 20px;
-    background-color: yellowgreen;
+    background-color: #7b9ded;
     border-radius: 5px;
     color: white;
     margin: 10px 5px;
@@ -42,16 +42,16 @@
 }
 
 .attend-button:hover {
-    background-color: rgb(181, 241, 59);
+    background-color: #99b8ff;
 }
 
 .attend-button.disabled {
-    background-color: #cfdbb6;
+    background-color: #5f7abb;
     cursor: auto;
 }
 
 .attend-button.disabled:hover {
-    background-color: #cfdbb6;
+    background-color: #5f7abb;
 }
 
 .attend-button-next {

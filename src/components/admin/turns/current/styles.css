@@ -18,13 +18,13 @@
 }
 
 .MuiDataGrid-columnHeaders {
-    background-color: #5a8f80;
+    background-color: #1c3e8e;
     color: white;
     border-radius: 5px 5px 0 0;
 }
 
 .MuiDataGrid-row:nth-child(even) {
-    background-color: #c1dbd4;
+    background-color: #c0d1fd;
 }
 
 .current-container .button-filter {
@@ -42,13 +42,13 @@
     align-items: center;
     cursor: pointer;
     border-radius: 50%;
-    background-color: #c1dbd4;
+    background-color: #c0d1fd;
     box-shadow: 2px 3px 5px grey;
     color: white;
 }
 
 .current-container .button-filter:hover{
-    background-color: #a5d3c7;
+    background-color: #95b2fb;
 }
 
 .current-container .button-filter:hover .icon{
@@ -78,18 +78,18 @@
     align-items: center;
     padding: 15px;
     width: 50%;
-    background-color: #136646;
+    background-color: #1c3e8e;
     cursor: pointer;
     font-size: 20px;
     font-weight: bold;
 }
 
 .tab-buttons .tab:hover {
-    background-color: #2f6c55;
+    background-color: #1e45a1;
 }
 
 .tab-buttons .select {
-    background-color: #2f6c55;
+    background-color: #1e45a1;
     position: relative;
 }
 

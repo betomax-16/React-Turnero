@@ -1,8 +1,8 @@
 .attendMenu-container {
     display: flex;
     justify-content: space-between;
-    background-color: #05805e;
-    box-shadow: inset 0px -4px 20px 0px #13664612;
+    background-color: #103595;
+    box-shadow: inset -7px 0px 20px #1f4192;
     height: 63px;
 }
 
@@ -68,7 +68,7 @@
 
 .menu-btn-ok {
     cursor: pointer;
-    background-color: #067f5d;
+    background-color: #1c3e8e;
     padding: 5px 10px;
     color: white;
     font-weight: bold;
@@ -78,7 +78,7 @@
 }
 
 .menu-btn-ok:hover {
-    background-color: #08926b;
+    background-color: #152e68;
 }
 
 /* Extra small devices (phones, 600px and down) */

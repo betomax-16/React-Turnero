@@ -1,5 +1,5 @@
 .login-container {
-    background: linear-gradient(318deg, #f7f7f7, #0a5d48);
+    background: linear-gradient(318deg, #f7f7f7, #36c);
     background-size: 400% 400%;
     -webkit-animation: AnimationName 30s ease infinite;
     -moz-animation: AnimationName 30s ease infinite;
@@ -67,7 +67,7 @@
 
 .login-button {
     color: white;
-    background-color: #1f6c58;
+    background-color: #1455b6;
     border-radius: 5px;
     text-align: center;
     padding: 10px 20px;
@@ -78,7 +78,7 @@
 }
 
 .login-button:hover {
-    background-color: #24836a;
+    background-color: #124ba0;
 }
 
 .messageError {

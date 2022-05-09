@@ -33,7 +33,7 @@
 .lookout-content .up>.title {
     font-size: 30px;
     font-weight: bold;
-    color: #05805e;
+    color: #1c3e8e;
     padding-top: 10px;
 }
 
@@ -48,7 +48,7 @@
 .lookout-content .down {
     position: relative;
     box-sizing: border-box;
-    background-color: #05805e;
+    background-color: #142b60;
     padding: 5px 25px;
     overflow: auto;
     width: 100%;
@@ -104,7 +104,7 @@
 
 .lookout-content .greeting .title{
     font-size: 500%;
-    color: #5a8f80;
+    color: #647dbd;
     font-weight: bold;
     text-align: center;
 }
@@ -116,13 +116,13 @@
 }
 
 .MuiDataGrid-columnHeaders {
-    background-color: #5a8f80;
+    background-color: #1c3e8e;
     color: white;
     border-radius: 5px 5px 0 0;
 }
 
 .MuiDataGrid-row:nth-child(even) {
-    background-color: #c1dbd4;
+    background-color: #c0d1fd;
 }
 
 
@@ -145,18 +145,18 @@
     align-items: center;
     padding: 15px;
     width: 50%;
-    background-color: #136646;
+    background-color: #1c3e8e;
     cursor: pointer;
     font-size: 20px;
     font-weight: bold;
 }
 
 .tab-buttons .tab:hover {
-    background-color: #2f6c55;
+    background-color: #1e45a1;
 }
 
 .tab-buttons .select {
-    background-color: #2f6c55;
+    background-color: #1e45a1;
     position: relative;
 }
 

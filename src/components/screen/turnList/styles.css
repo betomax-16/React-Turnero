@@ -11,7 +11,7 @@
     width: 100%;
     padding: 25px;
     box-sizing: border-box;
-    background-color: #01613cab;
+    background-color: #1c3e8e;
 }
 
 .turnList {
@@ -29,7 +29,7 @@
     text-align: center;
     text-transform: uppercase;
     color: #fafcea;
-    background-color: #6dc19f;
+    background-color: #4d6fbf;
 }
 
 .turns{
@@ -47,7 +47,7 @@
 }
 
 .turn-card .title {
-    background-color: rgb(240 241 158);
+    background-color: rgb(49 71 120);
     display: flex;
     text-align: center;
     justify-content: center;
@@ -55,7 +55,7 @@
     padding: 10px 0;
     font-size: 180%;
     font-weight: 500;
-    color: #746300;
+    color: #ffffff;
 }
 
 .turn-card .body {
@@ -75,7 +75,7 @@
     justify-content: center;
     align-items: center;
     /* background-color: #ffc77a; */
-    background-color: #6dc19f;
+    background-color: #4d6fbf;
     color: #fafcea;
 }
 
@@ -84,7 +84,7 @@
     text-align: center;
     width: 50%;
     padding: 25px 10px;
-    border-right: 1px dashed #a5d3c7;
+    border-right: 1px dashed #86a4eb;
 }
 
 .today-date .date span{

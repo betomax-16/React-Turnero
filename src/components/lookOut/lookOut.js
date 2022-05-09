@@ -42,7 +42,7 @@ function LookOut(props) {
     const [dateState, setDateState] = useState(moment());
     const [timer, setTimer] = useState(null);
     const [configSucursal, setConfigSucursal] = useState({
-        color: '#05805e'
+        color: '#103595'
     });
 
     const [stateModule, setStateModule] = useState({

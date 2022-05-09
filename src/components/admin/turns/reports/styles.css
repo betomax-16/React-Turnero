@@ -17,13 +17,13 @@
 }
 
 .reports-container .content .button {
-    background-color: #5a8f80;
+    background-color: #1c3e8e;
     height: 50px;
     margin-top: 35px;
 }
 
 .reports-container .content .button:hover {
-    background-color: #487065;
+    background-color: #152e68;
 }
 
 .reports-container .table {

@@ -21,7 +21,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #079970;
+    background-color: #1c3e8e;
     color: white;
     flex-direction: column;
     z-index: 1;
@@ -36,7 +36,7 @@
 }
 
 .takeTurn-header {
-    color: #05805e;
+    color: #1c3e8e;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -53,7 +53,7 @@
 }
 
 .takeTurn-sucursal {
-    color: #05805e;
+    color: #1c3e8e;
     margin: 0;
     margin-bottom: 25px;
     font-size: 22px;
@@ -62,7 +62,7 @@
 }
 
 .takeTurn-body {
-    background-color: #079970;
+    background-color: #1c3e8e;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -89,7 +89,7 @@
 }
 
 .takeTurn-button {
-    background-color: #98c9bb;
+    background-color: #4e74cf;
     color: white;
     border-radius: 5px;
     padding: 15px 30px;
@@ -102,11 +102,11 @@
 }
 
 .takeTurn-button:hover {
-    background-color: #83afa3;
+    background-color: #7a9beb;
 }
 
 .takeTurn-footer {
-    background-color: #066a4f;
+    background-color: #4e74cf;
     color: white;
     display: flex;
     justify-content: center;

@@ -14,12 +14,12 @@
 }
 
 .Mui-checked {
-    color: #88c2b1 !important;
+    color: #1c3e8e !important;
 }
 
 .button-associate, 
 .button-link {
-    background-color: #86c1af;
+    background-color: #1c3e8e;
     padding: 9px 20px;
     cursor: pointer;
     border-radius: 5px;
@@ -31,7 +31,7 @@
 
 .button-associate:hover,
 .button-link:hover {
-    background-color: #95d4c1;
+    background-color: #152e68;
 }
 
 .button-link:visited {

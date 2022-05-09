@@ -127,7 +127,7 @@
     font-weight: bold;
     text-align: center;
     font-size: 25px;
-    color: #136646;
+    color: #142b60;
     margin-top: 10px;
 }
 
@@ -213,7 +213,7 @@
     }
 
     .card-footer .tag .important {
-        color: #136646;
+        color: #142b60;
         font-size: inherit;
         margin-right: 0;
         margin-left: 0;
