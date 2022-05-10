@@ -84,7 +84,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 15px;
+    gap: 45px;
     flex: 1 0 auto;
 }
 
@@ -92,13 +92,14 @@
     background-color: #98c9bb;
     color: white;
     border-radius: 5px;
-    padding: 15px 30px;
-    width: 25%;
+    padding: 25px 30px;
+    width: 75%;
     min-width: 200px;
     text-align: center;
     font-size: 30px;
     font-weight: bold;
     cursor: pointer;
+    box-sizing: border-box;
 }
 
 .takeTurn-button:hover {
@@ -112,4 +113,47 @@
     justify-content: center;
     flex: 0 0 auto;
     text-align: center;
+}
+
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+    
+} 
+
+/* Small devices (portrait tablets and large phones, 600px and up) */
+@media only screen and (min-width: 600px) {
+    
+} 
+
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
+    
+} 
+
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
+    
+} 
+
+/* Extra large devices (large laptops and desktops, 1200px and up) */
+@media only screen and (min-width: 1200px) {
+    .takeTurn-buttons {
+        gap: 15px;
+    }
+
+    .takeTurn-button {
+        width: 25%;
+        padding: 15px 30px;
+    }
+}
+
+@media only screen and (min-width: 1700px) {
+    .takeTurn-buttons {
+        gap: 15px;
+    }
+
+    .takeTurn-button {
+        width: 25%;
+        padding: 15px 30px;
+    }
 }
