@@ -83,7 +83,7 @@ function Modules(props) {
             }
             else if (openConfirm.title === 'Liberación de módulo') {
                 url = `http://${window.location.hostname}:4000/api/modules/${openConfirm.module}/${openConfirm.sucursal}`;
-                bodyRequest = {username: ''};
+                bodyRequest = {username: '', status: false};
                 const res = await axios.put(url, bodyRequest, { 
                     headers: {
                         'auth': localStorage.getItem('token')
