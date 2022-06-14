@@ -4,6 +4,7 @@ import axios from 'axios';
 import AppContext from "../../context/app/app-context";
 import './styles.css';
 import logo from '../../public/img/logo.png';
+import sound from "../../public/sounds/timbre.mp3";
 const W3CWebSocket = require('websocket').w3cwebsocket;
 
 function TakeTurn(props) {
@@ -75,6 +76,18 @@ function TakeTurn(props) {
 
       socket.emit('newTurn', {sucursal:sucursal.name, data:res.data.body});
       sendPrint(res.data.body);
+
+      const audio = new Audio(sound);
+      let promise = audio.play();
+
+      if (promise !== undefined) {
+        promise.then(_ => {
+          audio.autoplay = true;
+        }).catch(error => {
+          console.log(error);
+        });
+      }
+
       showAlert("green", "Turno creado."); 
     } catch (error) {
       console.log(error);
