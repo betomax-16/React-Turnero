@@ -14,10 +14,30 @@ function TakeTurn(props) {
   const [sucursal, setSucursal] = useState(null);
   const { showAlert } = useContext(AppContext);
   const [areas, setAreas] = useState([]);
+  const [tabHasFocus, setTabHasFocus] = useState(true);
 
   useEffect(() => {
     try {
       callGetSucursal(); 
+
+      const handleFocus = () => {
+        // console.log('Tab has focus');
+        setTabHasFocus(true);
+      };
+  
+      const handleBlur = () => {
+        // console.log('Tab lost focus');
+        setTabHasFocus(false);
+      };
+  
+      window.addEventListener('focus', handleFocus);
+      window.addEventListener('blur', handleBlur);
+  
+      return () => {
+        window.removeEventListener('focus', handleFocus);
+        window.removeEventListener('blur', handleBlur);
+      };
+      
     } catch (error) {
       console.log(error);
       if (error.response && error.response.data) {
@@ -29,6 +49,28 @@ function TakeTurn(props) {
     }
   }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (tabHasFocus) {
+      if (socketPrint) {
+        if (socketPrint.readyState === socketPrint.CLOSED) {
+          connectSocketPrint();
+        }
+      }
+      else {
+        connectSocketPrint();
+      }
+    }
+  }, [tabHasFocus])
+
+  const connectSocketPrint = () => {
+    const client = new W3CWebSocket(`ws://${window.location.hostname}:7000/`);
+    client.onopen = function() {
+        if (client.readyState === client.OPEN) {
+          setSocketPrint(client);   
+        }
+    };
+  }
+
   const callGetSucursal = async () => {
     try {
       const suc = window.atob(props.match.params.suc);      
@@ -37,12 +79,13 @@ function TakeTurn(props) {
         setSucursal(res.data.body);
         callGetAreas(suc);
         setSocket(socketIOClient(ENDPOINT));
-        const client = new W3CWebSocket(`ws://${window.location.hostname}:7000/`);
-        client.onopen = function() {
-            if (client.readyState === client.OPEN) {
-              setSocketPrint(client);   
-            }
-        };
+        
+        // const client = new W3CWebSocket(`ws://${window.location.hostname}:7000/`);
+        // client.onopen = function() {
+        //     if (client.readyState === client.OPEN) {
+        //       setSocketPrint(client);   
+        //     }
+        // };
         // setSucursalExist(true);
       }
     } catch (error) {
