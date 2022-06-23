@@ -60,7 +60,7 @@ function TakeTurn(props) {
         connectSocketPrint();
       }
     }
-  }, [tabHasFocus])
+  }, [tabHasFocus])// eslint-disable-line react-hooks/exhaustive-deps
 
   const connectSocketPrint = () => {
     const client = new W3CWebSocket(`ws://${window.location.hostname}:7000/`);
