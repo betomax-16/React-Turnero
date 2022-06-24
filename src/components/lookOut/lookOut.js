@@ -807,7 +807,7 @@ function LookOut(props) {
     const handleAcceptConfirm = async () => {
         try {
             if (openConfirm.title === 'Liberación de módulo') {
-                const res = await axios.put(`http://${window.location.hostname}:4000/api/modules/${openConfirm.module}/${openConfirm.sucursal}`, {username: ''}, { 
+                const res = await axios.put(`http://${window.location.hostname}:4000/api/modules/${openConfirm.module}/${openConfirm.sucursal}`, {username: '', status: false}, { 
                     headers: {
                         'auth': localStorage.getItem('token')
                     }
@@ -818,7 +818,7 @@ function LookOut(props) {
                 for (let index = 0; index < auxSlaveModules.length; index++) {
                     const element = {...auxSlaveModules[index]};
                     if (element.name === openConfirm.module) {
-                        element.status = 'Libre';
+                        element.status = 'Inactivo';
                     }
                     auxSlaveModules[index] = element;
                 }

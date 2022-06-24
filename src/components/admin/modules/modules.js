@@ -24,13 +24,28 @@ import { DataGrid, esES } from '@mui/x-data-grid';
 import { MdModeEdit } from "react-icons/md";
 import { AiFillDelete } from "react-icons/ai";
 import { BsPlusLg } from "react-icons/bs";
-import { FaFilter, FaUserCheck, FaUserTimes } from "react-icons/fa";
+import { FaFilter } from "react-icons/fa";
 import { getOperatorMongo } from "../../../utils/operatorsMongoQuery";
+import Switch from '@mui/material/Switch';
 import Log from "../../utils/logError/log";
+import { alpha, styled } from '@mui/material/styles';
+import { green } from '@mui/material/colors';
 import './styles.css';
 
 // const protocol = window.location.protocol;
 // const host = window.location.host;
+
+const GreenSwitch = styled(Switch)(({ theme }) => ({
+    '& .MuiSwitch-switchBase.Mui-checked': {
+      color: green[600],
+      '&:hover': {
+        backgroundColor: alpha(green[600], theme.palette.action.hoverOpacity),
+      },
+    },
+    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+      backgroundColor: green[600],
+    },
+}));
 
 function Modules(props) {
     const urlModules = `http://${window.location.hostname}:4000/api/modules`;
@@ -83,7 +98,7 @@ function Modules(props) {
             }
             else if (openConfirm.title === 'Liberación de módulo') {
                 url = `http://${window.location.hostname}:4000/api/modules/${openConfirm.module}/${openConfirm.sucursal}`;
-                bodyRequest = {username: ''};
+                bodyRequest = {username: '', status: false};
                 const res = await axios.put(url, bodyRequest, { 
                     headers: {
                         'auth': localStorage.getItem('token')
@@ -431,15 +446,24 @@ function Modules(props) {
         }
     }
 
+    const handleChangeState = (event, data) => {
+        const module = modules.find(m => m.id === data.id);
+
+        if (module) {
+            changeStatus(module.status, event.target.checked);
+        }
+    }
+
     const columns = [
         { field: 'name', headerName: 'Modulo', width: 120, mytype: 'string' }, 
         { field: 'type', headerName: 'Tipo', width: 100, mytype: 'string' },
         { field: 'status', headerName: 'Estado', width: 80, mytype: 'bool',
             renderCell: (params) => (
-                params.value === null ? <></> :
-                params.value ? 
-                <FaUserCheck className="icon-green" size={20}/> : 
-                <FaUserTimes className="icon-red" size={20}/>
+                params.value === null ? <></> : <GreenSwitch checked={params.value.val} onChange={(event) => handleChangeState(event, params.value)}/>
+                // params.value === null ? <></> :
+                // params.value ? 
+                // <FaUserCheck className="icon-green" size={20}/> : 
+                // <FaUserTimes className="icon-red" size={20}/>
           ), },
         { field: 'sucursal', headerName: 'Sucursal', width: 180, mytype: 'string' },
         { field: 'username', headerName: 'Atendiendo', width: 180, mytype: 'string' },
@@ -504,6 +528,46 @@ function Modules(props) {
                 objectModule: module,
                 sucursal: module.sucursal
             });
+        } catch (error) {
+            console.log(error);
+            if (error.response && error.response.data) {
+                showAlert("red", error.response.data.body.message);
+            }
+            else {
+                showAlert("red", 'Ocurrió algún error interno.');
+            }
+        }
+    }
+
+    const changeStatus = async (data, newStatus) => {
+        try {
+            const url = `http://${window.location.hostname}:4000/api/modules/${data.name}/${data.sucursal}`;
+            const bodyRequest = {status: newStatus};
+            const res = await axios.put(url, bodyRequest, { 
+                headers: {
+                    'auth': localStorage.getItem('token')
+                }
+            });
+
+            if (res.data.statusCode === 200) {
+                const auxModules = [...modules];
+                for (let index = 0; index < auxModules.length; index++) {
+                    const element = {...auxModules[index]};
+                    if (element.id === data.id) {
+                        element.status.val = newStatus;
+                        auxModules[index] = element;
+                        break;
+                    }
+                }
+                
+                setModules(auxModules);
+
+                if (props.socket) {
+                    props.socket.emit('refresh', {sucursal: data.sucursal, module: data.name}); 
+                }
+                
+                showAlert("green", `${data.name} actualizado exitosamente.`); 
+            }
         } catch (error) {
             console.log(error);
             if (error.response && error.response.data) {
@@ -655,7 +719,12 @@ function Modules(props) {
 
                 let auxStatus = null; 
                 if (row.type !== 'toma') {
-                    auxStatus = row.status;
+                    auxStatus = {
+                        val: row.status,
+                        id: row._id,
+                        sucursal: row.sucursal,
+                        name: row.name
+                    };
                 }
                 
                 const auxPattern = {

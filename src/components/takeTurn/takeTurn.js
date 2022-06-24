@@ -4,6 +4,7 @@ import axios from 'axios';
 import AppContext from "../../context/app/app-context";
 import './styles.css';
 import logo from '../../public/img/logo.png';
+import sound from "../../public/sounds/timbre.mp3";
 const W3CWebSocket = require('websocket').w3cwebsocket;
 
 function TakeTurn(props) {
@@ -13,10 +14,30 @@ function TakeTurn(props) {
   const [sucursal, setSucursal] = useState(null);
   const { showAlert } = useContext(AppContext);
   const [areas, setAreas] = useState([]);
+  const [tabHasFocus, setTabHasFocus] = useState(true);
 
   useEffect(() => {
     try {
       callGetSucursal(); 
+
+      const handleFocus = () => {
+        // console.log('Tab has focus');
+        setTabHasFocus(true);
+      };
+  
+      const handleBlur = () => {
+        // console.log('Tab lost focus');
+        setTabHasFocus(false);
+      };
+  
+      window.addEventListener('focus', handleFocus);
+      window.addEventListener('blur', handleBlur);
+  
+      return () => {
+        window.removeEventListener('focus', handleFocus);
+        window.removeEventListener('blur', handleBlur);
+      };
+      
     } catch (error) {
       console.log(error);
       if (error.response && error.response.data) {
@@ -28,6 +49,28 @@ function TakeTurn(props) {
     }
   }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (tabHasFocus) {
+      if (socketPrint) {
+        if (socketPrint.readyState === socketPrint.CLOSED) {
+          connectSocketPrint();
+        }
+      }
+      else {
+        connectSocketPrint();
+      }
+    }
+  }, [tabHasFocus])// eslint-disable-line react-hooks/exhaustive-deps
+
+  const connectSocketPrint = () => {
+    const client = new W3CWebSocket(`ws://${window.location.hostname}:7000/`);
+    client.onopen = function() {
+        if (client.readyState === client.OPEN) {
+          setSocketPrint(client);   
+        }
+    };
+  }
+
   const callGetSucursal = async () => {
     try {
       const suc = window.atob(props.match.params.suc);      
@@ -36,12 +79,13 @@ function TakeTurn(props) {
         setSucursal(res.data.body);
         callGetAreas(suc);
         setSocket(socketIOClient(ENDPOINT));
-        const client = new W3CWebSocket(`ws://${window.location.hostname}:7000/`);
-        client.onopen = function() {
-            if (client.readyState === client.OPEN) {
-              setSocketPrint(client);   
-            }
-        };
+        
+        // const client = new W3CWebSocket(`ws://${window.location.hostname}:7000/`);
+        // client.onopen = function() {
+        //     if (client.readyState === client.OPEN) {
+        //       setSocketPrint(client);   
+        //     }
+        // };
         // setSucursalExist(true);
       }
     } catch (error) {
@@ -75,6 +119,18 @@ function TakeTurn(props) {
 
       socket.emit('newTurn', {sucursal:sucursal.name, data:res.data.body});
       sendPrint(res.data.body);
+
+      const audio = new Audio(sound);
+      let promise = audio.play();
+
+      if (promise !== undefined) {
+        promise.then(_ => {
+          audio.autoplay = true;
+        }).catch(error => {
+          console.log(error);
+        });
+      }
+
       showAlert("green", "Turno creado."); 
     } catch (error) {
       console.log(error);
