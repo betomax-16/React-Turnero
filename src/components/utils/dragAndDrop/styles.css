@@ -1,0 +1,27 @@
+.config-container .form-box {
+    height: 80%;
+    position: relative;
+    z-index: 1;
+    background: #fffef859;
+    border: 2px gray dashed;
+    border-radius: 15px;
+    overflow: auto;
+}
+
+.config-container .form-box .grid-image {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    grid-template-rows: auto;
+    grid-column-gap: 15px;
+    grid-row-gap: 15px;
+    margin: 15px;
+    box-sizing: border-box;
+}
+
+.config-container .form-box .message {
+    font-size: 200%;
+    color: #9d9d9d78;
+    text-align: center;
+    width: inherit;
+    overflow: initial;
+}

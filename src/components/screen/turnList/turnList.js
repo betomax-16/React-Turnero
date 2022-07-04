@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
+import axios from 'axios';
 import CurrentTurn from "../currentTurn/currentTurn";
 import './styles.css';
-import add from "../../../public/img/adds/aviso-covid.jpeg";
+// import add from "../../../public/img/adds/aviso-covid.jpeg";
 
 function TurnList(props) {
     const [showAdd, setShowAdd] = useState(false);
     
-    useEffect(() => {
+    useEffect(async () => {
         if (props.showAdds) {
             setTimeout(() => { 
                 setShowAdd(true);
@@ -17,7 +18,7 @@ function TurnList(props) {
     return (
         <div className="turnList-container">
             <div className="turnList-info">
-                {showAdd ? <img alt="adds" className="add" src={add}/> :
+                {showAdd ? <img alt="adds" className="add" src={props.currentAd}/> :
                 <CurrentTurn currentTurn={props.currentTurn}/>
                 }
             </div>

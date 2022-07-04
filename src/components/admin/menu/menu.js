@@ -11,6 +11,7 @@ import { BsClockHistory } from "react-icons/bs";
 import { MdSchema, MdLocalConvenienceStore } from "react-icons/md";
 import { HiDocumentReport } from "react-icons/hi";
 import { GiGears } from "react-icons/gi";
+import { FaBuysellads } from "react-icons/fa";
 import Tooltip from '@mui/material/Tooltip';
 import Select from '@mui/material/Select';
 import Dialog from '@mui/material/Dialog';
@@ -229,12 +230,12 @@ function Menu(props) {
                 </div>
                 {user && user.rol === 'Admin' && <Link to="/admin/configurations">
                     <div className="option">
-                        <Tooltip title="Configuraciones">
+                        <Tooltip title="Anuncios">
                             <div className="icon">
-                                <GiGears size={30}/>
+                                <FaBuysellads size={30}/>
                             </div> 
                         </Tooltip>
-                        <span  className="title">Configuraciones</span>
+                        <span  className="title">Anuncios</span>
                     </div>
                 </Link>}
                 <div className="option" onClick={() => {userLogout()}}>

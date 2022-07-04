@@ -6,11 +6,13 @@ import Tooltip from '@mui/material/Tooltip';
 import { IoIosSave } from "react-icons/io";
 import { useForm, Controller } from "react-hook-form";
 import Log from "../../utils/logError/log";
+import FilesDragAndDrop from '../../utils/dragAndDrop/dragAndDrop';
 import './styles.css';
 
 function Config(props) {
     const { showAlert, getDataUser } = useContext(AppContext);
     const [messageResponse, setMessageResponse] = useState('');
+    const [ads, setAds] = useState([]);
     const [preSaveData, setPreSaveData] = useState({});
     const { control, setValue, handleSubmit, watch, formState: { errors } } = useForm({defaultValues:{
         timer: '5',
@@ -18,6 +20,7 @@ function Config(props) {
 
     useEffect(() => {
         getData();
+        getImages();
     }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
@@ -100,10 +103,113 @@ function Config(props) {
         }
     }
 
+    const onUpload = async (files) => {
+        const bodyFormData = new FormData();
+        for (let index = 0; index < files.length; index++) {
+            const file = files[index];
+            bodyFormData.append('myFiles', file);
+        }
+        
+        const res = await axios.post(`http://${window.location.hostname}:4000/api/images`, bodyFormData, { 
+            headers: {
+                'auth': localStorage.getItem('token'),
+                "Content-Type": "multipart/form-data"
+            }
+        });
+
+        if (res.status === 201) {
+            getImages();
+            if (props.socket) {
+                props.socket.emit('updateImages', {});  
+            }
+        }
+        else {
+            showAlert("red", 'Ocurrió algún error al subir las imagenes.');
+        }
+    };
+
+    const onDeleteAd = async (id) => {
+        try {
+            const res = await axios.delete(`http://${window.location.hostname}:4000/api/images/${id}`, { 
+                headers: {
+                    'auth': localStorage.getItem('token')
+                }
+            });
+
+            console.log(res);
+            if (res.status === 204) {
+                getImages();
+                if (props.socket) {
+                    props.socket.emit('updateImages', {});  
+                }
+            }
+            else {
+                showAlert("red", 'Ocurrió algún error al eliminar la imagen.');
+            }
+        } catch (error) {
+            console.log(error);
+            showAlert("red", 'Ocurrió algún error al eliminar la imagen.');
+        }
+    }
+
+    const onUpdateAd = async (id, status) => {
+        try {
+            const res = await axios.put(`http://${window.location.hostname}:4000/api/images/${id}`, {isActive: status}, { 
+                headers: {
+                    'auth': localStorage.getItem('token')
+                }
+            });
+
+            console.log(res);
+            if (res.status === 200) {
+                const auxAds = [...ads];
+                for (let index = 0; index < auxAds.length; index++) {
+                    const ad = {...auxAds[index]};
+                    if (ad._id === id) {
+                        ad.isActive = res.data.body.isActive;
+                        auxAds[index] = ad;
+                        break;
+                    }
+                }
+
+                setAds(auxAds);
+                if (props.socket) {
+                    props.socket.emit('updateImages', {});  
+                }
+            }
+            else {
+                showAlert("red", 'Ocurrió algún error al eliminar la imagen.');
+            }
+        } catch (error) {
+            console.log(error);
+            showAlert("red", 'Ocurrió algún error al eliminar la imagen.');
+        }
+    }
+
+    const getImages = async () => {
+        const res = await axios.get(`http://${window.location.hostname}:4000/api/images`, { 
+            headers: {
+                'auth': localStorage.getItem('token')
+            }
+        });
+        if (res.status === 200) {
+           console.log(res.data.body.files);
+           setAds(res.data.body.files);
+        }
+    }
+
     return (<>
         <div className="config-container">
-            <h1>Configuraciones</h1>
-            <form className="form-box">
+            <h1>Anuncios</h1>
+            <FilesDragAndDrop onUpdateAd={onUpdateAd} onDeleteAd={onDeleteAd} onUpload={onUpload} count={12} formats={['.jpeg', '.jpg', '.png']} ads={ads}>
+                <h2 className="message">Arrastra tus archivos</h2>
+            </FilesDragAndDrop>
+            {/* <Tooltip title="Guardar">
+                <div className="button-add" onClick={handleSubmit(onSubmit)}>
+                    <IoIosSave className="icon" size={25}/>
+                </div>
+            </Tooltip> */}
+            {/* <form className="form-box">
                 <Controller
                     name="timer"
                     control={control}
@@ -111,7 +217,7 @@ function Config(props) {
                                                 className="input"
                                                 error={errors.timer?.type === 'required'}
                                                 helperText={errors.timer ? 'Campo obligatorio.' : ''} 
-                                                id="timer" label="Tiempo de timbre en pantalla en seg." type="number" margin="dense" variant="standard" fullWidth {...field}/> }
+                                                id="timer" label="Tiempo de turno llamado en pantalla en seg." type="number" margin="dense" variant="standard" fullWidth {...field}/> }
                     rules={{ required: true }}
                 />
                 {messageResponse !== '' && <span className="messageError">{messageResponse}</span>}
@@ -120,7 +226,8 @@ function Config(props) {
                         <IoIosSave className="icon" size={25}/>
                     </div>
                 </Tooltip>
-            </form>
+            </form> */}
+
         </div>
     </>);
 }
