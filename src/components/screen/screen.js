@@ -20,6 +20,9 @@ function Screen(props) {
     const [shifts, setShifts] = useState([]);
     const [timer, setTimer] = useState(5000);
     const [lastTurns, setLastTurns] = useState([]);
+    const [currentAd, setCurrentAd] = useState('');
+    const [ads, setAds] = useState([]);
+    const [intervalAd, setIntervalAd] = useState(null);
     const [recall, setRecall] = useState({state: false, data: {
         turn: '',
         ubication: ''
@@ -73,8 +76,18 @@ function Screen(props) {
                         window.location.reload();
                     });
 
+                    auxSocket.on('updateImages', async () => {
+                        if (props.showAdds) {
+                            await getImages();
+                        }
+                    });
+
                     if (query.get('tv') && query.get('tv').toLowerCase() === 'si') {
                         setShowTV(true);
+                    }
+
+                    if (props.showAdds) {
+                        await getImages();
                     }
                 }
             } catch (error) {
@@ -91,6 +104,22 @@ function Screen(props) {
         init();
     }, []);// eslint-disable-line react-hooks/exhaustive-deps
 
+    useEffect(() => {
+        let index = 0;
+        if (intervalAd !== null) {
+            clearInterval(intervalAd);
+        }
+        setIntervalAd(setInterval(() => {
+            if (ads.length) {
+                index = index < ads.length - 1 ? index + 1 : 0;
+                setCurrentAd(ads[index].url);
+            }
+            else {
+                setCurrentAd('');
+            }
+        }, 1000 * 60));    
+    }, [ads]);
+    
     useEffect(() => {
         if (stateDataTurns.status && stateDataTurns.data !== null) {
             setStateDataTurns({ status: false, action: '', data: null });
@@ -163,6 +192,12 @@ function Screen(props) {
         }
     }, [stateDataTurns]);// eslint-disable-line react-hooks/exhaustive-deps
 
+    const getImages = async () => {
+        const res = await axios.get(`http://${window.location.hostname}:4000/api/images`);
+        if (res.status === 200) {
+            setAds(res.data.body.files.filter(f => f.isActive));
+        }
+    }
 
     const callGetSucursal = async (sucursal) => {
         try {
@@ -269,7 +304,7 @@ function Screen(props) {
             {recall.state && <CurrentTurn currentTurn={recall.data} wave="wave-down" playSound={true}/>}
         </> :
         !recall.state ? 
-            <TurnList date={dateState} currentTurn={currentTurn} lastTurns={lastTurns} showAdds={props.showAdds}/> :
+            <TurnList date={dateState} currentTurn={currentTurn} lastTurns={lastTurns} showAdds={props.showAdds} currentAd={currentAd}/> :
             <CurrentTurn currentTurn={recall.data} wave="wave-down" playSound={true}/>
         : <>
             <div className="takeTurn-empty-header">

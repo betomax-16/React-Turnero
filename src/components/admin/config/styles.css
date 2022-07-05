@@ -2,17 +2,11 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    padding: 25px;
+    box-sizing: border-box;
 }
 
-.config-container .form-box {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    position: relative;
-    z-index: 1;
-}
-
-.config-container .form-box .input {
+/* .config-container .form-box .input {
     max-width: 250px;
 }
 
@@ -21,13 +15,13 @@
     position: absolute;
     bottom: 0;
     right: 0;
-}
+}*/
 
 
-.config-container .form-box .button-add {
+.config-container .button-add {
     position: absolute;
-    bottom: 0;
-    right: 0;
+    bottom: 15px;
+    right: 15px;
     width: 30px;
     height: 30px;
     padding: 10px;
@@ -41,14 +35,15 @@
     color: white;
 }
 
+
 .config-container .form-box .button-add:hover {
     background-color: #95b2fb;
 }
 
-.config-container .form-box .button-add:hover .icon {
+.config-container .button-add:hover .icon {
     transform: scale(1.2);
 }
 
-.config-container .form-box .button-add .icon{
+.config-container .button-add .icon{
     transition: transform .2s;
-}
+} 
