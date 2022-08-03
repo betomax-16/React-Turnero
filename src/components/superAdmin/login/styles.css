@@ -1,0 +1,107 @@
+.login-container-aries {
+    background: linear-gradient(318deg, #f7f7f7, #2fa6c2);
+    background-size: 400% 400%;
+    -webkit-animation: AnimationName 30s ease infinite;
+    -moz-animation: AnimationName 30s ease infinite;
+    animation: AnimationName 30s ease infinite;
+    /* background-color: #079970; */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-box-aries {
+    background-color: #ffffff;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 60px;
+    width: 250px;
+}
+
+.login-header-aries {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-header-aries .logo-aries{
+    width: 100%;
+}
+
+.login-body-aries {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.input {
+    box-sizing: border-box;
+    transition: border-width 120ms ease-in-out;
+    border-width: 1px 1px 1px 1px;
+    font-size: 20px;
+    margin-bottom: 15px;
+    border-radius: 3px;
+    border: solid 1px #0000001f;
+    padding: 8px;
+}
+
+.input:focus-visible {
+    outline-color: #ccddd9;
+}
+
+.errorInput {
+    transition: border-width 120ms ease-in-out;
+    border-width: 1px 1px 1px 10px;
+    border-style: solid;
+    border-color: rgb(191, 22, 80) rgb(191, 22, 80) rgb(191, 22, 80) rgb(191, 25, 87);
+    border-image: initial;
+    background: rgb(251, 236, 242);
+}
+
+.errorInput::placeholder {
+    color: rgb(191, 25, 87);
+  }
+
+.errorInput:focus-visible {
+    outline-color: rgb(191, 22, 80);
+}
+
+.login-button-aries {
+    color: white;
+    background-color: #d5e07f;
+    border-radius: 5px;
+    text-align: center;
+    padding: 10px 20px;
+    font-weight: bold;
+    margin-top: 15px;
+    cursor: pointer;
+    border: none;
+}
+
+.login-button-aries:hover {
+    background-color: #b5bf6a;
+}
+
+.messageError {
+    font-weight: bold;
+    color: rgb(191, 25, 87);
+}
+
+@-webkit-keyframes AnimationName {
+    0%{background-position:20% 0%}
+    50%{background-position:81% 100%}
+    100%{background-position:20% 0%}
+}
+@-moz-keyframes AnimationName {
+    0%{background-position:20% 0%}
+    50%{background-position:81% 100%}
+    100%{background-position:20% 0%}
+}
+@keyframes AnimationName {
+    0%{background-position:20% 0%}
+    50%{background-position:81% 100%}
+    100%{background-position:20% 0%}
+}

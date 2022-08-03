@@ -15,6 +15,9 @@ function RequireNoAuth({children}) {
         let path = '/login';
         if (location.pathname === '/login') {
           switch (user.rol.toLowerCase()) {
+            case 'super-admin':
+                path = '/admin';
+              break;
             case 'admin':
                 path = '/admin';
               break;

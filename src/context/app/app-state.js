@@ -76,6 +76,9 @@ const AppState = (props) => {
             });
             if (!location.pathname.includes('/toma-turno') && !location.pathname.includes('/toma') && !location.pathname.includes('/pantalla')) {
                 switch (user.rol.toLowerCase()) {
+                    case 'super-admin':
+                        history.push('/admin');
+                        break;
                     case 'admin':
                         history.push('/admin');
                         break;

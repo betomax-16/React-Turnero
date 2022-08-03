@@ -2,12 +2,12 @@ import { useState, useEffect, useContext } from "react";
 import { useForm, Controller } from "react-hook-form";
 import TextField from '@mui/material/TextField';
 import axios from 'axios';
-import AppContext from "../../context/app/app-context";
-import logo from '../../public/img/logo.png';
-import RequireNoAuth from "../utils/auth/RequireNoAuth";
+import AppContext from "../../../context/app/app-context";
+import logo from '../../../public/img/logo-aries.png';
+import RequireNoAuth from "../../utils/auth/RequireNoAuth";
 import './styles.css';
 
-function Login(props) {
+function LoginSuperAdmin() {
   const { showAlert, userLogin } = useContext(AppContext);
   const [messageResponse, setMessageResponse] = useState('');
   const { control, handleSubmit, watch, formState: { errors } } = useForm({defaultValues:{
@@ -17,36 +17,12 @@ function Login(props) {
   const onSubmit = data => callCheckLogin(data);
 
   useEffect(() => {
-    getBrandData();
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
     watch((value, { name, type }) => setMessageResponse(''));
   }, [watch]);
 
-  const getBrandData = async () => {
-    try {
-      const res = await axios.get(`http://${window.location.hostname}:4000/api/v1/brands/${props.match.params.idBrand}`);
-      if (res.status === 204) {
-        showAlert("red", "Marca no existente");
-      }
-      else {
-        console.log(res.data.body);
-      }
-    } catch (error) {
-      console.log(error);
-      if (error.response && error.response.data) {
-          showAlert("red", error.response.data.body.errors[0].msg);
-      }
-      else {
-          showAlert("red", 'Ocurrió algún error interno.');
-      }
-    }
-  }
-
   const callCheckLogin = async (data) => {
     try {
-      const res = await axios.post(`http://${window.location.hostname}:4000/api/v1/brands/${props.match.params.idBrand}/login`, data);
+      const res = await axios.post(`http://${window.location.hostname}:4000/api/v1/login`, data);
       userLogin(res.data.body.token);
     } catch (error) {
       console.log(error);
@@ -61,13 +37,13 @@ function Login(props) {
 
   return (
     <RequireNoAuth>
-      <div className="login-container">
-        <form className="login-box" onSubmit={handleSubmit(onSubmit)}>
-          <div className="login-header">
-            <img src={logo} alt="logo"></img>
+      <div className="login-container-aries">
+        <form className="login-box-aries" onSubmit={handleSubmit(onSubmit)}>
+          <div className="login-header-aries">
+            <img src={logo} alt="logo" className="logo-aries"></img>
           </div>
-          <div className="login-body">
-            <h1>Bienvenido</h1>
+          <div className="login-body-aries">
+            <h1 style={{color: '#2e97c8'}}>Bienvenido</h1>
             <Controller
                 name="username"
                 control={control}
@@ -87,7 +63,7 @@ function Login(props) {
                 rules={{ required: true }}
             />
             {messageResponse !== '' && <span className="messageError">{messageResponse}</span>}
-            <input type="submit" className="login-button" value="Acceder" />
+            <input type="submit" className="login-button-aries" value="Acceder" />
           </div>
         </form>
       </div>
@@ -95,4 +71,4 @@ function Login(props) {
   );
 }
 
-export default Login;
+export default LoginSuperAdmin;

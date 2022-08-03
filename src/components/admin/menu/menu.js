@@ -11,6 +11,7 @@ import { BsClockHistory } from "react-icons/bs";
 import { MdSchema, MdLocalConvenienceStore } from "react-icons/md";
 import { HiDocumentReport } from "react-icons/hi";
 import { GiGears } from "react-icons/gi";
+import { RiBuilding2Fill } from "react-icons/ri";
 import { FaBuysellads } from "react-icons/fa";
 import Tooltip from '@mui/material/Tooltip';
 import Select from '@mui/material/Select';
@@ -22,6 +23,7 @@ import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import logo from "../../../public/img/logo.png";
 import Log from "../../utils/logError/log";
+
 
 function Menu(props) {
     const { userLogout, showAlert, setReset, reset, getDataUser, setUser, user } = useContext(AppContext);
@@ -138,7 +140,17 @@ function Menu(props) {
                 {/* <span className="capital">E</span> */}
             </div>
             <div className="options">
-                {user && user.rol === 'Admin' && <Link to="/admin/sucursales">
+                {user && user.rol === 'Super-Admin' && <Link to="/admin/marcas">
+                    <div className="option">
+                        <Tooltip title="Marcas">
+                            <div className="icon">
+                                <RiBuilding2Fill size={30}/>
+                            </div>    
+                        </Tooltip>
+                        <span className="title">Marcas</span>
+                    </div>
+                </Link>}
+                {user && (user.rol === 'Admin' || user.rol === 'Super-Admin') && <Link to="/admin/sucursales">
                     <div className="option">
                         <Tooltip title="Sucursales">
                             <div className="icon">
@@ -168,7 +180,7 @@ function Menu(props) {
                         <span  className="title">Modulos</span>
                     </div>
                 </Link>
-                {user && user.rol === 'Admin' && <Link to="/admin/areas">
+                {user && (user.rol === 'Admin' || user.rol === 'Super-Admin') && <Link to="/admin/areas">
                     <div className="option">
                         <Tooltip title="Areas">
                             <div className="icon">

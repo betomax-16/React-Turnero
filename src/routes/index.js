@@ -15,9 +15,16 @@ import History from "../components/admin/turns/history/history";
 import Reports from "../components/admin/turns/reports/reports";
 import Config from "../components/admin/config/config";
 
+import LoginSuperAdmin from "../components/superAdmin/login/login";
+import Brand from "../components/superAdmin/brands/brand";
+//login brand
 const routes = [
     {
         path: '/login',
+        component: LoginSuperAdmin,
+    },
+    {
+        path: '/:idBrand/login',
         component: Login,
     },
     {
@@ -45,6 +52,10 @@ const routes = [
         path: '/admin',
         component: Admin,
         routes: [    
+            {
+                path: '/admin/marcas',
+                component: Brand,
+            }, 
             {
                 path: '/admin/sucursales',
                 component: Sucursales,

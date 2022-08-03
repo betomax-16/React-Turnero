@@ -1,0 +1,48 @@
+.sucursal-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    z-index: 1;
+}
+
+.sucursal-container .table{
+    height: 100%;
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    padding-bottom: 15px;
+}
+
+.Mui-checked {
+    color: #88c2b1 !important;
+}
+
+.button-associate, 
+.button-link {
+    background-color: #86c1af;
+    padding: 9px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    line-height: normal;
+    margin-right: 5px;
+}
+
+.button-associate:hover,
+.button-link:hover {
+    background-color: #95d4c1;
+}
+
+.button-link:visited {
+    color: white;
+}
+
+h2>.MuiCheckbox-root {
+    padding-left: 0;
+}
+
+.content-modal-sucursal {
+    display: flex;
+    gap: 30px;
+}
