@@ -254,7 +254,9 @@ function AttendTurn(props) {
           return 0;
         });
         setSucursals(auxSucursals);
-        setSucursalSelect(auxSucursals[0].name);
+        if (auxSucursals.length && (sucursalSelect === '' || sucursalSelect === null)) {
+          setSucursalSelect(auxSucursals[0].name);
+        } 
       }  
     } catch (error) {
       console.log(error);
@@ -310,7 +312,7 @@ function AttendTurn(props) {
         });
         
         setModules(rows);
-        if (rows.length) {
+        if (rows.length && (moduleSelect === '' || moduleSelect === null)) {
             setModuleSelect(rows[0].name);
         }            
 
